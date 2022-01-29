@@ -1,0 +1,158 @@
+---
+title: "Data science per psicologi - demo 03.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+# Pacchetti
+
+Carichiamo i pacchetti necessari. Se tali pacchetti non sono presenti nella macchina, devono prima essere installati con la funzione `install.packages()`.
+
+```{r}
+library("tidyverse")
+library("rio")
+library("here")
+theme_set(theme_minimal())
+```
+
+# Importare i dati
+
+La _working directory_ del progetto che contiene questo script Rmd si può recuperare con la funzione
+
+```{r}
+here::here()
+```
+
+Questo percorso è ovviamente specifico al computer che sto usando in questo momento. Su qualsiasi altra macchina sarà diverso.
+
+Sulla mia macchina, nella cartella `ds4psy_R_demos` è contenuta la cartella `data` dove si trova il file `data_mood.csv`. Importiamo i dati in R nel modo seguente:
+
+```{r}
+d <- rio::import(
+  here::here("data", "data_mood.csv")
+)
+```
+
+Si noti che la funzione 
+
+```{r, eval=FALSE}
+here::here("data", "data_mood.csv")
+```
+
+non fa altro che stampare l'indirizzo assoluto, avendo specificato soltanto il percorso relativo alla corrente _working directory_. 
+
+L'istruzione precedente salva i dati nel data.frame `d`. Uso `glimpse()` per esaminare questo oggetto:
+
+```{r}
+glimpse(d)
+```
+
+Questi dati sono stati messi a disposizione da Zetsche et al. (2021); contengono 1188 righe e 44 colonne.
+
+Ci focalizziamo qui sulla variabile `rrs_brood`. Questi sono i valori della scala  _Ruminative Response Scale_ (RRS) di  Treynor, Gonzalez, e Nolen-Hoksema (2003), che è uno degli strumenti maggiormente impiegati in letteratura per la misurazione della ruminazione depressiva. La scala misura le due componenti della ruminazione, ossia "Rimuginazione" e “Riflessione”, e la componente “Depressione”. La variabile `rrs_brood` corrisponde alla sottoscala "Rimuginazione".
+
+Nel DataFrame `d`, i valori RRS-brood si ripetono tante volte, per ciascun partecipante, perché lo stesso partecipante è stato esaminato in momenti diversi e in condizioni diverse. Poniamoci innanzitutto il problema di recuparare un solo valore per ciascun partecipante:
+
+```{r}
+bysubj <- d %>% 
+  group_by(esm_id) %>% 
+  summarise(
+    rrs_brood = mean(rrs_brood)
+  )
+head(bysubj)
+```
+Otteniamo così un DataFrame con due colonne: il codice identificativo del partecipante e il valore sulla scala RRS-brood.
+
+Lo scopo di questo esercizio è quello di descrivere la distribuzione dei valori `rrs_brood`.
+
+
+```{r}
+rrs_brood <- 
+length(unique(d$esm_id))
+```
+
+Iniziamo chiedendoci quali sono le modalità della variabile `rrs_brood` nel presente campione:
+
+```{r}
+sort(unique(bysubj$rrs_brood))
+```
+
+Creaiamo ora una tabella che riporta la frequenza assoluta del numero di partecipanti che hanno ottenuto ciascuno dei valori `rrs_brood` elencati sopra:
+
+```{r}
+table(bysubj$rrs_brood)
+```
+
+Quattro partecipanti hanno ottenuto un valore RRS-brood uguale a 5, otto partecipanti un valore uguale a 6, ..., un partecipante un valore uguale a 19.
+
+Una tabella come la precedente è però difficile da capire. Creiamo dunque un istogramma, scegliendo le classi seguenti: (0-3], (3-6],  (6-9],  (9-12], (12-15], (15-18], (18-21]. Dato che `ggplot()` utilizza intervalli aperti a destra, $[\,)$.  
+
+```{r}
+bysubj %>% 
+  ggplot(aes(rrs_brood)) +
+  geom_histogram(
+    aes(y = ..density..),
+    breaks = c(0, 3, 6, 9, 12, 15, 18, 21),
+    closed = "right"
+  )
+```
+
+Controlliamo. La seconda classe è (3-6]. In tale classe cadono 
+
+```{r}
+sort(bysubj$rrs_brood)
+```
+
+12 osservazioni, ovvero una proporzione di casi pari a
+
+```{r}
+12 / length(bysubj$rrs_brood)
+```
+
+L'altezza della barra dell'istogramma corrispondente alla classe (3-6] sarà dunque uguale a
+
+```{r}
+(12 / length(bysubj$rrs_brood)) / 3
+```
+
+Questo valore corrisponde a quello rappresentato nell'istogramma precedente.  
+
+Se invece avessimo usato classi aperte a destra, avremmo ottenuto l'istogramma seguente:
+
+```{r}
+bysubj %>% 
+  ggplot(aes(rrs_brood)) +
+  geom_histogram(
+    aes(y = ..density..),
+    breaks = c(0, 3, 6, 9, 12, 15, 18, 21),
+    closed = "left"
+  )
+```
+
+Possiamo migliorare l'istogramma nel modo seguente:
+
+```{r}
+bysubj %>% 
+  ggplot(aes(rrs_brood)) +
+  geom_histogram(
+    aes(y = ..density..),
+    breaks = c(0, 3, 6, 9, 12, 15, 18, 21),
+    closed = "right"
+  ) +
+  labs(
+    title='Istogramme dei valori RRS-Rimuginazione', 
+    x = 'RRS-rimuginazione',
+    y = 'Densità')
+```
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
