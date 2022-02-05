@@ -1,0 +1,230 @@
+---
+title: "Data science per psicologi - demo 07.03"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+# Esercizi sulla probabilità condizionata e sul teorema di Bayes
+
+```{r}
+suppressPackageStartupMessages({
+  library("tidyverse")
+  library("prob")
+})
+```
+
+## Esercizio 1
+
+Un dado a sei facce viene lanciato due volte. Sia A = "i due lanci producono lo stesso numero" e B = "la somma dei risultati è almeno 8". Si trovino le probabilità $P(A \mid B)$ e $P(B \mid A)$.
+
+Usiamo le funzioni di `prob`.
+
+```{r}
+S <- rolldie(2, makespace = TRUE) 
+head(S)
+```
+
+```{r}
+A <- subset(S, X1 == X2)
+B <- subset(S, X1 + X2 >= 8)
+```
+
+La soluzione è
+
+```{r}
+Prob(A, given = B)
+```
+
+```{r}
+Prob(B, given = A)
+```
+
+Oppure
+
+```{r}
+Prob(S, X1 == X2, given = (X1 + X2 >= 8))
+```
+
+```{r}
+Prob(S, X1 + X2 >= 8, given = (X1 == X2))
+```
+
+## Esercizio 2
+
+Supponiamo di estrarre due carte da un mazzo da poker ben mescolato. Qual è la probabilità che siano entrambi degli assi?
+
+Chiamiamo $A$ = "la prima carta estratta è un asso" e $B$ = "la seconda carta estratta è un asso".
+
+La soluzione può essere trovata usando la regola della catena:
+
+$$
+P(A \cap B) = P(A) P(B \mid A) = \frac{4}{52} \frac{3}{51} \approx 0.00452.
+$$
+
+Ora usiamo $\textsf{R}$.
+
+```{r}
+L <- cards()
+head(L)
+```
+```{r}
+M <- urnsamples(L, size = 2) # creates a sample space
+N <- probspace(M) # creates a probability space from a set of outcomes
+Prob(N, all(rank == "A")) # all() = given a set of logical vectors, are all of the values true?
+```
+
+## Esercizio 3
+
+Si consideri un'urna con all'interno 10 palline, di cui 7 rosse e 3 verdi. Estraiamo 3 palline in successione dall'urna. Sia A = "la prima pallina è rossa", B = "la seconda pallina è rossa", e C = "la terza palla è rossa". Allora
+
+$$
+P(\text{tutte tre le palline rosse}) = P(A \cap B \cap C) = \frac{7}{10}\frac{6}{9}\frac{5}{8} \approx 0.2917.
+$$
+Ovvero
+
+```{r}
+L <- rep(c("red", "green"), times = c(7, 3))
+M <- urnsamples(L, size = 3, replace = FALSE, ordered = TRUE) 
+N <- probspace(M)
+head(N)
+dim(N)
+```
+
+```{r}
+Prob(N, isrep(N, "red", 3))
+```
+
+Con la stessa procedura possiamo anche rispondere a domande come: qual è la probabilità che due estrazioni siano palline rosse?
+
+```{r}
+Prob(N, isrep(N, "red", 2))
+```
+
+Qual è la probabilità di osservare "red", "green", "red", in sequenza?
+
+```{r}
+Prob(N, isin(N, c("red", "green", "red"), ordered = TRUE))
+```
+
+Usando la regola della catena, otteniamo
+
+```{r}
+7/10 * 3/9 * 6/8
+```
+
+Qual è la probabilità di osservare "red", "green", "red", senza considerare l'ordine?
+
+```{r}
+Prob(N, isin(N, c("red", "green", "red")))
+```
+
+Il che corrisponde al valore trovato prima: la probabilità che due estrazioni siano palline rosse.
+
+## Esercizio 4
+
+Vengono lanciate dieci monete. Qual è la probabilità di osservare almeno una Testa?
+
+La soluzione è $1 - P(\text{tutte Croce})$, ovvero
+
+$$
+1 - P(C_1 \cap C_2 \cap \dots \cap C_{10})
+$$
+
+Dato che sono eventi indipendenti
+
+$$
+1 - P(C_1) P(C_2) \dots P(C_{10}) = 1 - \left(\frac{1}{2}\right)^{10} \approx 0.9990234.
+$$
+
+Usando $\textsf{R}$:
+
+```{r}
+S <- tosscoin(10, makespace = TRUE)
+A <- subset(S, isrep(S, vals = "T", nrep = 10)) 
+1 - Prob(A)
+```
+
+## Esercizio 5
+
+Lanciamo tre volte una moneta non bilanciata con probabilità di Testa uguale a 0.7. Si trovi la probabilità di ottenere Croce tre volte.
+
+Essendo eventi indipendenti, la risposta è $0.3^3$.
+
+Usando $\textsf{R}$:
+
+```{r}
+S <- iidspace(c("H","T"), ntrials = 3, probs = c(0.7, 0.3))
+S
+```
+
+```{r}
+Prob(S, isrep(S, "T", 3))
+```
+
+## Esercizio 6
+
+Tre psicologi lavorano in una cooperativa, Maria, Luca, e Carla. Sono in ufficio uno alla volta. Maria lavora il 60% del tempo, Luca il 30% e Carla il rimanente 10%. Lavorano tutti e tre ad un progetto in cui devono riorganizzare delle cartelle cliniche. Chiamiamo M l'evento per cui Maria conclude il lavoro su una cartella; L e C sono gli eventi corrispondenti per Luca e Carla. 
+
+Se lavorano tutti con la stessa velocità, le probabilità a priori che una cartella generica sia stata completata da Maria, Luca e Carla sono, rispettivamente, uguali a 0.6, 0.3, e 0.1. Chiamiamo queste le _probabilità a priori_.
+
+Ad un controllo, emerge che una cartella è stata completata in maniera sbagliata. Chi è il responsabile?
+
+Per rispondere a questa domanda, dobbiamo anche sapere quanto quanti errori fanno, in media, i tre psicologi. Sulla base di tutta l'esperienza passata, possiamo dire che, per Maria, Luca e Carla, la probabilità di commettere un errore, è rispettivamente uguale a 0.003, 0.007 e 0.010.
+
+Chiamiamo $E$ l'evento: la cartella è sbagliata.  Ci chiediamo: qual è la probabilità che a completare il lavoro sia stata Maria, dato che la cartella è sbagliata? Ovvero, qual è la probabilità $P(M \mid E)$? Di Maria conosciamo la probabilità a priori di commettere un errore.  Quello che vogliamo sapere è la probabilità a posteriori (ovvero, dopo che è stato osservato un errore). Calcoliamo le probabilità a posteriori per tutti e tre gli psicologi.
+
+Ovviamente, dobbiamo applicare il teorema di Bayes. Troviamo $P(M \mid E) = \frac{P(M \cap E)}{P(E)}$. Il numeratore è $P(E \mid M) P(M)$, ovvero $0.003 \cdot 0.6 = 0.0018.$ Il denominatore è $P(E \cap M) + P(E \cap L) + P(E \cap C)$, usando il teorema della probabilità totale, ovvero:
+
+$$
+P(E \mid M) P(M) +  P(E \mid L) P(M) + P(E \mid M) P(C) = 0.003 \cdot 0.6 + 0.007 \cdot 0.30 + 0.010 \cdot 0.10 = 0.0049.
+$$
+
+Possiamo dunque calcolare
+
+$$
+P(M \mid E) = \frac{0.0018}{0.0049} \approx 0.37.
+$$
+
+In modo più semplice, possiamo procedere nel modo seguente. Le probabilità a priori che è stato commesso un errore, per Maria, Luca e Carla, sono:
+
+```{r}
+prior <- c(0.6, 0.3, 0.1)
+```
+
+La verosimiglianza che Maria, Luca e Carla commettano un errore è
+
+```{r}
+likelihood <- c(0.003, 0.007, 0.01)
+```
+
+Le probabilità a posteriori sono:
+
+```{r}
+post <- prior * likelihood # distribuzione a posteriori non normalizzata
+post / sum(post) # distribuzione a posteriori normalizzata
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
