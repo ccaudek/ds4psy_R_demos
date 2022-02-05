@@ -1,0 +1,121 @@
+---
+title: "Data science per psicologi - demo 11.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+# Esercizi sul valore atteso e sulla varianza
+
+```{r}
+suppressPackageStartupMessages({
+  library("tidyverse")
+  library("prob")
+  library("distrEx")
+})
+```
+
+## Esercizio 1
+
+Lanciamo 3 monete.  Sia $Y$ il numero di volte in cui si ossserva Testa.  Si trovi il valore atteso di $Y$, la sua varianza e la sua deviazione standard.
+
+
+Lo spazio campionario è
+
+```{r}
+S <- tosscoin(3, makespace = TRUE)
+S
+```
+
+Trasformo `H` in 1 e `T` in 0:
+
+```{r}
+S <- S %>% 
+  transmute(
+    toss1 = ifelse(toss1 == "H", 1, 0),
+    toss2 = ifelse(toss2 == "H", 1, 0),
+    toss3 = ifelse(toss3 == "H", 1, 0),
+    probs = probs
+)
+S
+```
+
+Ora posso creare la variabile casuale $Y$:
+
+```{r}
+S <- addrv(S, sum, name = "Y")
+S
+```
+
+La distribuzione di massa di probabilità di $Y$ è
+
+```{r}
+p_mar <- marginal(S, vars = c("Y"))
+p_mar
+```
+
+Per semplicità, estraggo i valori della variabile casuale e le rispettive probabilità; salvo questi valori in due vettori:
+
+```{r}
+y <- p_mar$Y
+p <- p_mar$probs
+```
+
+Calcolo il valore atteso:
+
+```{r}
+mu <- sum(y * p)
+mu
+```
+
+la varianza
+
+```{r}
+sigma2 <- sum((y - mu)^2 * p)
+sigma2
+```
+
+e la deviazione standard
+
+```{r}
+sigma <- sqrt(sigma2)
+sigma
+```
+
+La distribuzione cumulativa di probabilità si ottiene nel modo seguente:
+
+```{r}
+F = cumsum(p) 
+F
+```
+
+## Pacchetto `distrEx`
+
+Uso le funzioni di `distrEx` per eseguire in maniera più semplice gli stessi calcoli descritti sopra:
+
+```{r}
+Y <- DiscreteDistribution(supp = 0:3, prob = c(1, 3, 3, 1) / 8)
+Y
+```
+
+```{r}
+plot(Y)
+```
+
+```{r}
+E(Y)
+var(Y)
+sd(Y)
+```
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
