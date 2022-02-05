@@ -1,0 +1,105 @@
+---
+title: "Data science per psicologi - demo 07.02"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+# Il problema del compleanno
+
+Esaminiamo ora il famoso _problema del compleanno_. Riporto qui la descrizione fornita da Wikipedia. 
+
+> Il problema del compleanno è un paradosso di teoria della probabilità definito nel 1939 da Richard von Mises. Il paradosso afferma che la probabilità che almeno due persone in un gruppo compiano gli anni lo stesso giorno è largamente superiore a quanto potrebbe dire l'intuito: infatti già in un gruppo di 23 persone la probabilità è circa 0.51 (51%); con 30 persone essa supera 0.70 (70%), con 50 persone tocca addirittura 0.97 (97%).
+
+> Per effettuare il calcolo, si ricorre alla formula per la probabilità condizionata: per rendere più semplice il calcolo si assume che gli anni siano tutti di 365 giorni. Si assume che tutti i giorni dell'anno siano equiprobabili per nascere, anche se in realtà non è così.
+
+> Il modo più semplice per calcolare la probabilità $P(k)$ che ci siano almeno due persone appartenenti ad un gruppo di $p$ persone che compiano gli anni lo stesso giorno è calcolare dapprima la probabilità $P_1(k)$ che ciò non accada. Il ragionamento è questo: data una qualunque persona del gruppo (indipendentemente dalla data del suo compleanno), vi sono 364 casi su 365 in cui il compleanno di una seconda persona avvenga in un giorno diverso; se si considera una terza persona, ci sono 363 casi su 365 in cui compie gli anni in un giorno diverso dalle prime due persone e via dicendo. Esprimendo in formule quanto sopra, la probabilità che tutti i $p$ compleanni cadano in date diverse è:
+
+$$
+P_{1}(k)={\frac{364}{365}}\cdot {\frac{363}{365}}\cdots {\frac{365-k+1}{365}}
+$$
+
+> e dunque la probabilità del suo evento complementare, cioè che esistano almeno due compleanni uguali, è
+
+$$
+P(k) = 1-P_{1}(k)
+$$
+
+## La soluzione con $\textsf{R}$
+
+```{r}
+suppressPackageStartupMessages({
+  library("tidyverse")
+  })
+```
+
+
+```{r}
+pbirthday <- function(k) {
+  
+  # k = number of people in the room
+  pvec <- numeric(k) # numeric vector to store probabilities
+  for (i in 1:k) {
+    q <- (366 - (1:i)) / 365 
+    pvec[i] <- 1 - prod(q) # prob(matches)
+  }
+  pvec
+}
+```
+
+
+```{r}
+k <- 50
+tibble(
+  x = 1:50,
+  pvec = pbirthday(k)
+) %>%
+  ggplot(
+    aes(x = x, y = pvec)
+  ) +
+  geom_line() +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray") +
+  labs(
+    x = "Numero di persone",
+    y = "Probabilità dell'evento\n'almeno due persone con lo stesso compleanno'"
+  )
+```
+
+Controlliamo. Con tre persone, la probabilità è
+
+```{r}
+1 - (365/365) * (364/365) * (363/365) 
+```
+
+Ovvero
+
+```{r}
+pbirthday(3)[3]
+```
+
+Con 22 persone abbiamo
+
+```{r}
+k <- 22
+pbirthday(k)[k]
+```
+
+e con 23 persone
+
+```{r}
+k <- 23
+pbirthday(k)[k]
+```
+
+il che riproduce il risultato atteso. 
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
