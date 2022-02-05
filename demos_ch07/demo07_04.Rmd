@@ -1,0 +1,110 @@
+---
+title: "Data science per psicologi - demo 07.04"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+# Esercizi sulle variabili casuali
+
+```{r}
+suppressPackageStartupMessages({
+  library("tidyverse")
+  library("prob")
+})
+```
+
+## Esercizio 1
+
+Conosciamo già esperimenti casuali, spazi campionari e gli eventi. Ora ci preoccupiamo di associare un numero agli eventi dell'esperimento casuale. Eseguiamo un esperimento casuale e, dopo aver osservato il risultato $\omega$, calcoliamo un numero $X$. Cioè, ad ogni risultato $\omega$ nello spazio campionario associamo un numero $X(\omega) = x$.
+
+A titolo di esempio, lanciamo tre volte un dado a 4 facce e definiamo la variabile casuale $U = X1 − X2 + X3$.
+
+```{r}
+S <- rolldie(3, nsides = 4, makespace = TRUE) 
+S <- addrv(S, U = X1 - X2 + X3)
+head(S)
+```
+
+Calcoliamo la funzione di massa di $U$:
+
+```{r}
+Prob(S, U == -2)
+Prob(S, U == -1)
+Prob(S, U == 0)
+Prob(S, U == 1)
+Prob(S, U == 2)
+Prob(S, U == 3)
+Prob(S, U == 4)
+Prob(S, U == 5)
+Prob(S, U == 6)
+Prob(S, U == 7)
+```
+
+Controlliamo:
+
+```{r}
+Prob(S, U == -2) +
+Prob(S, U == -1) +
+Prob(S, U == 0) +
+Prob(S, U == 1) +
+Prob(S, U == 2) +
+Prob(S, U == 3) +
+Prob(S, U == 4) +
+Prob(S, U == 5) +
+Prob(S, U == 6) +
+Prob(S, U == 7) 
+```
+
+La probabilità $P(U > 5)$ è
+
+```{r}
+Prob(S, U > 5)
+```
+
+Creiamo due altre variabili casuali definite come il massimo delle tre variabili originarie, o come la loro somma:
+
+```{r}
+S <- addrv(S, FUN = max, invars = c("X1", "X2", "X3"), name = "V")
+S <- addrv(S, FUN = sum, invars = c("X1", "X2", "X3"), name = "W")
+```
+
+La distribuzione marginale di $V$ è 
+
+```{r}
+marginal(S, vars = "V")
+```
+
+La distribuzione congiunta di $V$ e $W$ è
+
+```{r}
+J <- marginal(S, vars = c("V", "W"))
+J
+```
+
+```{r}
+sum(J$probs)
+```
+
+Troviamo, ad esempio, la probabilità dell'evento $V > 2$ e $W < 7$:
+
+```{r}
+J1 <- J %>% 
+  dplyr::filter(
+    V > 2,
+    W < 7
+  )
+sum(J1$probs)
+```
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
