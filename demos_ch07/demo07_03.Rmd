@@ -167,17 +167,21 @@ Prob(S, isrep(S, "T", 3))
 
 ## Esercizio 6
 
-Tre psicologi lavorano in una cooperativa, Maria, Luca, e Carla. Sono in ufficio uno alla volta. Maria lavora il 60% del tempo, Luca il 30% e Carla il rimanente 10%. Lavorano tutti e tre ad un progetto in cui devono riorganizzare delle cartelle cliniche. Chiamiamo M l'evento per cui Maria conclude il lavoro su una cartella; L e C sono gli eventi corrispondenti per Luca e Carla. 
+Tre psicologi lavorano in una cooperativa, Maria, Luca, e Carla. Sono in ufficio uno alla volta. Maria lavora il 60% del tempo, Luca il 30% e Carla il rimanente 10%. Lavorano tutti e tre ad un progetto in cui devono riorganizzare delle cartelle cliniche. Chiamiamo $M$ l'evento per cui Maria conclude il lavoro su una cartella; $L$ e $C$ sono gli eventi corrispondenti per Luca e Carla. 
 
-Se lavorano tutti con la stessa velocità, le probabilità a priori che una cartella generica sia stata completata da Maria, Luca e Carla sono, rispettivamente, uguali a 0.6, 0.3, e 0.1. Chiamiamo queste le _probabilità a priori_.
+Se lavorano tutti con la stessa velocità, le probabilità a priori che una cartella generica sia stata completata da Maria, Luca e Carla sono, rispettivamente, uguali a 0.6, 0.3, e 0.1. 
 
 Ad un controllo, emerge che una cartella è stata completata in maniera sbagliata. Chi è il responsabile?
 
-Per rispondere a questa domanda, dobbiamo anche sapere quanto quanti errori fanno, in media, i tre psicologi. Sulla base di tutta l'esperienza passata, possiamo dire che, per Maria, Luca e Carla, la probabilità di commettere un errore, è rispettivamente uguale a 0.003, 0.007 e 0.010.
+Per rispondere a questa domanda possiamo usare l'informazione precedente. Non sapendo nient'altro, le _probabilità a priori_ di un errore sono, rispettivamente, 0.6, 0.3, e 0.1 per Maria, Luca e Carla. 
 
-Chiamiamo $E$ l'evento: la cartella è sbagliata.  Ci chiediamo: qual è la probabilità che a completare il lavoro sia stata Maria, dato che la cartella è sbagliata? Ovvero, qual è la probabilità $P(M \mid E)$? Di Maria conosciamo la probabilità a priori di commettere un errore.  Quello che vogliamo sapere è la probabilità a posteriori (ovvero, dopo che è stato osservato un errore). Calcoliamo le probabilità a posteriori per tutti e tre gli psicologi.
+Ma abbiamo anche altre informazioni. I tre psicologi non sono tutti egualmente bravi in questo lavoro. Per Maria, Luca e Carla, la probabilità di commettere un errore, è rispettivamente, uguale a 0.003, 0.007 e 0.010. Ciò significa che, su 1000 cartelle, Maria ne sbaglia 3; e così via per gli altri.
 
-Ovviamente, dobbiamo applicare il teorema di Bayes. Troviamo $P(M \mid E) = \frac{P(M \cap E)}{P(E)}$. Il numeratore è $P(E \mid M) P(M)$, ovvero $0.003 \cdot 0.6 = 0.0018.$ Il denominatore è $P(E \cap M) + P(E \cap L) + P(E \cap C)$, usando il teorema della probabilità totale, ovvero:
+Supponiamo ora che sia stata osservata una cartella che è stata completata in maniera errata.  Chiamiamo $E$ l'evento: la cartella è sbagliata.  Ci chiediamo: avendo osservato un errore, qual è la probabilità che a fare l'errore sia stato ciascuno dei tre psicologi?  Per Maria, ci chiediamo quale sia la probabilità $P(M \mid E)$; lo stesso per gli altri. Calcoliamo dunque le probabilità a posteriori di un errore, per ciascuno dei tre psicologi.
+
+Ovviamente, per trovare la soluzione di questo problema dobbiamo applicare il teorema di Bayes. Iniziamo con Maria.
+
+Cerchiamo $P(M \mid E) = \frac{P(M \cap E)}{P(E)}$. Il numeratore è $P(E \mid M) P(M)$, ovvero $0.003 \cdot 0.6 = 0.0018.$ Il denominatore è $P(E \cap M) + P(E \cap L) + P(E \cap C)$, usando il teorema della probabilità totale, ovvero:
 
 $$
 P(E \mid M) P(M) +  P(E \mid L) P(M) + P(E \mid M) P(C) = 0.003 \cdot 0.6 + 0.007 \cdot 0.30 + 0.010 \cdot 0.10 = 0.0049.
@@ -188,8 +192,9 @@ Possiamo dunque calcolare
 $$
 P(M \mid E) = \frac{0.0018}{0.0049} \approx 0.37.
 $$
+La stessa procedura può essere applicata agli altri due psicologi.
 
-In modo più semplice, possiamo procedere nel modo seguente. Le probabilità a priori che è stato commesso un errore, per Maria, Luca e Carla, sono:
+In modo più semplice, però, possiamo procedere nel modo seguente. Le probabilità a priori che sia stato commesso un errore, per Maria, Luca e Carla, sono:
 
 ```{r}
 prior <- c(0.6, 0.3, 0.1)
@@ -201,23 +206,12 @@ La verosimiglianza che Maria, Luca e Carla commettano un errore è
 likelihood <- c(0.003, 0.007, 0.01)
 ```
 
-Le probabilità a posteriori sono:
+Dunque, le probabilità a posteriori sono:
 
 ```{r}
 post <- prior * likelihood # distribuzione a posteriori non normalizzata
 post / sum(post) # distribuzione a posteriori normalizzata
 ```
-
-
-
-
-
-
-
-
-
-
-
 
 
 
