@@ -1,0 +1,432 @@
+---
+title: "Data science per psicologi - demo 07.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+
+Il pacchetto `prob` di $\textsf{R}$ sviluppato da G. Jay Kerns contiene una serie di funzioni che possono essere usate per il calcolo delle probabilità nel caso di spazi campionari finiti. 
+
+```{r}
+suppressPackageStartupMessages(library("prob"))
+```
+
+La ragione di usare $\textsf{R}$ in questo caso, e in tutti gli altri casi, non è quella di potere risolvere in maniera meccanica un esercizio così da evitare la fatica di dovere comprendere la logica sottostante. La ragione è invece quella di evitare di dovere fare i calcoli "a mano", in modo da avere più tempo per ciò che è importante, ovvero il ragionamento logico che è richiesto per risolvere il problema. 
+
+Facciamo un esempio. Lo spazio campionario dell’esperimento casuale corrispondente al lancio di due dadi si crea nel modo seguente:
+
+```{r}
+tosscoin(2)
+```
+
+
+Una volta specificato lo spazio campionario $\mathcal{S}$ dell'esperimento casuale è necessario associare una probabilità a ciascun evento elementare di $\mathcal{S}$. 
+Questo risultato si ottiene usando la funzione `probspace()`. 
+Nel caso di due monete equilibrate abbiamo:
+
+```{r}
+S <- tosscoin(2)
+probspace(S)
+```
+
+Consideriamo alcuni esempi dell'uso delle funzioni contenute nel pacchetto $\texttt{prob}$ per la soluzione di problemi relativi alla probabilità discreta.
+
+
+## Esercizi con il pacchetto $\texttt{prob}$
+
+### Esercizio 1
+
+Si consideri l'esperimento che consiste nel lancio di due monete. 
+Supponiamo che gli eventi dello spazio campionario $\mathcal{S} = \{TT, TC, CT, CC\}$ siano equiprobabili. Qual è la probabilità dell'evento "testa nel primo lancio"?
+
+_Soluzione._
+
+Gli eventi $\{TT\}$ e $\{TC\}$ sono incompatibili e la probabilità dell'evento $A = \{\text{testa nel primo lancio}\} = \{TT, TC\}$ è data dalla somma delle probabilità degli eventi elementari che lo costituiscono. La probabilità cercata è dunque uguale a
+
+$$P(TT \cup TC) = P(TT) ` P(TC) = 0.25 ` 0.25 = 0.50.$$
+
+Usando le funzioni del pacchetto `prob`, il problema si affronta nel modo seguente.
+Iniziamo a specificare lo spazio campionario dell'esperimento casuale e associamo una probabilità a ciascun evento elementare dello spazio campionario.
+
+```{r}
+S <- tosscoin(2, makespace = TRUE)
+S
+```
+
+Selezioniamo ora un sottoinsieme dello spazio campionario, ovvero l'insieme degli eventi elementari che corrispondono all'evento $A$.
+
+```{r}
+A <- subset(S, toss1 == "H")
+A
+```
+
+L'ultimo passo è quello di sommare le probabilità associate a tutti gli eventi elementari in $A$.
+
+```{r}
+Prob(A)
+```
+
+### Esercizio 2
+
+Vengono lanciate due monete equilibrate. Siano $A$ l'evento "croce nel primo lancio" e $B$ l'evento "due volte testa". Si trovi la probabilità $P(A \cup B)$.
+
+_Soluzione._
+
+Gli eventi $A = \{CC, CT\}$ e $B = \{TT\}$ sono disgiunti. La probabilità di $P(A \cup B)$ è 
+
+$$P(A \cup B) = P(A) + P(B) = 0.50 + 0.25 = 0.75.$$
+
+Possiamo replicare il risultato usando le funzioni `tosscoin()`, `subset()`, `Prob()` e `union()` del pacchetto `prob`. Iniziamo a creare lo spazio campionario dell'esperimento casuale.
+
+```{r}
+S <- tosscoin(2, makespace = TRUE) 
+S
+```
+
+Specifichiamo l'insieme degli eventi elementari che costituiscono l'evento $A$.
+
+```{r}
+A <- subset(S, toss1 == "H")
+A
+```
+
+Specifichiamo l'insieme degli eventi elementari che costituiscono l'evento $B$.
+
+```{r}
+B <- subset(S, toss1 == "H" & toss2 == "H")
+B
+```
+
+Calcoliamo ora la probabilità dell'evento $P(A \cup B)$.
+
+```{r}
+Prob(union(A, B))
+```
+
+Si noti l'uso degli operatori logici. La funzione `subset()` crea un sottoinsieme dello spazio campionario sulla base delle condizioni logiche che vengono specificate che sono applicate a ciascuna riga di `S`. Per esempio, l'istruzione `subset(S, toss1 == "H" & toss2 == "H")` identifica l'insieme delle righe nelle quali la colonna `toss1` assume il valore `H` e la colonna `toss2` assume il valore `H`. La funzione `union()` crea un oggetto che è l'unione dei due oggetti  specificati come argomenti.  Infine, la funzione `Prob()` somma i valori contenuti nella colonna `probs` dell'oggetto creato da `union()`. 
+
+### Esercizio 3
+
+Estraendo una carta da un mazzo di 52, qual è la probabilità che esca una figura di cuori? Sapendo che il seme della carta estratta è cuori, qual è la probabilità che il valore numerico della carta sia 7, 8, o 9?
+
+_Soluzione._
+
+Ci sono 13 carte di cuori su 52, dunque la risposta alla prima domanda è 1/4. 
+Per rispondere alla seconda domanda consideriamo solo le 13 carte di cuori.  La probabilità cercata è dunque 3/13 = 0.2308.
+
+Iniziamo a specificare lo spazio campionario dell'esperimento casuale con la funzione  `cards()`. 
+
+```{r}
+S <- cards(makespace = TRUE)
+S
+```
+
+L'insieme `A` viene creato quale sottoinsieme di `S` usando la funzione `subset()` e specificando che la colonna `suit` (seme) deve assumere il valore `Hart` (cuori). 
+
+```{r}
+A <- subset(S, suit == "Heart")
+A
+```
+
+Per creare l'insieme `B`, nella funzione `subset()` usiamo l'operatore logico `%in%` per identificare le righe di `S` nelle quali la colonna `rank` (valore numerico) è 7 o 8 o 9. 
+
+```{r}
+B <- subset(S, rank %in% 7:9)
+B
+```
+
+Calcoliamo la probabilità di una carta di cuori.
+
+```{r}
+Prob(S, suit == "Heart")
+```
+
+L'argomento `given` passato alla funzione `Prob()` viene usato per specificare la probabilità condizionata.
+
+```{r}
+Prob(B, given = A)
+```
+
+### Esercizio 4 (Paradosso dei due bambini) 
+
+Una coppia ha due bambini. Almeno uno dei due è una femmina. Qual è la probabilità che siano entrambe femmine? Qual è la probabilità che siano entrambe femmine, sapendo che il primogenito è una femmina?
+
+_Soluzione._
+
+Nell'ipotesi che maschi e femmine abbiano la stessa probabilità di nascere, si ha che
+
+\begin{align}
+&P(\text{entrambe femmine} \,\vert\, \text{almeno una femmina}) =\notag\\ &\frac{P(\text{entrambe femmine} \cap \text{almeno una femmina})}{P(\text{almeno una femmina})} = \frac{1/4}{3/4} = 1/3,\notag\\
+&P(\text{entrambe femmine} \,\vert\, \text{primogenita femmina}) =\notag\\ &\frac{P(\text{entrambe femmine} \cap \text{primogenita femmina})}{P(\text{primogenita femmina})} = \frac{1/4}{1/2} = 1/2.\notag
+\end{align}
+
+In realtà, nella maggior parte dei paesi la probabilità che un neonato sia maschio è pari a 0.51, quindi la soluzione precedente è approssimata.
+
+Risolviamo ora il paradosso dei due bambini usando le funzioni del pacchetto `prob`. 
+Usiamo la funzione `tosscoin()` assegnando ad `H` il significato "femmina". La prima domanda diventa dunque la seguente: qual è la probabilità di osservare due teste in due lanci di una moneta, sapendo che è stata ottenuta testa almeno una volta. 
+
+```{r}
+# Femmina = H.
+S <- tosscoin(2, makespace = TRUE)
+S
+```
+
+Specifichiamo $A$ = entrambe femmine.
+
+```{r}
+A <- subset(S, toss1 == "H" & toss2 == "H")
+A
+```
+
+Specifichiamo l'evento $B$ = almeno una femmina, ovvero "non entrambi maschi".
+
+```{r}
+B <- subset(S, !(toss1 == "T" & toss2 == "T"))
+B
+```
+
+Possiamo ora calcolare la probabilità $P(A \mid B)$:
+
+```{r}
+Prob(A, given = B)
+```
+
+La seconda domanda corrisponde alla probabilità di due teste ("femmine"), dato che il primo lancio ha prodotto testa ("femmina"). Iniziamo a definire l'evento $C$ = primogenito femmina.
+
+```{r}
+C <- subset(S, toss1 == "H")
+C
+```
+
+Possiamo ora calcolare la probabilità $P(A \mid C)$.
+
+```{r}
+Prob(A, given = C)
+```
+
+
+### Esercizio 5
+
+Si consideri l'esperimento casuale che consiste nel lancio di due dadi bilanciati. Definiamo i seguenti eventi: $A=\{$esce un 1 o un 2 nel primo lancio$\}$ e $B=\{$il punteggio totale è 8$\}$. Ci chiediamo: gli eventi $A$ e $B$ sono statisticamente indipendenti?
+
+_Soluzione._
+
+Gli eventi $A$ e $B$ non sono indipendenti in quanto le loro probabilità valgono $P(A) = 12/36$ e $P(B) = 5/36$ e la probabilità della loro intersezione vale $P(A \cap B) = 1/36 = 3/108 \neq P(A)P(B) = 5/108$.
+
+Usiamo ora le funzioni del pacchetto `prob` per ottenere il risultato descritto sopra. Iniziamo a definire lo spazio campionario `S` dell'esperimento casuale corrispondente al lancio di due dadi equilibrati.
+
+```{r}
+S <- rolldie(2, makespace = TRUE)
+S
+```
+
+Specifichiamo il sottoinsieme dello spazio campionario $S$ che corrisponde all'evento $A$.
+
+```{r}
+A <- subset(S, X1 %in% c(1, 2))
+A
+```
+
+
+Calcoliamo $P(A)$:
+
+```{r}
+Prob(A)
+```
+
+Specifichiamo il sottoinsieme dello spazio campionario $S$ che corrisponde all'evento $B$.
+
+```{r}
+B <- subset(S, (X1 + X2) == 8)
+B
+```
+
+Calcoliamo $P(B)$:
+
+```{r}
+Prob(B)
+```
+
+Calcoliamo $P(A \cap B)$:
+
+```{r}
+Prob(intersect(A,B))
+```
+
+Calcoliamo il prodotto $P(A) P(B)$:
+
+```{r}
+Prob(A) * Prob(B)
+```
+
+Dato che $P(A \cap B) \neq P(A) P(B)$, i due eventi $A$ e $B$ non sono indipendenti.
+
+### Esercizio 6
+
+Consideriamo il fenomeno causale consistente nell'osservazione dei punti ottenuti dal lancio di una coppia di dadi a sei facce.  Supponiamo che i dadi siano truccati e poniamo su $S = \{ (i, j) \mid i, j \in \{1, 2, 3, 4, 5, 6\} \}$ la probabilità  $\{0.3, 0.3, 0.1, 0.1, 0.1, 0.1\}$.  Indichiamo con $X_1$ il valore del  lancio del primo dado, cioè $X_1(i,j) = i$ per ogni $(i,j) \in S$, e con $X_2$ il valore del lancio del secondo dado, cioè $X_2(i,j) = j$ per ogni $(i,j) \in \mathcal{S}$.
+
+Per creare lo spazio campionario dell'esperimento casuale dobbiamo innanzitutto definire la distribuzione di probabilità di massa che corrisponde ai 6 possibili valori che possono essere osservati nel caso del lancio di un dado.
+
+```{r}
+p <- c(0.3, 0.3, 0.1, 0.1, 0.1, 0.1)
+```
+
+Adesso dobbiamo calcolare le probabilità da associare a ciascuno dei $6 \times 6$ eventi elementari dello spazio campionario. A questo fine utilizziamo la funzione `iidspace()` che definisce lo spazio campionario corrispondente ad un insieme di esperimenti indipendenti e aventi la medesima distribuzione di probabilità. Tali condizioni corrispondono al caso presente in cui abbiamo due dadi sbilanciati che sono tra loro indipendenti e ciascuno con la distribuzione di probabilità definita sopra. Il primo argomento di `iidspace()` specifica i valori prodotti dal lancio di uno dei due dadi, ovvero i valori prodotti da uno dei due esperimenti casuali, l'argomento `ntrials` definisce il numero di dadi, ovvero il numero di esperimenti casuali indipendenti che vengono eseguiti e infine l'argomento `probs` specifica la distribuzione di massa di probabilità per i valori del lancio del dado.
+
+```{r}
+S <- iidspace(1:6, ntrials = 2, probs = p)
+S
+```
+
+In questo esempio, gli eventi $X_1$ e $X_2$ sono indipendenti. Dunque, la probabilità che si verifichino entrambi, ovvero $P(\{X_1 = h \cap X_2 = k\})$, è uguale al prodotto $P(\{X_1 = h\}) P(\{X_2 = k\})$. Per esempio, 
+
+$$P(\{X_1 = 1 \cap X_2 = 1\} = 0.3 \times 0.3 = 0.9$$
+
+e così via. Procedendo in questo modo si costruisce la distribuzione di probabilità che è stata fornita da `iidspace()`.
+
+Iniziamo ora a porci una domanda semplice. Qual è la probabilità che la somma dei punti ottenuti nel lancio dei due dadi sia uguale a 7?
+
+
+L'evento \enquote{somma uguale a 7} è l'unione degli eventi $(1,6)$, $(2,5)$, $(3,4)$, $(4,3)$, $(5,2)$ e $(6,1)$. Dunque il risultato cercato è
+
+\begin{align}
+P(\text{somma dei due dadi uguale a 7}) &= 0.03 + 0.03 + 0.01 + 0.01 + 0.03 + 0.03 \notag\\
+&= 0.14.\notag
+\end{align}
+
+Troviamo ora tale risultato utilizzando le funzioni del pacchetto $\texttt{prob}$.
+Definiamo l'evento $A$ specificando la condizione logica secondo la quale la somma di $X1$ e di $X2$ deve essere uguale a 7
+
+```{r}
+A <- subset(S, (X1 + X2) == 7)
+A
+```
+
+Possiamo ora calcolare $P(A)$:
+
+```{r}
+Prob(A)
+```
+
+
+### Esercizio 7 (Unione di eventi) 
+
+Si consideri l'esperimento casuale definito nell'esercizio 6 e si calcoli la probabilità del seguente evento: il lancio del primo dado produce un numero minore di 3 oppure il lancio del secondo dado produce un numero dispari.    
+
+_Soluzione._
+
+Definiamo l'evento $A$.
+
+```{r}
+A <- subset(S, X1 < 3)
+A
+```
+
+Per definire l'evento $B$ è necessario verificare se un numero sia dispari o meno. 
+Tale problema può essere risolto creando una funzione che ritorna `TRUE` se i valori passati alla funzione sono dispari e `FALSE` altrimenti.
+
+```{r}
+is_odd <- function(x) {
+  return(x %% 2 != 0)
+} 
+```
+
+Mediante la funzione `is_odd()` possiamo ora selezionare gli eventi elementari di $S$ per i quali la somma dei due dadi è dispari, definendo in questo modo l'evento $B$.
+
+```{r}
+B <- subset(S, is_odd(X2))
+B
+```
+
+Stampiamo sulla console di \R\, l'evento che corrisponde all'unione di $A$ e $B$, per verificare che non ci siano errori.
+
+```{r}
+union(A, B)
+```
+
+Calcoliamo ora la probabilità $P(A \cup B)$.
+
+```{r}
+Prob(union(A, B))
+```
+
+### Esercizio 8 (intersezione di eventi) 
+
+Si consideri l'esperimento casuale definito nell'esercizio 6 e si calcoli la probabilità che il lancio del primo dado produca un numero minore di 3 e il lancio del secondo dado produca un numero dispari. Si noti che, mentre l'unione di due eventi si descrive mediante il connettivo "o", l'intersezione di due eventi viene formulata con l'uso del connettivo "e". 
+
+Utilizzando gli eventi $A$ e $B$ che sono stati definiti in precedenza, possiamo calcolare la probabilità $P(A \cap B)$ nel modo seguente:
+
+```{r}
+intersect(A, B)
+```
+
+```{r}
+Prob(intersect(A, B))
+```
+
+
+### Esercizio 9 (probabilità marginale) 
+
+Si consideri l'esperimento casuale definito nell'esercizio 6 e si calcoli la probabilità di ottenere 3 con il lancio del primo dado.
+
+_Soluzione._
+
+Definiamo l'evento $C$
+
+```{r}
+C <- subset(S, X1 == 3)
+C
+```
+
+La probabilità $P(C)$ è uguale a:
+
+```{r}
+Prob(C)
+```
+
+
+### Esercizio 10 (probabilità condizionata) 
+
+Si consideri l'esperimento casuale definito nell'esercizio 6 e si calcoli la probabilità di ottenere 3 con il secondo dado, dato che il primo dado ha prodotto l'esito 4.
+
+_Soluzione._
+
+Iniziamo a definire l'evento $D$ = "il primo dado produce 4".
+
+```{r}
+D <- subset(S, X1 == 4)
+D
+```
+
+Definiamo l'evento $E$ = "il secondo dado produce 3".
+
+```{r}
+E <- subset(S, X2 == 3)
+E
+```
+
+Calcoliamo $P(E \mid D)$.
+
+```{r}
+Prob(E, given = D)
+```
+
+Si noti che, per calcolare la probabilità di un evento condizionato, è sufficiente valutarne la cardinalità all'interno dello spazio campionario ristretto definito dall'evento condizionante e dividere per la cardinalità dell'evento condizionante.
+Ovvero
+
+```{r}
+Prob(intersect(D, E)) / Prob(D)
+```
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
