@@ -32,7 +32,7 @@ set.seed(84735)
 
 knitr::opts_chunk$set(
   collapse = TRUE,
-  tidy = 'styler',
+  # tidy = 'styler',
   fig.width = 6,
   fig.asp = 0.618 # 1 / phi
 )

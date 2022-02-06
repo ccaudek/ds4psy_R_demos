@@ -123,6 +123,53 @@ oppure con
 sd(X)
 ```
 
+## Esercizio 3
+
+Un recente studio mostra che i pazienti con il disturbo $A$ mostrano il sintomo $B$ quando si trovano in una situazione di stress. Sia $X$ il numero di pazienti con il disturbo $A$ che mostrano il sintomo $B$ sotto stress di un campione casuale di ampiezza $n = 31$. Si trovi la probabilità che $X = 17$, che $X$ non sia maggiore di 13, che $X$ sia maggiore di 11, che $X$ sia al massimo 15, che $X$ sia compreso tra 16 e 19 (inclusi). Si trovino inoltre il valore atteso, la varianza e la deviazione standard di $X$. Si trovi anche il valore atteso di $4X + 51.324$.
+
+```{r}
+dbinom(17, size = 31, prob = 0.447)
+```
+
+```{r}
+pbinom(13, size = 31, prob = 0.447)
+```
+
+```{r}
+pbinom(11, size = 31, prob = 0.447, lower.tail = FALSE)
+```
+
+```{r}
+pbinom(14, size = 31, prob = 0.447, lower.tail = FALSE)
+```
+
+```{r}
+sum(dbinom(16:19, size = 31, prob = 0.447))
+```
+
+oppure
+
+```{r}
+diff(pbinom(c(19, 15), size = 31, prob = 0.447, lower.tail = FALSE))
+```
+
+```{r}
+X <- Binom(size = 31, prob = 0.447)
+E(X)
+```
+
+```{r}
+var(X)
+```
+
+```{r}
+sd(X)
+```
+
+```{r}
+E(4 * X + 51.324)
+```
+
 
 ## Informazioni sulla sessione di lavoro
 
