@@ -10,13 +10,28 @@ output:
 
 # Pacchetti
 
-Carichiamo i pacchetti necessari. Se tali pacchetti non sono presenti nella macchina, devono prima essere installati con la funzione `install.packages()`.
+Carichiamo i pacchetti necessari. Se tali pacchetti non sono presenti sulla macchina, devono prima essere installati con la funzione `install.packages()`.
 
 ```{r}
-library("tidyverse")
-library("rio")
-library("here")
-theme_set(theme_minimal())
+suppressPackageStartupMessages({
+  library("tidyverse")
+  library("bayesplot")
+  library("rio")
+  library("here")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  fig.align = "center",
+  fig.asp = 0.618, # 1 / phi
+  fig.pos = "h",
+  comment = "#>",
+  tidy.opts = list(width.cutoff = 70),
+  tidy = "styler"
+)
 ```
 
 # Importare i dati

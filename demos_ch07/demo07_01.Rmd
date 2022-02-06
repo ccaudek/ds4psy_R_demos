@@ -12,7 +12,20 @@ output:
 Il pacchetto `prob` di $\textsf{R}$ sviluppato da G. Jay Kerns contiene una serie di funzioni che possono essere usate per il calcolo delle probabilità nel caso di spazi campionari finiti. 
 
 ```{r}
-suppressPackageStartupMessages(library("prob"))
+suppressPackageStartupMessages({
+  library("prob")
+})
+
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  fig.align = "center",
+  fig.asp = 0.618, # 1 / phi
+  fig.pos = "h",
+  comment = "#>",
+  tidy.opts = list(width.cutoff = 70),
+  tidy = "styler"
+)
 ```
 
 La ragione di usare $\textsf{R}$ in questo caso, e in tutti gli altri casi, non è quella di potere risolvere in maniera meccanica un esercizio così da evitare la fatica di dovere comprendere la logica sottostante. La ragione è invece quella di evitare di dovere fare i calcoli "a mano", in modo da avere più tempo per ciò che è importante, ovvero il ragionamento logico che è richiesto per risolvere il problema. 
@@ -22,7 +35,6 @@ Facciamo un esempio. Lo spazio campionario dell’esperimento casuale corrispond
 ```{r}
 tosscoin(2)
 ```
-
 
 Una volta specificato lo spazio campionario $\mathcal{S}$ dell'esperimento casuale è necessario associare una probabilità a ciascun evento elementare di $\mathcal{S}$. 
 Questo risultato si ottiene usando la funzione `probspace()`. 

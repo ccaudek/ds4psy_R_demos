@@ -1,0 +1,16 @@
+---
+title: "Data science per psicologi - demo 05.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+# Manipolazione dei dati con il pacchetto `dplyr`
+
+Aggiungo qui il [link](https://drive.google.com/file/d/1AV-shsx5wNCar2VjHUh4cbIt84f1Dytw/view?usp=sharing) ad un video-tutorial che ho preparato relativamente alla manipolazione dei dati con le funzioni del pacchetto `dplyr`. Nel video non faccio altro che commentare un tutorial predisposto da Allison Horst e disponibile seguendo questo  [link](https://allisonhorst.shinyapps.io/dplyr-learnr/#section-welcome). Il tutorial di Allison Horst è fatto benissimo e non vedo ragioni di tradurlo o cambiarlo in alcun modo. Inoltre, se andate nella pagina web che ho indicato sopra, potete anche fare degli esercizi che vi consentono di verificare se avete capito come utilizzare in pratica le istruzioni `R` che vengono discusse -- le risposte agli esercizi sono immediatamente disponibili il che rende il tutorial di Allison Horst un utile strumento di apprendimento. 
+
+
+

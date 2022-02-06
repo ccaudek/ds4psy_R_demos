@@ -8,14 +8,25 @@ output:
     code_download: true
 ---
 
-# Esercizi sulla probabilità condizionata e sul teorema di Bayes
-
 ```{r}
 suppressPackageStartupMessages({
   library("tidyverse")
   library("prob")
 })
+
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  fig.align = "center",
+  fig.asp = 0.618, # 1 / phi
+  fig.pos = "h",
+  comment = "#>",
+  tidy.opts = list(width.cutoff = 70),
+  tidy = "styler"
+)
 ```
+
+# Esercizi sulla probabilità condizionata e sul teorema di Bayes
 
 ## Esercizio 1
 

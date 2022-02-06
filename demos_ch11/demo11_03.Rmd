@@ -1,0 +1,176 @@
+---
+title: "Data science per psicologi - demo 11.02"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("scales")
+  library("bayesplot")
+  library("prob")
+  library("distrEx")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  fig.align = "center",
+  fig.asp = 0.618, # 1 / phi
+  fig.pos = "h",
+  comment = "#>",
+  tidy.opts = list(width.cutoff = 70),
+  tidy = "styler"
+)
+```
+
+# La covarianza di due variabili aleatorie discrete
+
+Poniamoci il problema di calcolare la covarianza e la correlazione di due variabili aleatorie discrete utilizzando l'informazione fornita dalla distribuzione di probabilità congiunta.  
+
+Consideriamo l'esperimento casuale che corrisponde al lancio di due dadi bilanciati. Creiamo lo spazio campionario di questo esperimento casuale e definiamo su di esso le seguenti variabili aleatorie:
+
+- U: somma dei punti dei due dadi,
+- V: 1 se i punti del lancio del primo dado sono minori di 4, 0 altrimenti.
+
+Possiamo ottenere un elenco di tutti gli eventi elementari dello spazio campionario usando le istruzioni seguenti:
+
+```{r}
+S <- rolldie(2, nsides = 6, makespace = TRUE)
+S <- addrv(S, U = X1+X2, V = ifelse(X1 < 4, 1, 0))
+S
+```
+
+Le istruzioni precedenti specificano, in corrispondenza di ogni punto dello spazio campionario (ovvero, in ciascuna riga del data.frame che viene generato), il valore assunto dalle due variabili aleatorie che sono state definite.
+
+La descrizione dello spazio campionario fornita da `R` è corretta: questo esperimento casuale produce infatti 6 $\times$ 6 esiti (eventi elementari) possibili. Ma si noti che alcune righe del data.frame si ripetono più volte. Possiamo dunque semplificare tale descrizione nel modo seguente:
+
+```{r}
+UV <- marginal(S, vars = c("U", "V")) 
+UV
+```
+
+L'elenco dei valori che le due variabili aleatorie $U$ e $V$ possono assumere, insieme alla probabilità del loro verificarsi, costituisce la _distribuzione di probabilità congiunta_ delle due variabili aleatorie. È anche possibile presentare la distribuzione di probabilità congiunta in forma tabulare. A tale fine possiamo utilizzare la funzione `xtabs()`:
+
+```{r}
+xtabs(round(probs, 3) ~ U + V, data = UV)
+```
+
+Ripetiamo ora il processo precedente chiedendo alla funzione `marginal()` di calcolare le due distribuzioni marginali univariate:
+
+```{r}
+pu <- marginal(S, vars = "U")
+pu
+```
+
+e
+
+```{r}
+pv <- marginal(S, vars = "V")
+pv
+```
+
+In maniera equivalente, lo stesso risultato si trova applicando le funzioni `rowSums()` e `colSums()` all'oggetto creato da `xtabs()`:
+
+```{r}
+temp <- xtabs(probs ~ U + V, data = UV)
+rowSums(temp)
+```
+
+e
+
+```{r}
+colSums(temp)
+```
+
+## Valore atteso
+
+Calcoliamo ora il valore atteso delle due variabili aleatorie. Utilizziamo la funzione `DiscreteDistribution()`. Il primo argomento richiede un vettore che specifica il supporto della variabile casuale discreta. Il secondo argomento è un vettore che, per ciasun valore della variabile casuale discreta, specifica il corrispondente valore della funzione di massa di probabilità. Mediante la funzione `DiscreteDistribution()` otteniamo il valore atteso di `U`:
+
+```{r}
+U <- DiscreteDistribution(supp = pu$U, prob = pu$probs)
+mu_u <- E(U)
+mu_u
+```
+
+Inoltre, il valore atteso di `V` è:
+
+```{r}
+V <- DiscreteDistribution(supp = pv$V, prob = pv$probs)
+mu_v <- E(V)
+mu_v
+```
+
+
+## Covarianza
+
+Utilizzando le informazioni precedenti possiamo calcolare la covarianza tra $U$ e $V$. La formula della covarianza
+
+$$
+\sigma_{xy} = \sum_i \big(x_i - \mathbb{E}(x)\big)\big(y_i - \mathbb{E}(y)\big) \cdot p_i(x,y)
+$$
+
+può essere implementata in `R` nel modo seguente:
+
+```{r}
+s_uv <- sum((UV$U - mu_u) * (UV$V - mu_v) * UV$probs)
+s_uv
+```
+
+Lo stesso risultato si ottiene usando la formula alternativa per il calcolo della covarianza:
+
+$$
+\sigma_{xy} = \mathbb{E}(xy) -\mathbb{E}(x)\mathbb{E}(y)
+$$
+ovvero 
+
+```{r}
+sum((UV$U * UV$V) * UV$probs) - mu_u * mu_v
+```
+
+
+## Correlazione
+
+Conoscendo la covarianza è possibile calcolare la correlazione. La correlazione infatti è una covarianza standardizzata:
+
+$$
+\rho_{xy} = \frac{\sigma_{xy}}{\sigma_x\sigma_y}
+$$
+
+Per standardizzare dobbiamo dividere per le due deviazioni standard. Iniziamo dunque a calcolare le varianze delle due variabili aleatorie $U$ e $V$:
+
+```{r}
+v_u <- sum((pu$U - mu_u)^2 * pu$probs)
+v_u
+v_v <- sum((pv$V - mu_v)^2 * pv$probs)
+v_v
+```
+
+oppure, in maniera equivalente
+
+```{r}
+var(U)
+var(V)
+```
+
+Abbiamo ora tutte le informazioni necessarie per il calcolo della correlazione:
+
+```{r}
+s_uv / sqrt(var(U) * var(V))
+```
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

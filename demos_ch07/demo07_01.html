@@ -11,7 +11,7 @@
 
 <meta name="author" content="Corrado Caudek" />
 
-<meta name="date" content="2022-02-05" />
+<meta name="date" content="2022-02-06" />
 
 <title>Data science per psicologi - demo 07.01</title>
 
@@ -475,7 +475,7 @@ pre code {
 <h1 class="title toc-ignore">Data science per psicologi - demo
 07.01</h1>
 <h4 class="author">Corrado Caudek</h4>
-<h4 class="date">2022-02-05</h4>
+<h4 class="date">2022-02-06</h4>
 
 </div>
 
@@ -483,7 +483,20 @@ pre code {
 <p>Il pacchetto <code>prob</code> di <span class="math inline">\(\textsf{R}\)</span> sviluppato da G. Jay Kerns
 contiene una serie di funzioni che possono essere usate per il calcolo
 delle probabilità nel caso di spazi campionari finiti.</p>
-<pre class="r"><code>suppressPackageStartupMessages(library(&quot;prob&quot;))</code></pre>
+<pre class="r"><code>suppressPackageStartupMessages({
+  library(&quot;prob&quot;)
+})
+
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  fig.align = &quot;center&quot;,
+  fig.asp = 0.618, # 1 / phi
+  fig.pos = &quot;h&quot;,
+  comment = &quot;#&gt;&quot;,
+  tidy.opts = list(width.cutoff = 70),
+  tidy = &quot;styler&quot;
+)</code></pre>
 <p>La ragione di usare <span class="math inline">\(\textsf{R}\)</span>
 in questo caso, e in tutti gli altri casi, non è quella di potere
 risolvere in maniera meccanica un esercizio così da evitare la fatica di
@@ -494,11 +507,11 @@ per risolvere il problema.</p>
 <p>Facciamo un esempio. Lo spazio campionario dell’esperimento casuale
 corrispondente al lancio di due dadi si crea nel modo seguente:</p>
 <pre class="r"><code>tosscoin(2)</code></pre>
-<pre><code>##   toss1 toss2
-## 1     H     H
-## 2     T     H
-## 3     H     T
-## 4     T     T</code></pre>
+<pre><code>#&gt;   toss1 toss2
+#&gt; 1     H     H
+#&gt; 2     T     H
+#&gt; 3     H     T
+#&gt; 4     T     T</code></pre>
 <p>Una volta specificato lo spazio campionario <span class="math inline">\(\mathcal{S}\)</span> dell’esperimento casuale è
 necessario associare una probabilità a ciascun evento elementare di
 <span class="math inline">\(\mathcal{S}\)</span>. Questo risultato si
@@ -506,11 +519,11 @@ ottiene usando la funzione <code>probspace()</code>. Nel caso di due
 monete equilibrate abbiamo:</p>
 <pre class="r"><code>S &lt;- tosscoin(2)
 probspace(S)</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25
-## 2     T     H  0.25
-## 3     H     T  0.25
-## 4     T     T  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25
+#&gt; 2     T     H  0.25
+#&gt; 3     H     T  0.25
+#&gt; 4     T     T  0.25</code></pre>
 <p>Consideriamo alcuni esempi dell’uso delle funzioni contenute nel
 pacchetto <span class="math inline">\(\texttt{prob}\)</span> per la
 soluzione di problemi relativi alla probabilità discreta.</p>
@@ -536,22 +549,22 @@ dell’esperimento casuale e associamo una probabilità a ciascun evento
 elementare dello spazio campionario.</p>
 <pre class="r"><code>S &lt;- tosscoin(2, makespace = TRUE)
 S</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25
-## 2     T     H  0.25
-## 3     H     T  0.25
-## 4     T     T  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25
+#&gt; 2     T     H  0.25
+#&gt; 3     H     T  0.25
+#&gt; 4     T     T  0.25</code></pre>
 <p>Selezioniamo ora un sottoinsieme dello spazio campionario, ovvero
 l’insieme degli eventi elementari che corrispondono all’evento <span class="math inline">\(A\)</span>.</p>
 <pre class="r"><code>A &lt;- subset(S, toss1 == &quot;H&quot;)
 A</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25
-## 3     H     T  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25
+#&gt; 3     H     T  0.25</code></pre>
 <p>L’ultimo passo è quello di sommare le probabilità associate a tutti
 gli eventi elementari in <span class="math inline">\(A\)</span>.</p>
 <pre class="r"><code>Prob(A)</code></pre>
-<pre><code>## [1] 0.5</code></pre>
+<pre><code>#&gt; [1] 0.5</code></pre>
 </div>
 <div id="esercizio-2" class="section level3">
 <h3>Esercizio 2</h3>
@@ -571,27 +584,27 @@ probabilità di <span class="math inline">\(P(A \cup B)\)</span> è</p>
 lo spazio campionario dell’esperimento casuale.</p>
 <pre class="r"><code>S &lt;- tosscoin(2, makespace = TRUE) 
 S</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25
-## 2     T     H  0.25
-## 3     H     T  0.25
-## 4     T     T  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25
+#&gt; 2     T     H  0.25
+#&gt; 3     H     T  0.25
+#&gt; 4     T     T  0.25</code></pre>
 <p>Specifichiamo l’insieme degli eventi elementari che costituiscono
 l’evento <span class="math inline">\(A\)</span>.</p>
 <pre class="r"><code>A &lt;- subset(S, toss1 == &quot;H&quot;)
 A</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25
-## 3     H     T  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25
+#&gt; 3     H     T  0.25</code></pre>
 <p>Specifichiamo l’insieme degli eventi elementari che costituiscono
 l’evento <span class="math inline">\(B\)</span>.</p>
 <pre class="r"><code>B &lt;- subset(S, toss1 == &quot;H&quot; &amp; toss2 == &quot;H&quot;)
 B</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25</code></pre>
 <p>Calcoliamo ora la probabilità dell’evento <span class="math inline">\(P(A \cup B)\)</span>.</p>
 <pre class="r"><code>Prob(union(A, B))</code></pre>
-<pre><code>## [1] 0.5</code></pre>
+<pre><code>#&gt; [1] 0.5</code></pre>
 <p>Si noti l’uso degli operatori logici. La funzione
 <code>subset()</code> crea un sottoinsieme dello spazio campionario
 sulla base delle condizioni logiche che vengono specificate che sono
@@ -618,106 +631,106 @@ domanda è 1/4. Per rispondere alla seconda domanda consideriamo solo le
 con la funzione <code>cards()</code>.</p>
 <pre class="r"><code>S &lt;- cards(makespace = TRUE)
 S</code></pre>
-<pre><code>##    rank    suit      probs
-## 1     2    Club 0.01923077
-## 2     3    Club 0.01923077
-## 3     4    Club 0.01923077
-## 4     5    Club 0.01923077
-## 5     6    Club 0.01923077
-## 6     7    Club 0.01923077
-## 7     8    Club 0.01923077
-## 8     9    Club 0.01923077
-## 9    10    Club 0.01923077
-## 10    J    Club 0.01923077
-## 11    Q    Club 0.01923077
-## 12    K    Club 0.01923077
-## 13    A    Club 0.01923077
-## 14    2 Diamond 0.01923077
-## 15    3 Diamond 0.01923077
-## 16    4 Diamond 0.01923077
-## 17    5 Diamond 0.01923077
-## 18    6 Diamond 0.01923077
-## 19    7 Diamond 0.01923077
-## 20    8 Diamond 0.01923077
-## 21    9 Diamond 0.01923077
-## 22   10 Diamond 0.01923077
-## 23    J Diamond 0.01923077
-## 24    Q Diamond 0.01923077
-## 25    K Diamond 0.01923077
-## 26    A Diamond 0.01923077
-## 27    2   Heart 0.01923077
-## 28    3   Heart 0.01923077
-## 29    4   Heart 0.01923077
-## 30    5   Heart 0.01923077
-## 31    6   Heart 0.01923077
-## 32    7   Heart 0.01923077
-## 33    8   Heart 0.01923077
-## 34    9   Heart 0.01923077
-## 35   10   Heart 0.01923077
-## 36    J   Heart 0.01923077
-## 37    Q   Heart 0.01923077
-## 38    K   Heart 0.01923077
-## 39    A   Heart 0.01923077
-## 40    2   Spade 0.01923077
-## 41    3   Spade 0.01923077
-## 42    4   Spade 0.01923077
-## 43    5   Spade 0.01923077
-## 44    6   Spade 0.01923077
-## 45    7   Spade 0.01923077
-## 46    8   Spade 0.01923077
-## 47    9   Spade 0.01923077
-## 48   10   Spade 0.01923077
-## 49    J   Spade 0.01923077
-## 50    Q   Spade 0.01923077
-## 51    K   Spade 0.01923077
-## 52    A   Spade 0.01923077</code></pre>
+<pre><code>#&gt;    rank    suit      probs
+#&gt; 1     2    Club 0.01923077
+#&gt; 2     3    Club 0.01923077
+#&gt; 3     4    Club 0.01923077
+#&gt; 4     5    Club 0.01923077
+#&gt; 5     6    Club 0.01923077
+#&gt; 6     7    Club 0.01923077
+#&gt; 7     8    Club 0.01923077
+#&gt; 8     9    Club 0.01923077
+#&gt; 9    10    Club 0.01923077
+#&gt; 10    J    Club 0.01923077
+#&gt; 11    Q    Club 0.01923077
+#&gt; 12    K    Club 0.01923077
+#&gt; 13    A    Club 0.01923077
+#&gt; 14    2 Diamond 0.01923077
+#&gt; 15    3 Diamond 0.01923077
+#&gt; 16    4 Diamond 0.01923077
+#&gt; 17    5 Diamond 0.01923077
+#&gt; 18    6 Diamond 0.01923077
+#&gt; 19    7 Diamond 0.01923077
+#&gt; 20    8 Diamond 0.01923077
+#&gt; 21    9 Diamond 0.01923077
+#&gt; 22   10 Diamond 0.01923077
+#&gt; 23    J Diamond 0.01923077
+#&gt; 24    Q Diamond 0.01923077
+#&gt; 25    K Diamond 0.01923077
+#&gt; 26    A Diamond 0.01923077
+#&gt; 27    2   Heart 0.01923077
+#&gt; 28    3   Heart 0.01923077
+#&gt; 29    4   Heart 0.01923077
+#&gt; 30    5   Heart 0.01923077
+#&gt; 31    6   Heart 0.01923077
+#&gt; 32    7   Heart 0.01923077
+#&gt; 33    8   Heart 0.01923077
+#&gt; 34    9   Heart 0.01923077
+#&gt; 35   10   Heart 0.01923077
+#&gt; 36    J   Heart 0.01923077
+#&gt; 37    Q   Heart 0.01923077
+#&gt; 38    K   Heart 0.01923077
+#&gt; 39    A   Heart 0.01923077
+#&gt; 40    2   Spade 0.01923077
+#&gt; 41    3   Spade 0.01923077
+#&gt; 42    4   Spade 0.01923077
+#&gt; 43    5   Spade 0.01923077
+#&gt; 44    6   Spade 0.01923077
+#&gt; 45    7   Spade 0.01923077
+#&gt; 46    8   Spade 0.01923077
+#&gt; 47    9   Spade 0.01923077
+#&gt; 48   10   Spade 0.01923077
+#&gt; 49    J   Spade 0.01923077
+#&gt; 50    Q   Spade 0.01923077
+#&gt; 51    K   Spade 0.01923077
+#&gt; 52    A   Spade 0.01923077</code></pre>
 <p>L’insieme <code>A</code> viene creato quale sottoinsieme di
 <code>S</code> usando la funzione <code>subset()</code> e specificando
 che la colonna <code>suit</code> (seme) deve assumere il valore
 <code>Hart</code> (cuori).</p>
 <pre class="r"><code>A &lt;- subset(S, suit == &quot;Heart&quot;)
 A</code></pre>
-<pre><code>##    rank  suit      probs
-## 27    2 Heart 0.01923077
-## 28    3 Heart 0.01923077
-## 29    4 Heart 0.01923077
-## 30    5 Heart 0.01923077
-## 31    6 Heart 0.01923077
-## 32    7 Heart 0.01923077
-## 33    8 Heart 0.01923077
-## 34    9 Heart 0.01923077
-## 35   10 Heart 0.01923077
-## 36    J Heart 0.01923077
-## 37    Q Heart 0.01923077
-## 38    K Heart 0.01923077
-## 39    A Heart 0.01923077</code></pre>
+<pre><code>#&gt;    rank  suit      probs
+#&gt; 27    2 Heart 0.01923077
+#&gt; 28    3 Heart 0.01923077
+#&gt; 29    4 Heart 0.01923077
+#&gt; 30    5 Heart 0.01923077
+#&gt; 31    6 Heart 0.01923077
+#&gt; 32    7 Heart 0.01923077
+#&gt; 33    8 Heart 0.01923077
+#&gt; 34    9 Heart 0.01923077
+#&gt; 35   10 Heart 0.01923077
+#&gt; 36    J Heart 0.01923077
+#&gt; 37    Q Heart 0.01923077
+#&gt; 38    K Heart 0.01923077
+#&gt; 39    A Heart 0.01923077</code></pre>
 <p>Per creare l’insieme <code>B</code>, nella funzione
 <code>subset()</code> usiamo l’operatore logico <code>%in%</code> per
 identificare le righe di <code>S</code> nelle quali la colonna
 <code>rank</code> (valore numerico) è 7 o 8 o 9.</p>
 <pre class="r"><code>B &lt;- subset(S, rank %in% 7:9)
 B</code></pre>
-<pre><code>##    rank    suit      probs
-## 6     7    Club 0.01923077
-## 7     8    Club 0.01923077
-## 8     9    Club 0.01923077
-## 19    7 Diamond 0.01923077
-## 20    8 Diamond 0.01923077
-## 21    9 Diamond 0.01923077
-## 32    7   Heart 0.01923077
-## 33    8   Heart 0.01923077
-## 34    9   Heart 0.01923077
-## 45    7   Spade 0.01923077
-## 46    8   Spade 0.01923077
-## 47    9   Spade 0.01923077</code></pre>
+<pre><code>#&gt;    rank    suit      probs
+#&gt; 6     7    Club 0.01923077
+#&gt; 7     8    Club 0.01923077
+#&gt; 8     9    Club 0.01923077
+#&gt; 19    7 Diamond 0.01923077
+#&gt; 20    8 Diamond 0.01923077
+#&gt; 21    9 Diamond 0.01923077
+#&gt; 32    7   Heart 0.01923077
+#&gt; 33    8   Heart 0.01923077
+#&gt; 34    9   Heart 0.01923077
+#&gt; 45    7   Spade 0.01923077
+#&gt; 46    8   Spade 0.01923077
+#&gt; 47    9   Spade 0.01923077</code></pre>
 <p>Calcoliamo la probabilità di una carta di cuori.</p>
 <pre class="r"><code>Prob(S, suit == &quot;Heart&quot;)</code></pre>
-<pre><code>## [1] 0.25</code></pre>
+<pre><code>#&gt; [1] 0.25</code></pre>
 <p>L’argomento <code>given</code> passato alla funzione
 <code>Prob()</code> viene usato per specificare la probabilità
 condizionata.</p>
 <pre class="r"><code>Prob(B, given = A)</code></pre>
-<pre><code>## [1] 0.2307692</code></pre>
+<pre><code>#&gt; [1] 0.2307692</code></pre>
 </div>
 <div id="esercizio-4-paradosso-dei-due-bambini" class="section level3">
 <h3>Esercizio 4 (Paradosso dei due bambini)</h3>
@@ -748,42 +761,42 @@ una volta.</p>
 <pre class="r"><code># Femmina = H.
 S &lt;- tosscoin(2, makespace = TRUE)
 S</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25
-## 2     T     H  0.25
-## 3     H     T  0.25
-## 4     T     T  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25
+#&gt; 2     T     H  0.25
+#&gt; 3     H     T  0.25
+#&gt; 4     T     T  0.25</code></pre>
 <p>Specifichiamo <span class="math inline">\(A\)</span> = entrambe
 femmine.</p>
 <pre class="r"><code>A &lt;- subset(S, toss1 == &quot;H&quot; &amp; toss2 == &quot;H&quot;)
 A</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25</code></pre>
 <p>Specifichiamo l’evento <span class="math inline">\(B\)</span> =
 almeno una femmina, ovvero “non entrambi maschi”.</p>
 <pre class="r"><code>B &lt;- subset(S, !(toss1 == &quot;T&quot; &amp; toss2 == &quot;T&quot;))
 B</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25
-## 2     T     H  0.25
-## 3     H     T  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25
+#&gt; 2     T     H  0.25
+#&gt; 3     H     T  0.25</code></pre>
 <p>Possiamo ora calcolare la probabilità <span class="math inline">\(P(A
 \mid B)\)</span>:</p>
 <pre class="r"><code>Prob(A, given = B)</code></pre>
-<pre><code>## [1] 0.3333333</code></pre>
+<pre><code>#&gt; [1] 0.3333333</code></pre>
 <p>La seconda domanda corrisponde alla probabilità di due teste
 (“femmine”), dato che il primo lancio ha prodotto testa (“femmina”).
 Iniziamo a definire l’evento <span class="math inline">\(C\)</span> =
 primogenito femmina.</p>
 <pre class="r"><code>C &lt;- subset(S, toss1 == &quot;H&quot;)
 C</code></pre>
-<pre><code>##   toss1 toss2 probs
-## 1     H     H  0.25
-## 3     H     T  0.25</code></pre>
+<pre><code>#&gt;   toss1 toss2 probs
+#&gt; 1     H     H  0.25
+#&gt; 3     H     T  0.25</code></pre>
 <p>Possiamo ora calcolare la probabilità <span class="math inline">\(P(A
 \mid C)\)</span>.</p>
 <pre class="r"><code>Prob(A, given = C)</code></pre>
-<pre><code>## [1] 0.5</code></pre>
+<pre><code>#&gt; [1] 0.5</code></pre>
 </div>
 <div id="esercizio-5" class="section level3">
 <h3>Esercizio 5</h3>
@@ -802,81 +815,81 @@ il risultato descritto sopra. Iniziamo a definire lo spazio campionario
 dadi equilibrati.</p>
 <pre class="r"><code>S &lt;- rolldie(2, makespace = TRUE)
 S</code></pre>
-<pre><code>##    X1 X2      probs
-## 1   1  1 0.02777778
-## 2   2  1 0.02777778
-## 3   3  1 0.02777778
-## 4   4  1 0.02777778
-## 5   5  1 0.02777778
-## 6   6  1 0.02777778
-## 7   1  2 0.02777778
-## 8   2  2 0.02777778
-## 9   3  2 0.02777778
-## 10  4  2 0.02777778
-## 11  5  2 0.02777778
-## 12  6  2 0.02777778
-## 13  1  3 0.02777778
-## 14  2  3 0.02777778
-## 15  3  3 0.02777778
-## 16  4  3 0.02777778
-## 17  5  3 0.02777778
-## 18  6  3 0.02777778
-## 19  1  4 0.02777778
-## 20  2  4 0.02777778
-## 21  3  4 0.02777778
-## 22  4  4 0.02777778
-## 23  5  4 0.02777778
-## 24  6  4 0.02777778
-## 25  1  5 0.02777778
-## 26  2  5 0.02777778
-## 27  3  5 0.02777778
-## 28  4  5 0.02777778
-## 29  5  5 0.02777778
-## 30  6  5 0.02777778
-## 31  1  6 0.02777778
-## 32  2  6 0.02777778
-## 33  3  6 0.02777778
-## 34  4  6 0.02777778
-## 35  5  6 0.02777778
-## 36  6  6 0.02777778</code></pre>
+<pre><code>#&gt;    X1 X2      probs
+#&gt; 1   1  1 0.02777778
+#&gt; 2   2  1 0.02777778
+#&gt; 3   3  1 0.02777778
+#&gt; 4   4  1 0.02777778
+#&gt; 5   5  1 0.02777778
+#&gt; 6   6  1 0.02777778
+#&gt; 7   1  2 0.02777778
+#&gt; 8   2  2 0.02777778
+#&gt; 9   3  2 0.02777778
+#&gt; 10  4  2 0.02777778
+#&gt; 11  5  2 0.02777778
+#&gt; 12  6  2 0.02777778
+#&gt; 13  1  3 0.02777778
+#&gt; 14  2  3 0.02777778
+#&gt; 15  3  3 0.02777778
+#&gt; 16  4  3 0.02777778
+#&gt; 17  5  3 0.02777778
+#&gt; 18  6  3 0.02777778
+#&gt; 19  1  4 0.02777778
+#&gt; 20  2  4 0.02777778
+#&gt; 21  3  4 0.02777778
+#&gt; 22  4  4 0.02777778
+#&gt; 23  5  4 0.02777778
+#&gt; 24  6  4 0.02777778
+#&gt; 25  1  5 0.02777778
+#&gt; 26  2  5 0.02777778
+#&gt; 27  3  5 0.02777778
+#&gt; 28  4  5 0.02777778
+#&gt; 29  5  5 0.02777778
+#&gt; 30  6  5 0.02777778
+#&gt; 31  1  6 0.02777778
+#&gt; 32  2  6 0.02777778
+#&gt; 33  3  6 0.02777778
+#&gt; 34  4  6 0.02777778
+#&gt; 35  5  6 0.02777778
+#&gt; 36  6  6 0.02777778</code></pre>
 <p>Specifichiamo il sottoinsieme dello spazio campionario <span class="math inline">\(S\)</span> che corrisponde all’evento <span class="math inline">\(A\)</span>.</p>
 <pre class="r"><code>A &lt;- subset(S, X1 %in% c(1, 2))
 A</code></pre>
-<pre><code>##    X1 X2      probs
-## 1   1  1 0.02777778
-## 2   2  1 0.02777778
-## 7   1  2 0.02777778
-## 8   2  2 0.02777778
-## 13  1  3 0.02777778
-## 14  2  3 0.02777778
-## 19  1  4 0.02777778
-## 20  2  4 0.02777778
-## 25  1  5 0.02777778
-## 26  2  5 0.02777778
-## 31  1  6 0.02777778
-## 32  2  6 0.02777778</code></pre>
+<pre><code>#&gt;    X1 X2      probs
+#&gt; 1   1  1 0.02777778
+#&gt; 2   2  1 0.02777778
+#&gt; 7   1  2 0.02777778
+#&gt; 8   2  2 0.02777778
+#&gt; 13  1  3 0.02777778
+#&gt; 14  2  3 0.02777778
+#&gt; 19  1  4 0.02777778
+#&gt; 20  2  4 0.02777778
+#&gt; 25  1  5 0.02777778
+#&gt; 26  2  5 0.02777778
+#&gt; 31  1  6 0.02777778
+#&gt; 32  2  6 0.02777778</code></pre>
 <p>Calcoliamo <span class="math inline">\(P(A)\)</span>:</p>
 <pre class="r"><code>Prob(A)</code></pre>
-<pre><code>## [1] 0.3333333</code></pre>
+<pre><code>#&gt; [1] 0.3333333</code></pre>
 <p>Specifichiamo il sottoinsieme dello spazio campionario <span class="math inline">\(S\)</span> che corrisponde all’evento <span class="math inline">\(B\)</span>.</p>
 <pre class="r"><code>B &lt;- subset(S, (X1 + X2) == 8)
 B</code></pre>
-<pre><code>##    X1 X2      probs
-## 12  6  2 0.02777778
-## 17  5  3 0.02777778
-## 22  4  4 0.02777778
-## 27  3  5 0.02777778
-## 32  2  6 0.02777778</code></pre>
+<pre><code>#&gt;    X1 X2      probs
+#&gt; 12  6  2 0.02777778
+#&gt; 17  5  3 0.02777778
+#&gt; 22  4  4 0.02777778
+#&gt; 27  3  5 0.02777778
+#&gt; 32  2  6 0.02777778</code></pre>
 <p>Calcoliamo <span class="math inline">\(P(B)\)</span>:</p>
 <pre class="r"><code>Prob(B)</code></pre>
-<pre><code>## [1] 0.1388889</code></pre>
+<pre><code>#&gt; [1] 0.1388889</code></pre>
 <p>Calcoliamo <span class="math inline">\(P(A \cap B)\)</span>:</p>
 <pre class="r"><code>Prob(intersect(A,B))</code></pre>
-<pre><code>## [1] 0.02777778</code></pre>
+<pre><code>#&gt; [1] 0.02777778</code></pre>
 <p>Calcoliamo il prodotto <span class="math inline">\(P(A)
 P(B)\)</span>:</p>
 <pre class="r"><code>Prob(A) * Prob(B)</code></pre>
-<pre><code>## [1] 0.0462963</code></pre>
+<pre><code>#&gt; [1] 0.0462963</code></pre>
 <p>Dato che <span class="math inline">\(P(A \cap B) \neq P(A)
 P(B)\)</span>, i due eventi <span class="math inline">\(A\)</span> e
 <span class="math inline">\(B\)</span> non sono indipendenti.</p>
@@ -916,43 +929,43 @@ la distribuzione di massa di probabilità per i valori del lancio del
 dado.</p>
 <pre class="r"><code>S &lt;- iidspace(1:6, ntrials = 2, probs = p)
 S</code></pre>
-<pre><code>##    X1 X2 probs
-## 1   1  1  0.09
-## 2   2  1  0.09
-## 3   3  1  0.03
-## 4   4  1  0.03
-## 5   5  1  0.03
-## 6   6  1  0.03
-## 7   1  2  0.09
-## 8   2  2  0.09
-## 9   3  2  0.03
-## 10  4  2  0.03
-## 11  5  2  0.03
-## 12  6  2  0.03
-## 13  1  3  0.03
-## 14  2  3  0.03
-## 15  3  3  0.01
-## 16  4  3  0.01
-## 17  5  3  0.01
-## 18  6  3  0.01
-## 19  1  4  0.03
-## 20  2  4  0.03
-## 21  3  4  0.01
-## 22  4  4  0.01
-## 23  5  4  0.01
-## 24  6  4  0.01
-## 25  1  5  0.03
-## 26  2  5  0.03
-## 27  3  5  0.01
-## 28  4  5  0.01
-## 29  5  5  0.01
-## 30  6  5  0.01
-## 31  1  6  0.03
-## 32  2  6  0.03
-## 33  3  6  0.01
-## 34  4  6  0.01
-## 35  5  6  0.01
-## 36  6  6  0.01</code></pre>
+<pre><code>#&gt;    X1 X2 probs
+#&gt; 1   1  1  0.09
+#&gt; 2   2  1  0.09
+#&gt; 3   3  1  0.03
+#&gt; 4   4  1  0.03
+#&gt; 5   5  1  0.03
+#&gt; 6   6  1  0.03
+#&gt; 7   1  2  0.09
+#&gt; 8   2  2  0.09
+#&gt; 9   3  2  0.03
+#&gt; 10  4  2  0.03
+#&gt; 11  5  2  0.03
+#&gt; 12  6  2  0.03
+#&gt; 13  1  3  0.03
+#&gt; 14  2  3  0.03
+#&gt; 15  3  3  0.01
+#&gt; 16  4  3  0.01
+#&gt; 17  5  3  0.01
+#&gt; 18  6  3  0.01
+#&gt; 19  1  4  0.03
+#&gt; 20  2  4  0.03
+#&gt; 21  3  4  0.01
+#&gt; 22  4  4  0.01
+#&gt; 23  5  4  0.01
+#&gt; 24  6  4  0.01
+#&gt; 25  1  5  0.03
+#&gt; 26  2  5  0.03
+#&gt; 27  3  5  0.01
+#&gt; 28  4  5  0.01
+#&gt; 29  5  5  0.01
+#&gt; 30  6  5  0.01
+#&gt; 31  1  6  0.03
+#&gt; 32  2  6  0.03
+#&gt; 33  3  6  0.01
+#&gt; 34  4  6  0.01
+#&gt; 35  5  6  0.01
+#&gt; 36  6  6  0.01</code></pre>
 <p>In questo esempio, gli eventi <span class="math inline">\(X_1\)</span> e <span class="math inline">\(X_2\)</span> sono indipendenti. Dunque, la
 probabilità che si verifichino entrambi, ovvero <span class="math inline">\(P(\{X_1 = h \cap X_2 = k\})\)</span>, è uguale al
 prodotto <span class="math inline">\(P(\{X_1 = h\}) P(\{X_2 =
@@ -976,16 +989,16 @@ secondo la quale la somma di <span class="math inline">\(X1\)</span> e
 di <span class="math inline">\(X2\)</span> deve essere uguale a 7</p>
 <pre class="r"><code>A &lt;- subset(S, (X1 + X2) == 7)
 A</code></pre>
-<pre><code>##    X1 X2 probs
-## 6   6  1  0.03
-## 11  5  2  0.03
-## 16  4  3  0.01
-## 21  3  4  0.01
-## 26  2  5  0.03
-## 31  1  6  0.03</code></pre>
+<pre><code>#&gt;    X1 X2 probs
+#&gt; 6   6  1  0.03
+#&gt; 11  5  2  0.03
+#&gt; 16  4  3  0.01
+#&gt; 21  3  4  0.01
+#&gt; 26  2  5  0.03
+#&gt; 31  1  6  0.03</code></pre>
 <p>Possiamo ora calcolare <span class="math inline">\(P(A)\)</span>:</p>
 <pre class="r"><code>Prob(A)</code></pre>
-<pre><code>## [1] 0.14</code></pre>
+<pre><code>#&gt; [1] 0.14</code></pre>
 </div>
 <div id="esercizio-7-unione-di-eventi" class="section level3">
 <h3>Esercizio 7 (Unione di eventi)</h3>
@@ -997,19 +1010,19 @@ un numero dispari.</p>
 <p>Definiamo l’evento <span class="math inline">\(A\)</span>.</p>
 <pre class="r"><code>A &lt;- subset(S, X1 &lt; 3)
 A</code></pre>
-<pre><code>##    X1 X2 probs
-## 1   1  1  0.09
-## 2   2  1  0.09
-## 7   1  2  0.09
-## 8   2  2  0.09
-## 13  1  3  0.03
-## 14  2  3  0.03
-## 19  1  4  0.03
-## 20  2  4  0.03
-## 25  1  5  0.03
-## 26  2  5  0.03
-## 31  1  6  0.03
-## 32  2  6  0.03</code></pre>
+<pre><code>#&gt;    X1 X2 probs
+#&gt; 1   1  1  0.09
+#&gt; 2   2  1  0.09
+#&gt; 7   1  2  0.09
+#&gt; 8   2  2  0.09
+#&gt; 13  1  3  0.03
+#&gt; 14  2  3  0.03
+#&gt; 19  1  4  0.03
+#&gt; 20  2  4  0.03
+#&gt; 25  1  5  0.03
+#&gt; 26  2  5  0.03
+#&gt; 31  1  6  0.03
+#&gt; 32  2  6  0.03</code></pre>
 <p>Per definire l’evento <span class="math inline">\(B\)</span> è
 necessario verificare se un numero sia dispari o meno. Tale problema può
 essere risolto creando una funzione che ritorna <code>TRUE</code> se i
@@ -1024,58 +1037,58 @@ quali la somma dei due dadi è dispari, definendo in questo modo l’evento
 <span class="math inline">\(B\)</span>.</p>
 <pre class="r"><code>B &lt;- subset(S, is_odd(X2))
 B</code></pre>
-<pre><code>##    X1 X2 probs
-## 1   1  1  0.09
-## 2   2  1  0.09
-## 3   3  1  0.03
-## 4   4  1  0.03
-## 5   5  1  0.03
-## 6   6  1  0.03
-## 13  1  3  0.03
-## 14  2  3  0.03
-## 15  3  3  0.01
-## 16  4  3  0.01
-## 17  5  3  0.01
-## 18  6  3  0.01
-## 25  1  5  0.03
-## 26  2  5  0.03
-## 27  3  5  0.01
-## 28  4  5  0.01
-## 29  5  5  0.01
-## 30  6  5  0.01</code></pre>
+<pre><code>#&gt;    X1 X2 probs
+#&gt; 1   1  1  0.09
+#&gt; 2   2  1  0.09
+#&gt; 3   3  1  0.03
+#&gt; 4   4  1  0.03
+#&gt; 5   5  1  0.03
+#&gt; 6   6  1  0.03
+#&gt; 13  1  3  0.03
+#&gt; 14  2  3  0.03
+#&gt; 15  3  3  0.01
+#&gt; 16  4  3  0.01
+#&gt; 17  5  3  0.01
+#&gt; 18  6  3  0.01
+#&gt; 25  1  5  0.03
+#&gt; 26  2  5  0.03
+#&gt; 27  3  5  0.01
+#&gt; 28  4  5  0.01
+#&gt; 29  5  5  0.01
+#&gt; 30  6  5  0.01</code></pre>
 <p>Stampiamo sulla console di , l’evento che corrisponde all’unione di
 <span class="math inline">\(A\)</span> e <span class="math inline">\(B\)</span>, per verificare che non ci siano
 errori.</p>
 <pre class="r"><code>union(A, B)</code></pre>
-<pre><code>##    X1 X2 probs
-## 1   1  1  0.09
-## 2   2  1  0.09
-## 3   3  1  0.03
-## 4   4  1  0.03
-## 5   5  1  0.03
-## 6   6  1  0.03
-## 7   1  2  0.09
-## 8   2  2  0.09
-## 13  1  3  0.03
-## 14  2  3  0.03
-## 15  3  3  0.01
-## 16  4  3  0.01
-## 17  5  3  0.01
-## 18  6  3  0.01
-## 19  1  4  0.03
-## 20  2  4  0.03
-## 25  1  5  0.03
-## 26  2  5  0.03
-## 27  3  5  0.01
-## 28  4  5  0.01
-## 29  5  5  0.01
-## 30  6  5  0.01
-## 31  1  6  0.03
-## 32  2  6  0.03</code></pre>
+<pre><code>#&gt;    X1 X2 probs
+#&gt; 1   1  1  0.09
+#&gt; 2   2  1  0.09
+#&gt; 3   3  1  0.03
+#&gt; 4   4  1  0.03
+#&gt; 5   5  1  0.03
+#&gt; 6   6  1  0.03
+#&gt; 7   1  2  0.09
+#&gt; 8   2  2  0.09
+#&gt; 13  1  3  0.03
+#&gt; 14  2  3  0.03
+#&gt; 15  3  3  0.01
+#&gt; 16  4  3  0.01
+#&gt; 17  5  3  0.01
+#&gt; 18  6  3  0.01
+#&gt; 19  1  4  0.03
+#&gt; 20  2  4  0.03
+#&gt; 25  1  5  0.03
+#&gt; 26  2  5  0.03
+#&gt; 27  3  5  0.01
+#&gt; 28  4  5  0.01
+#&gt; 29  5  5  0.01
+#&gt; 30  6  5  0.01
+#&gt; 31  1  6  0.03
+#&gt; 32  2  6  0.03</code></pre>
 <p>Calcoliamo ora la probabilità <span class="math inline">\(P(A \cup
 B)\)</span>.</p>
 <pre class="r"><code>Prob(union(A, B))</code></pre>
-<pre><code>## [1] 0.8</code></pre>
+<pre><code>#&gt; [1] 0.8</code></pre>
 </div>
 <div id="esercizio-8-intersezione-di-eventi" class="section level3">
 <h3>Esercizio 8 (intersezione di eventi)</h3>
@@ -1089,15 +1102,15 @@ del connettivo “e”.</p>
 possiamo calcolare la probabilità <span class="math inline">\(P(A \cap
 B)\)</span> nel modo seguente:</p>
 <pre class="r"><code>intersect(A, B)</code></pre>
-<pre><code>##    X1 X2 probs
-## 1   1  1  0.09
-## 2   2  1  0.09
-## 13  1  3  0.03
-## 14  2  3  0.03
-## 25  1  5  0.03
-## 26  2  5  0.03</code></pre>
+<pre><code>#&gt;    X1 X2 probs
+#&gt; 1   1  1  0.09
+#&gt; 2   2  1  0.09
+#&gt; 13  1  3  0.03
+#&gt; 14  2  3  0.03
+#&gt; 25  1  5  0.03
+#&gt; 26  2  5  0.03</code></pre>
 <pre class="r"><code>Prob(intersect(A, B))</code></pre>
-<pre><code>## [1] 0.3</code></pre>
+<pre><code>#&gt; [1] 0.3</code></pre>
 </div>
 <div id="esercizio-9-probabilità-marginale" class="section level3">
 <h3>Esercizio 9 (probabilità marginale)</h3>
@@ -1107,17 +1120,17 @@ calcoli la probabilità di ottenere 3 con il lancio del primo dado.</p>
 <p>Definiamo l’evento <span class="math inline">\(C\)</span></p>
 <pre class="r"><code>C &lt;- subset(S, X1 == 3)
 C</code></pre>
-<pre><code>##    X1 X2 probs
-## 3   3  1  0.03
-## 9   3  2  0.03
-## 15  3  3  0.01
-## 21  3  4  0.01
-## 27  3  5  0.01
-## 33  3  6  0.01</code></pre>
+<pre><code>#&gt;    X1 X2 probs
+#&gt; 3   3  1  0.03
+#&gt; 9   3  2  0.03
+#&gt; 15  3  3  0.01
+#&gt; 21  3  4  0.01
+#&gt; 27  3  5  0.01
+#&gt; 33  3  6  0.01</code></pre>
 <p>La probabilità <span class="math inline">\(P(C)\)</span> è uguale
 a:</p>
 <pre class="r"><code>Prob(C)</code></pre>
-<pre><code>## [1] 0.1</code></pre>
+<pre><code>#&gt; [1] 0.1</code></pre>
 </div>
 <div id="esercizio-10-probabilità-condizionata" class="section level3">
 <h3>Esercizio 10 (probabilità condizionata)</h3>
@@ -1129,67 +1142,71 @@ primo dado ha prodotto l’esito 4.</p>
 “il primo dado produce 4”.</p>
 <pre class="r"><code>D &lt;- subset(S, X1 == 4)
 D</code></pre>
-<pre><code>##    X1 X2 probs
-## 4   4  1  0.03
-## 10  4  2  0.03
-## 16  4  3  0.01
-## 22  4  4  0.01
-## 28  4  5  0.01
-## 34  4  6  0.01</code></pre>
+<pre><code>#&gt;    X1 X2 probs
+#&gt; 4   4  1  0.03
+#&gt; 10  4  2  0.03
+#&gt; 16  4  3  0.01
+#&gt; 22  4  4  0.01
+#&gt; 28  4  5  0.01
+#&gt; 34  4  6  0.01</code></pre>
 <p>Definiamo l’evento <span class="math inline">\(E\)</span> = “il
 secondo dado produce 3”.</p>
 <pre class="r"><code>E &lt;- subset(S, X2 == 3)
 E</code></pre>
-<pre><code>##    X1 X2 probs
-## 13  1  3  0.03
-## 14  2  3  0.03
-## 15  3  3  0.01
-## 16  4  3  0.01
-## 17  5  3  0.01
-## 18  6  3  0.01</code></pre>
+<pre><code>#&gt;    X1 X2 probs
+#&gt; 13  1  3  0.03
+#&gt; 14  2  3  0.03
+#&gt; 15  3  3  0.01
+#&gt; 16  4  3  0.01
+#&gt; 17  5  3  0.01
+#&gt; 18  6  3  0.01</code></pre>
 <p>Calcoliamo <span class="math inline">\(P(E \mid D)\)</span>.</p>
 <pre class="r"><code>Prob(E, given = D)</code></pre>
-<pre><code>## [1] 0.1</code></pre>
+<pre><code>#&gt; [1] 0.1</code></pre>
 <p>Si noti che, per calcolare la probabilità di un evento condizionato,
 è sufficiente valutarne la cardinalità all’interno dello spazio
 campionario ristretto definito dall’evento condizionante e dividere per
 la cardinalità dell’evento condizionante. Ovvero</p>
 <pre class="r"><code>Prob(intersect(D, E)) / Prob(D)</code></pre>
-<pre><code>## [1] 0.1</code></pre>
+<pre><code>#&gt; [1] 0.1</code></pre>
 </div>
 </div>
 <div id="informazioni-sulla-sessione-di-lavoro" class="section level2">
 <h2>Informazioni sulla sessione di lavoro</h2>
 <pre class="r"><code>utils::sessionInfo()</code></pre>
-<pre><code>## R version 4.1.2 (2021-11-01)
-## Platform: x86_64-apple-darwin17.0 (64-bit)
-## Running under: macOS Big Sur 10.16
-## 
-## Matrix products: default
-## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
-## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
-## 
-## locale:
-## [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8
-## 
-## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
-## 
-## other attached packages:
-## [1] prob_1.0-1            fAsianOptions_3042.82 fOptions_3042.86     
-## [4] fBasics_3042.89.1     timeSeries_3062.100   timeDate_3043.102    
-## [7] combinat_0.0-8       
-## 
-## loaded via a namespace (and not attached):
-##  [1] rstudioapi_0.13 knitr_1.37      magrittr_2.0.2  R6_2.5.1       
-##  [5] rlang_1.0.1     fastmap_1.1.0   stringr_1.4.0   tools_4.1.2    
-##  [9] xfun_0.29       cli_3.1.1       jquerylib_0.1.4 htmltools_0.5.2
-## [13] yaml_2.2.2      digest_0.6.29   sass_0.4.0      evaluate_0.14  
-## [17] rmarkdown_2.11  stringi_1.7.6   compiler_4.1.2  bslib_0.3.1    
-## [21] spatial_7.3-15  jsonlite_1.7.3</code></pre>
+<pre><code>#&gt; R version 4.1.2 (2021-11-01)
+#&gt; Platform: x86_64-apple-darwin17.0 (64-bit)
+#&gt; Running under: macOS Big Sur 10.16
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] prob_1.0-1            fAsianOptions_3042.82 fOptions_3042.86     
+#&gt; [4] fBasics_3042.89.1     timeSeries_3062.100   timeDate_3043.102    
+#&gt; [7] combinat_0.0-8       
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] bslib_0.3.1       compiler_4.1.2    pillar_1.7.0      jquerylib_0.1.4  
+#&gt;  [5] R.utils_2.11.0    R.methodsS3_1.8.1 tools_4.1.2       digest_0.6.29    
+#&gt;  [9] R.cache_0.15.0    jsonlite_1.7.3    evaluate_0.14     tibble_3.1.6     
+#&gt; [13] lifecycle_1.0.1   pkgconfig_2.0.3   rlang_1.0.1       cli_3.1.1        
+#&gt; [17] rstudioapi_0.13   yaml_2.2.2        xfun_0.29         fastmap_1.1.0    
+#&gt; [21] stringr_1.4.0     styler_1.6.2      knitr_1.37        sass_0.4.0       
+#&gt; [25] vctrs_0.3.8       glue_1.6.1        R6_2.5.1          fansi_1.0.2      
+#&gt; [29] spatial_7.3-15    rmarkdown_2.11    purrr_0.3.4       magrittr_2.0.2   
+#&gt; [33] backports_1.4.1   htmltools_0.5.2   ellipsis_0.3.2    utf8_1.2.2       
+#&gt; [37] stringi_1.7.6     crayon_1.4.2      R.oo_1.24.0</code></pre>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDA3LjAxIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKCklsIHBhY2NoZXR0byBgcHJvYmAgZGkgJFx0ZXh0c2Z7Un0kIHN2aWx1cHBhdG8gZGEgRy4gSmF5IEtlcm5zIGNvbnRpZW5lIHVuYSBzZXJpZSBkaSBmdW56aW9uaSBjaGUgcG9zc29ubyBlc3NlcmUgdXNhdGUgcGVyIGlsIGNhbGNvbG8gZGVsbGUgcHJvYmFiaWxpdMOgIG5lbCBjYXNvIGRpIHNwYXppIGNhbXBpb25hcmkgZmluaXRpLiAKCmBgYHtyfQpzdXBwcmVzc1BhY2thZ2VTdGFydHVwTWVzc2FnZXMobGlicmFyeSgicHJvYiIpKQpgYGAKCkxhIHJhZ2lvbmUgZGkgdXNhcmUgJFx0ZXh0c2Z7Un0kIGluIHF1ZXN0byBjYXNvLCBlIGluIHR1dHRpIGdsaSBhbHRyaSBjYXNpLCBub24gw6ggcXVlbGxhIGRpIHBvdGVyZSByaXNvbHZlcmUgaW4gbWFuaWVyYSBtZWNjYW5pY2EgdW4gZXNlcmNpemlvIGNvc8OsIGRhIGV2aXRhcmUgbGEgZmF0aWNhIGRpIGRvdmVyZSBjb21wcmVuZGVyZSBsYSBsb2dpY2Egc290dG9zdGFudGUuIExhIHJhZ2lvbmUgw6ggaW52ZWNlIHF1ZWxsYSBkaSBldml0YXJlIGRpIGRvdmVyZSBmYXJlIGkgY2FsY29saSAiYSBtYW5vIiwgaW4gbW9kbyBkYSBhdmVyZSBwacO5IHRlbXBvIHBlciBjacOyIGNoZSDDqCBpbXBvcnRhbnRlLCBvdnZlcm8gaWwgcmFnaW9uYW1lbnRvIGxvZ2ljbyBjaGUgw6ggcmljaGllc3RvIHBlciByaXNvbHZlcmUgaWwgcHJvYmxlbWEuIAoKRmFjY2lhbW8gdW4gZXNlbXBpby4gTG8gc3BhemlvIGNhbXBpb25hcmlvIGRlbGzigJllc3BlcmltZW50byBjYXN1YWxlIGNvcnJpc3BvbmRlbnRlIGFsIGxhbmNpbyBkaSBkdWUgZGFkaSBzaSBjcmVhIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9CnRvc3Njb2luKDIpCmBgYAoKClVuYSB2b2x0YSBzcGVjaWZpY2F0byBsbyBzcGF6aW8gY2FtcGlvbmFyaW8gJFxtYXRoY2Fse1N9JCBkZWxsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgw6ggbmVjZXNzYXJpbyBhc3NvY2lhcmUgdW5hIHByb2JhYmlsaXTDoCBhIGNpYXNjdW4gZXZlbnRvIGVsZW1lbnRhcmUgZGkgJFxtYXRoY2Fse1N9JC4gClF1ZXN0byByaXN1bHRhdG8gc2kgb3R0aWVuZSB1c2FuZG8gbGEgZnVuemlvbmUgYHByb2JzcGFjZSgpYC4gCk5lbCBjYXNvIGRpIGR1ZSBtb25ldGUgZXF1aWxpYnJhdGUgYWJiaWFtbzoKCmBgYHtyfQpTIDwtIHRvc3Njb2luKDIpCnByb2JzcGFjZShTKQpgYGAKCkNvbnNpZGVyaWFtbyBhbGN1bmkgZXNlbXBpIGRlbGwndXNvIGRlbGxlIGZ1bnppb25pIGNvbnRlbnV0ZSBuZWwgcGFjY2hldHRvICRcdGV4dHR0e3Byb2J9JCBwZXIgbGEgc29sdXppb25lIGRpIHByb2JsZW1pIHJlbGF0aXZpIGFsbGEgcHJvYmFiaWxpdMOgIGRpc2NyZXRhLgoKCiMjIEVzZXJjaXppIGNvbiBpbCBwYWNjaGV0dG8gJFx0ZXh0dHR7cHJvYn0kCgojIyMgRXNlcmNpemlvIDEKClNpIGNvbnNpZGVyaSBsJ2VzcGVyaW1lbnRvIGNoZSBjb25zaXN0ZSBuZWwgbGFuY2lvIGRpIGR1ZSBtb25ldGUuIApTdXBwb25pYW1vIGNoZSBnbGkgZXZlbnRpIGRlbGxvIHNwYXppbyBjYW1waW9uYXJpbyAkXG1hdGhjYWx7U30gPSBce1RULCBUQywgQ1QsIENDXH0kIHNpYW5vIGVxdWlwcm9iYWJpbGkuIFF1YWwgw6ggbGEgcHJvYmFiaWxpdMOgIGRlbGwnZXZlbnRvICJ0ZXN0YSBuZWwgcHJpbW8gbGFuY2lvIj8KCl9Tb2x1emlvbmUuXwoKR2xpIGV2ZW50aSAkXHtUVFx9JCBlICRce1RDXH0kIHNvbm8gaW5jb21wYXRpYmlsaSBlIGxhIHByb2JhYmlsaXTDoCBkZWxsJ2V2ZW50byAkQSA9IFx7XHRleHR7dGVzdGEgbmVsIHByaW1vIGxhbmNpb31cfSA9IFx7VFQsIFRDXH0kIMOoIGRhdGEgZGFsbGEgc29tbWEgZGVsbGUgcHJvYmFiaWxpdMOgIGRlZ2xpIGV2ZW50aSBlbGVtZW50YXJpIGNoZSBsbyBjb3N0aXR1aXNjb25vLiBMYSBwcm9iYWJpbGl0w6AgY2VyY2F0YSDDqCBkdW5xdWUgdWd1YWxlIGEKCiQkUChUVCBcY3VwIFRDKSA9IFAoVFQpIGAgUChUQykgPSAwLjI1IGAgMC4yNSA9IDAuNTAuJCQKClVzYW5kbyBsZSBmdW56aW9uaSBkZWwgcGFjY2hldHRvIGBwcm9iYCwgaWwgcHJvYmxlbWEgc2kgYWZmcm9udGEgbmVsIG1vZG8gc2VndWVudGUuCkluaXppYW1vIGEgc3BlY2lmaWNhcmUgbG8gc3BhemlvIGNhbXBpb25hcmlvIGRlbGwnZXNwZXJpbWVudG8gY2FzdWFsZSBlIGFzc29jaWFtbyB1bmEgcHJvYmFiaWxpdMOgIGEgY2lhc2N1biBldmVudG8gZWxlbWVudGFyZSBkZWxsbyBzcGF6aW8gY2FtcGlvbmFyaW8uCgpgYGB7cn0KUyA8LSB0b3NzY29pbigyLCBtYWtlc3BhY2UgPSBUUlVFKQpTCmBgYAoKU2VsZXppb25pYW1vIG9yYSB1biBzb3R0b2luc2llbWUgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvLCBvdnZlcm8gbCdpbnNpZW1lIGRlZ2xpIGV2ZW50aSBlbGVtZW50YXJpIGNoZSBjb3JyaXNwb25kb25vIGFsbCdldmVudG8gJEEkLgoKYGBge3J9CkEgPC0gc3Vic2V0KFMsIHRvc3MxID09ICJIIikKQQpgYGAKCkwndWx0aW1vIHBhc3NvIMOoIHF1ZWxsbyBkaSBzb21tYXJlIGxlIHByb2JhYmlsaXTDoCBhc3NvY2lhdGUgYSB0dXR0aSBnbGkgZXZlbnRpIGVsZW1lbnRhcmkgaW4gJEEkLgoKYGBge3J9ClByb2IoQSkKYGBgCgojIyMgRXNlcmNpemlvIDIKClZlbmdvbm8gbGFuY2lhdGUgZHVlIG1vbmV0ZSBlcXVpbGlicmF0ZS4gU2lhbm8gJEEkIGwnZXZlbnRvICJjcm9jZSBuZWwgcHJpbW8gbGFuY2lvIiBlICRCJCBsJ2V2ZW50byAiZHVlIHZvbHRlIHRlc3RhIi4gU2kgdHJvdmkgbGEgcHJvYmFiaWxpdMOgICRQKEEgXGN1cCBCKSQuCgpfU29sdXppb25lLl8KCkdsaSBldmVudGkgJEEgPSBce0NDLCBDVFx9JCBlICRCID0gXHtUVFx9JCBzb25vIGRpc2dpdW50aS4gTGEgcHJvYmFiaWxpdMOgIGRpICRQKEEgXGN1cCBCKSQgw6ggCgokJFAoQSBcY3VwIEIpID0gUChBKSArIFAoQikgPSAwLjUwICsgMC4yNSA9IDAuNzUuJCQKClBvc3NpYW1vIHJlcGxpY2FyZSBpbCByaXN1bHRhdG8gdXNhbmRvIGxlIGZ1bnppb25pIGB0b3NzY29pbigpYCwgYHN1YnNldCgpYCwgYFByb2IoKWAgZSBgdW5pb24oKWAgZGVsIHBhY2NoZXR0byBgcHJvYmAuIEluaXppYW1vIGEgY3JlYXJlIGxvIHNwYXppbyBjYW1waW9uYXJpbyBkZWxsJ2VzcGVyaW1lbnRvIGNhc3VhbGUuCgpgYGB7cn0KUyA8LSB0b3NzY29pbigyLCBtYWtlc3BhY2UgPSBUUlVFKSAKUwpgYGAKClNwZWNpZmljaGlhbW8gbCdpbnNpZW1lIGRlZ2xpIGV2ZW50aSBlbGVtZW50YXJpIGNoZSBjb3N0aXR1aXNjb25vIGwnZXZlbnRvICRBJC4KCmBgYHtyfQpBIDwtIHN1YnNldChTLCB0b3NzMSA9PSAiSCIpCkEKYGBgCgpTcGVjaWZpY2hpYW1vIGwnaW5zaWVtZSBkZWdsaSBldmVudGkgZWxlbWVudGFyaSBjaGUgY29zdGl0dWlzY29ubyBsJ2V2ZW50byAkQiQuCgpgYGB7cn0KQiA8LSBzdWJzZXQoUywgdG9zczEgPT0gIkgiICYgdG9zczIgPT0gIkgiKQpCCmBgYAoKQ2FsY29saWFtbyBvcmEgbGEgcHJvYmFiaWxpdMOgIGRlbGwnZXZlbnRvICRQKEEgXGN1cCBCKSQuCgpgYGB7cn0KUHJvYih1bmlvbihBLCBCKSkKYGBgCgpTaSBub3RpIGwndXNvIGRlZ2xpIG9wZXJhdG9yaSBsb2dpY2kuIExhIGZ1bnppb25lIGBzdWJzZXQoKWAgY3JlYSB1biBzb3R0b2luc2llbWUgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIHN1bGxhIGJhc2UgZGVsbGUgY29uZGl6aW9uaSBsb2dpY2hlIGNoZSB2ZW5nb25vIHNwZWNpZmljYXRlIGNoZSBzb25vIGFwcGxpY2F0ZSBhIGNpYXNjdW5hIHJpZ2EgZGkgYFNgLiBQZXIgZXNlbXBpbywgbCdpc3RydXppb25lIGBzdWJzZXQoUywgdG9zczEgPT0gIkgiICYgdG9zczIgPT0gIkgiKWAgaWRlbnRpZmljYSBsJ2luc2llbWUgZGVsbGUgcmlnaGUgbmVsbGUgcXVhbGkgbGEgY29sb25uYSBgdG9zczFgIGFzc3VtZSBpbCB2YWxvcmUgYEhgIGUgbGEgY29sb25uYSBgdG9zczJgIGFzc3VtZSBpbCB2YWxvcmUgYEhgLiBMYSBmdW56aW9uZSBgdW5pb24oKWAgY3JlYSB1biBvZ2dldHRvIGNoZSDDqCBsJ3VuaW9uZSBkZWkgZHVlIG9nZ2V0dGkgIHNwZWNpZmljYXRpIGNvbWUgYXJnb21lbnRpLiAgSW5maW5lLCBsYSBmdW56aW9uZSBgUHJvYigpYCBzb21tYSBpIHZhbG9yaSBjb250ZW51dGkgbmVsbGEgY29sb25uYSBgcHJvYnNgIGRlbGwnb2dnZXR0byBjcmVhdG8gZGEgYHVuaW9uKClgLiAKCiMjIyBFc2VyY2l6aW8gMwoKRXN0cmFlbmRvIHVuYSBjYXJ0YSBkYSB1biBtYXp6byBkaSA1MiwgcXVhbCDDqCBsYSBwcm9iYWJpbGl0w6AgY2hlIGVzY2EgdW5hIGZpZ3VyYSBkaSBjdW9yaT8gU2FwZW5kbyBjaGUgaWwgc2VtZSBkZWxsYSBjYXJ0YSBlc3RyYXR0YSDDqCBjdW9yaSwgcXVhbCDDqCBsYSBwcm9iYWJpbGl0w6AgY2hlIGlsIHZhbG9yZSBudW1lcmljbyBkZWxsYSBjYXJ0YSBzaWEgNywgOCwgbyA5PwoKX1NvbHV6aW9uZS5fCgpDaSBzb25vIDEzIGNhcnRlIGRpIGN1b3JpIHN1IDUyLCBkdW5xdWUgbGEgcmlzcG9zdGEgYWxsYSBwcmltYSBkb21hbmRhIMOoIDEvNC4gClBlciByaXNwb25kZXJlIGFsbGEgc2Vjb25kYSBkb21hbmRhIGNvbnNpZGVyaWFtbyBzb2xvIGxlIDEzIGNhcnRlIGRpIGN1b3JpLiAgTGEgcHJvYmFiaWxpdMOgIGNlcmNhdGEgw6ggZHVucXVlIDMvMTMgPSAwLjIzMDguCgpJbml6aWFtbyBhIHNwZWNpZmljYXJlIGxvIHNwYXppbyBjYW1waW9uYXJpbyBkZWxsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgY29uIGxhIGZ1bnppb25lICBgY2FyZHMoKWAuIAoKYGBge3J9ClMgPC0gY2FyZHMobWFrZXNwYWNlID0gVFJVRSkKUwpgYGAKCkwnaW5zaWVtZSBgQWAgdmllbmUgY3JlYXRvIHF1YWxlIHNvdHRvaW5zaWVtZSBkaSBgU2AgdXNhbmRvIGxhIGZ1bnppb25lIGBzdWJzZXQoKWAgZSBzcGVjaWZpY2FuZG8gY2hlIGxhIGNvbG9ubmEgYHN1aXRgIChzZW1lKSBkZXZlIGFzc3VtZXJlIGlsIHZhbG9yZSBgSGFydGAgKGN1b3JpKS4gCgpgYGB7cn0KQSA8LSBzdWJzZXQoUywgc3VpdCA9PSAiSGVhcnQiKQpBCmBgYAoKUGVyIGNyZWFyZSBsJ2luc2llbWUgYEJgLCBuZWxsYSBmdW56aW9uZSBgc3Vic2V0KClgIHVzaWFtbyBsJ29wZXJhdG9yZSBsb2dpY28gYCVpbiVgIHBlciBpZGVudGlmaWNhcmUgbGUgcmlnaGUgZGkgYFNgIG5lbGxlIHF1YWxpIGxhIGNvbG9ubmEgYHJhbmtgICh2YWxvcmUgbnVtZXJpY28pIMOoIDcgbyA4IG8gOS4gCgpgYGB7cn0KQiA8LSBzdWJzZXQoUywgcmFuayAlaW4lIDc6OSkKQgpgYGAKCkNhbGNvbGlhbW8gbGEgcHJvYmFiaWxpdMOgIGRpIHVuYSBjYXJ0YSBkaSBjdW9yaS4KCmBgYHtyfQpQcm9iKFMsIHN1aXQgPT0gIkhlYXJ0IikKYGBgCgpMJ2FyZ29tZW50byBgZ2l2ZW5gIHBhc3NhdG8gYWxsYSBmdW56aW9uZSBgUHJvYigpYCB2aWVuZSB1c2F0byBwZXIgc3BlY2lmaWNhcmUgbGEgcHJvYmFiaWxpdMOgIGNvbmRpemlvbmF0YS4KCmBgYHtyfQpQcm9iKEIsIGdpdmVuID0gQSkKYGBgCgojIyMgRXNlcmNpemlvIDQgKFBhcmFkb3NzbyBkZWkgZHVlIGJhbWJpbmkpIAoKVW5hIGNvcHBpYSBoYSBkdWUgYmFtYmluaS4gQWxtZW5vIHVubyBkZWkgZHVlIMOoIHVuYSBmZW1taW5hLiBRdWFsIMOoIGxhIHByb2JhYmlsaXTDoCBjaGUgc2lhbm8gZW50cmFtYmUgZmVtbWluZT8gUXVhbCDDqCBsYSBwcm9iYWJpbGl0w6AgY2hlIHNpYW5vIGVudHJhbWJlIGZlbW1pbmUsIHNhcGVuZG8gY2hlIGlsIHByaW1vZ2VuaXRvIMOoIHVuYSBmZW1taW5hPwoKX1NvbHV6aW9uZS5fCgpOZWxsJ2lwb3Rlc2kgY2hlIG1hc2NoaSBlIGZlbW1pbmUgYWJiaWFubyBsYSBzdGVzc2EgcHJvYmFiaWxpdMOgIGRpIG5hc2NlcmUsIHNpIGhhIGNoZQoKXGJlZ2lue2FsaWdufQomUChcdGV4dHtlbnRyYW1iZSBmZW1taW5lfSBcLFx2ZXJ0XCwgXHRleHR7YWxtZW5vIHVuYSBmZW1taW5hfSkgPVxub3RhZ1xcICZcZnJhY3tQKFx0ZXh0e2VudHJhbWJlIGZlbW1pbmV9IFxjYXAgXHRleHR7YWxtZW5vIHVuYSBmZW1taW5hfSl9e1AoXHRleHR7YWxtZW5vIHVuYSBmZW1taW5hfSl9ID0gXGZyYWN7MS80fXszLzR9ID0gMS8zLFxub3RhZ1xcCiZQKFx0ZXh0e2VudHJhbWJlIGZlbW1pbmV9IFwsXHZlcnRcLCBcdGV4dHtwcmltb2dlbml0YSBmZW1taW5hfSkgPVxub3RhZ1xcICZcZnJhY3tQKFx0ZXh0e2VudHJhbWJlIGZlbW1pbmV9IFxjYXAgXHRleHR7cHJpbW9nZW5pdGEgZmVtbWluYX0pfXtQKFx0ZXh0e3ByaW1vZ2VuaXRhIGZlbW1pbmF9KX0gPSBcZnJhY3sxLzR9ezEvMn0gPSAxLzIuXG5vdGFnClxlbmR7YWxpZ259CgpJbiByZWFsdMOgLCBuZWxsYSBtYWdnaW9yIHBhcnRlIGRlaSBwYWVzaSBsYSBwcm9iYWJpbGl0w6AgY2hlIHVuIG5lb25hdG8gc2lhIG1hc2NoaW8gw6ggcGFyaSBhIDAuNTEsIHF1aW5kaSBsYSBzb2x1emlvbmUgcHJlY2VkZW50ZSDDqCBhcHByb3NzaW1hdGEuCgpSaXNvbHZpYW1vIG9yYSBpbCBwYXJhZG9zc28gZGVpIGR1ZSBiYW1iaW5pIHVzYW5kbyBsZSBmdW56aW9uaSBkZWwgcGFjY2hldHRvIGBwcm9iYC4gClVzaWFtbyBsYSBmdW56aW9uZSBgdG9zc2NvaW4oKWAgYXNzZWduYW5kbyBhZCBgSGAgaWwgc2lnbmlmaWNhdG8gImZlbW1pbmEiLiBMYSBwcmltYSBkb21hbmRhIGRpdmVudGEgZHVucXVlIGxhIHNlZ3VlbnRlOiBxdWFsIMOoIGxhIHByb2JhYmlsaXTDoCBkaSBvc3NlcnZhcmUgZHVlIHRlc3RlIGluIGR1ZSBsYW5jaSBkaSB1bmEgbW9uZXRhLCBzYXBlbmRvIGNoZSDDqCBzdGF0YSBvdHRlbnV0YSB0ZXN0YSBhbG1lbm8gdW5hIHZvbHRhLiAKCmBgYHtyfQojIEZlbW1pbmEgPSBILgpTIDwtIHRvc3Njb2luKDIsIG1ha2VzcGFjZSA9IFRSVUUpClMKYGBgCgpTcGVjaWZpY2hpYW1vICRBJCA9IGVudHJhbWJlIGZlbW1pbmUuCgpgYGB7cn0KQSA8LSBzdWJzZXQoUywgdG9zczEgPT0gIkgiICYgdG9zczIgPT0gIkgiKQpBCmBgYAoKU3BlY2lmaWNoaWFtbyBsJ2V2ZW50byAkQiQgPSBhbG1lbm8gdW5hIGZlbW1pbmEsIG92dmVybyAibm9uIGVudHJhbWJpIG1hc2NoaSIuCgpgYGB7cn0KQiA8LSBzdWJzZXQoUywgISh0b3NzMSA9PSAiVCIgJiB0b3NzMiA9PSAiVCIpKQpCCmBgYAoKUG9zc2lhbW8gb3JhIGNhbGNvbGFyZSBsYSBwcm9iYWJpbGl0w6AgJFAoQSBcbWlkIEIpJDoKCmBgYHtyfQpQcm9iKEEsIGdpdmVuID0gQikKYGBgCgpMYSBzZWNvbmRhIGRvbWFuZGEgY29ycmlzcG9uZGUgYWxsYSBwcm9iYWJpbGl0w6AgZGkgZHVlIHRlc3RlICgiZmVtbWluZSIpLCBkYXRvIGNoZSBpbCBwcmltbyBsYW5jaW8gaGEgcHJvZG90dG8gdGVzdGEgKCJmZW1taW5hIikuIEluaXppYW1vIGEgZGVmaW5pcmUgbCdldmVudG8gJEMkID0gcHJpbW9nZW5pdG8gZmVtbWluYS4KCmBgYHtyfQpDIDwtIHN1YnNldChTLCB0b3NzMSA9PSAiSCIpCkMKYGBgCgpQb3NzaWFtbyBvcmEgY2FsY29sYXJlIGxhIHByb2JhYmlsaXTDoCAkUChBIFxtaWQgQykkLgoKYGBge3J9ClByb2IoQSwgZ2l2ZW4gPSBDKQpgYGAKCgojIyMgRXNlcmNpemlvIDUKClNpIGNvbnNpZGVyaSBsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgY2hlIGNvbnNpc3RlIG5lbCBsYW5jaW8gZGkgZHVlIGRhZGkgYmlsYW5jaWF0aS4gRGVmaW5pYW1vIGkgc2VndWVudGkgZXZlbnRpOiAkQT1ceyRlc2NlIHVuIDEgbyB1biAyIG5lbCBwcmltbyBsYW5jaW8kXH0kIGUgJEI9XHskaWwgcHVudGVnZ2lvIHRvdGFsZSDDqCA4JFx9JC4gQ2kgY2hpZWRpYW1vOiBnbGkgZXZlbnRpICRBJCBlICRCJCBzb25vIHN0YXRpc3RpY2FtZW50ZSBpbmRpcGVuZGVudGk/CgpfU29sdXppb25lLl8KCkdsaSBldmVudGkgJEEkIGUgJEIkIG5vbiBzb25vIGluZGlwZW5kZW50aSBpbiBxdWFudG8gbGUgbG9ybyBwcm9iYWJpbGl0w6AgdmFsZ29ubyAkUChBKSA9IDEyLzM2JCBlICRQKEIpID0gNS8zNiQgZSBsYSBwcm9iYWJpbGl0w6AgZGVsbGEgbG9ybyBpbnRlcnNlemlvbmUgdmFsZSAkUChBIFxjYXAgQikgPSAxLzM2ID0gMy8xMDggXG5lcSBQKEEpUChCKSA9IDUvMTA4JC4KClVzaWFtbyBvcmEgbGUgZnVuemlvbmkgZGVsIHBhY2NoZXR0byBgcHJvYmAgcGVyIG90dGVuZXJlIGlsIHJpc3VsdGF0byBkZXNjcml0dG8gc29wcmEuIEluaXppYW1vIGEgZGVmaW5pcmUgbG8gc3BhemlvIGNhbXBpb25hcmlvIGBTYCBkZWxsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgY29ycmlzcG9uZGVudGUgYWwgbGFuY2lvIGRpIGR1ZSBkYWRpIGVxdWlsaWJyYXRpLgoKYGBge3J9ClMgPC0gcm9sbGRpZSgyLCBtYWtlc3BhY2UgPSBUUlVFKQpTCmBgYAoKU3BlY2lmaWNoaWFtbyBpbCBzb3R0b2luc2llbWUgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvICRTJCBjaGUgY29ycmlzcG9uZGUgYWxsJ2V2ZW50byAkQSQuCgpgYGB7cn0KQSA8LSBzdWJzZXQoUywgWDEgJWluJSBjKDEsIDIpKQpBCmBgYAoKCkNhbGNvbGlhbW8gJFAoQSkkOgoKYGBge3J9ClByb2IoQSkKYGBgCgpTcGVjaWZpY2hpYW1vIGlsIHNvdHRvaW5zaWVtZSBkZWxsbyBzcGF6aW8gY2FtcGlvbmFyaW8gJFMkIGNoZSBjb3JyaXNwb25kZSBhbGwnZXZlbnRvICRCJC4KCmBgYHtyfQpCIDwtIHN1YnNldChTLCAoWDEgKyBYMikgPT0gOCkKQgpgYGAKCkNhbGNvbGlhbW8gJFAoQikkOgoKYGBge3J9ClByb2IoQikKYGBgCgpDYWxjb2xpYW1vICRQKEEgXGNhcCBCKSQ6CgpgYGB7cn0KUHJvYihpbnRlcnNlY3QoQSxCKSkKYGBgCgpDYWxjb2xpYW1vIGlsIHByb2RvdHRvICRQKEEpIFAoQikkOgoKYGBge3J9ClByb2IoQSkgKiBQcm9iKEIpCmBgYAoKRGF0byBjaGUgJFAoQSBcY2FwIEIpIFxuZXEgUChBKSBQKEIpJCwgaSBkdWUgZXZlbnRpICRBJCBlICRCJCBub24gc29ubyBpbmRpcGVuZGVudGkuCgojIyMgRXNlcmNpemlvIDYKCkNvbnNpZGVyaWFtbyBpbCBmZW5vbWVubyBjYXVzYWxlIGNvbnNpc3RlbnRlIG5lbGwnb3NzZXJ2YXppb25lIGRlaSBwdW50aSBvdHRlbnV0aSBkYWwgbGFuY2lvIGRpIHVuYSBjb3BwaWEgZGkgZGFkaSBhIHNlaSBmYWNjZS4gIFN1cHBvbmlhbW8gY2hlIGkgZGFkaSBzaWFubyB0cnVjY2F0aSBlIHBvbmlhbW8gc3UgJFMgPSBceyAoaSwgaikgXG1pZCBpLCBqIFxpbiBcezEsIDIsIDMsIDQsIDUsIDZcfSBcfSQgbGEgcHJvYmFiaWxpdMOgICAkXHswLjMsIDAuMywgMC4xLCAwLjEsIDAuMSwgMC4xXH0kLiAgSW5kaWNoaWFtbyBjb24gJFhfMSQgaWwgdmFsb3JlIGRlbCAgbGFuY2lvIGRlbCBwcmltbyBkYWRvLCBjaW/DqCAkWF8xKGksaikgPSBpJCBwZXIgb2duaSAkKGksaikgXGluIFMkLCBlIGNvbiAkWF8yJCBpbCB2YWxvcmUgZGVsIGxhbmNpbyBkZWwgc2Vjb25kbyBkYWRvLCBjaW/DqCAkWF8yKGksaikgPSBqJCBwZXIgb2duaSAkKGksaikgXGluIFxtYXRoY2Fse1N9JC4KClBlciBjcmVhcmUgbG8gc3BhemlvIGNhbXBpb25hcmlvIGRlbGwnZXNwZXJpbWVudG8gY2FzdWFsZSBkb2JiaWFtbyBpbm5hbnppdHV0dG8gZGVmaW5pcmUgbGEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AgZGkgbWFzc2EgY2hlIGNvcnJpc3BvbmRlIGFpIDYgcG9zc2liaWxpIHZhbG9yaSBjaGUgcG9zc29ubyBlc3NlcmUgb3NzZXJ2YXRpIG5lbCBjYXNvIGRlbCBsYW5jaW8gZGkgdW4gZGFkby4KCmBgYHtyfQpwIDwtIGMoMC4zLCAwLjMsIDAuMSwgMC4xLCAwLjEsIDAuMSkKYGBgCgpBZGVzc28gZG9iYmlhbW8gY2FsY29sYXJlIGxlIHByb2JhYmlsaXTDoCBkYSBhc3NvY2lhcmUgYSBjaWFzY3VubyBkZWkgJDYgXHRpbWVzIDYkIGV2ZW50aSBlbGVtZW50YXJpIGRlbGxvIHNwYXppbyBjYW1waW9uYXJpby4gQSBxdWVzdG8gZmluZSB1dGlsaXp6aWFtbyBsYSBmdW56aW9uZSBgaWlkc3BhY2UoKWAgY2hlIGRlZmluaXNjZSBsbyBzcGF6aW8gY2FtcGlvbmFyaW8gY29ycmlzcG9uZGVudGUgYWQgdW4gaW5zaWVtZSBkaSBlc3BlcmltZW50aSBpbmRpcGVuZGVudGkgZSBhdmVudGkgbGEgbWVkZXNpbWEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AuIFRhbGkgY29uZGl6aW9uaSBjb3JyaXNwb25kb25vIGFsIGNhc28gcHJlc2VudGUgaW4gY3VpIGFiYmlhbW8gZHVlIGRhZGkgc2JpbGFuY2lhdGkgY2hlIHNvbm8gdHJhIGxvcm8gaW5kaXBlbmRlbnRpIGUgY2lhc2N1bm8gY29uIGxhIGRpc3RyaWJ1emlvbmUgZGkgcHJvYmFiaWxpdMOgIGRlZmluaXRhIHNvcHJhLiBJbCBwcmltbyBhcmdvbWVudG8gZGkgYGlpZHNwYWNlKClgIHNwZWNpZmljYSBpIHZhbG9yaSBwcm9kb3R0aSBkYWwgbGFuY2lvIGRpIHVubyBkZWkgZHVlIGRhZGksIG92dmVybyBpIHZhbG9yaSBwcm9kb3R0aSBkYSB1bm8gZGVpIGR1ZSBlc3BlcmltZW50aSBjYXN1YWxpLCBsJ2FyZ29tZW50byBgbnRyaWFsc2AgZGVmaW5pc2NlIGlsIG51bWVybyBkaSBkYWRpLCBvdnZlcm8gaWwgbnVtZXJvIGRpIGVzcGVyaW1lbnRpIGNhc3VhbGkgaW5kaXBlbmRlbnRpIGNoZSB2ZW5nb25vIGVzZWd1aXRpIGUgaW5maW5lIGwnYXJnb21lbnRvIGBwcm9ic2Agc3BlY2lmaWNhIGxhIGRpc3RyaWJ1emlvbmUgZGkgbWFzc2EgZGkgcHJvYmFiaWxpdMOgIHBlciBpIHZhbG9yaSBkZWwgbGFuY2lvIGRlbCBkYWRvLgoKYGBge3J9ClMgPC0gaWlkc3BhY2UoMTo2LCBudHJpYWxzID0gMiwgcHJvYnMgPSBwKQpTCmBgYAoKSW4gcXVlc3RvIGVzZW1waW8sIGdsaSBldmVudGkgJFhfMSQgZSAkWF8yJCBzb25vIGluZGlwZW5kZW50aS4gRHVucXVlLCBsYSBwcm9iYWJpbGl0w6AgY2hlIHNpIHZlcmlmaWNoaW5vIGVudHJhbWJpLCBvdnZlcm8gJFAoXHtYXzEgPSBoIFxjYXAgWF8yID0ga1x9KSQsIMOoIHVndWFsZSBhbCBwcm9kb3R0byAkUChce1hfMSA9IGhcfSkgUChce1hfMiA9IGtcfSkkLiBQZXIgZXNlbXBpbywgCgokJFAoXHtYXzEgPSAxIFxjYXAgWF8yID0gMVx9ID0gMC4zIFx0aW1lcyAwLjMgPSAwLjkkJAoKZSBjb3PDrCB2aWEuIFByb2NlZGVuZG8gaW4gcXVlc3RvIG1vZG8gc2kgY29zdHJ1aXNjZSBsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjaGUgw6ggc3RhdGEgZm9ybml0YSBkYSBgaWlkc3BhY2UoKWAuCgpJbml6aWFtbyBvcmEgYSBwb3JjaSB1bmEgZG9tYW5kYSBzZW1wbGljZS4gUXVhbCDDqCBsYSBwcm9iYWJpbGl0w6AgY2hlIGxhIHNvbW1hIGRlaSBwdW50aSBvdHRlbnV0aSBuZWwgbGFuY2lvIGRlaSBkdWUgZGFkaSBzaWEgdWd1YWxlIGEgNz8KCgpMJ2V2ZW50byBcZW5xdW90ZXtzb21tYSB1Z3VhbGUgYSA3fSDDqCBsJ3VuaW9uZSBkZWdsaSBldmVudGkgJCgxLDYpJCwgJCgyLDUpJCwgJCgzLDQpJCwgJCg0LDMpJCwgJCg1LDIpJCBlICQoNiwxKSQuIER1bnF1ZSBpbCByaXN1bHRhdG8gY2VyY2F0byDDqAoKXGJlZ2lue2FsaWdufQpQKFx0ZXh0e3NvbW1hIGRlaSBkdWUgZGFkaSB1Z3VhbGUgYSA3fSkgJj0gMC4wMyArIDAuMDMgKyAwLjAxICsgMC4wMSArIDAuMDMgKyAwLjAzIFxub3RhZ1xcCiY9IDAuMTQuXG5vdGFnClxlbmR7YWxpZ259CgpUcm92aWFtbyBvcmEgdGFsZSByaXN1bHRhdG8gdXRpbGl6emFuZG8gbGUgZnVuemlvbmkgZGVsIHBhY2NoZXR0byAkXHRleHR0dHtwcm9ifSQuCkRlZmluaWFtbyBsJ2V2ZW50byAkQSQgc3BlY2lmaWNhbmRvIGxhIGNvbmRpemlvbmUgbG9naWNhIHNlY29uZG8gbGEgcXVhbGUgbGEgc29tbWEgZGkgJFgxJCBlIGRpICRYMiQgZGV2ZSBlc3NlcmUgdWd1YWxlIGEgNwoKYGBge3J9CkEgPC0gc3Vic2V0KFMsIChYMSArIFgyKSA9PSA3KQpBCmBgYAoKUG9zc2lhbW8gb3JhIGNhbGNvbGFyZSAkUChBKSQ6CgpgYGB7cn0KUHJvYihBKQpgYGAKCgojIyMgRXNlcmNpemlvIDcgKFVuaW9uZSBkaSBldmVudGkpIAoKU2kgY29uc2lkZXJpIGwnZXNwZXJpbWVudG8gY2FzdWFsZSBkZWZpbml0byBuZWxsJ2VzZXJjaXppbyA2IGUgc2kgY2FsY29saSBsYSBwcm9iYWJpbGl0w6AgZGVsIHNlZ3VlbnRlIGV2ZW50bzogaWwgbGFuY2lvIGRlbCBwcmltbyBkYWRvIHByb2R1Y2UgdW4gbnVtZXJvIG1pbm9yZSBkaSAzIG9wcHVyZSBpbCBsYW5jaW8gZGVsIHNlY29uZG8gZGFkbyBwcm9kdWNlIHVuIG51bWVybyBkaXNwYXJpLiAgICAKCl9Tb2x1emlvbmUuXwoKRGVmaW5pYW1vIGwnZXZlbnRvICRBJC4KCmBgYHtyfQpBIDwtIHN1YnNldChTLCBYMSA8IDMpCkEKYGBgCgpQZXIgZGVmaW5pcmUgbCdldmVudG8gJEIkIMOoIG5lY2Vzc2FyaW8gdmVyaWZpY2FyZSBzZSB1biBudW1lcm8gc2lhIGRpc3BhcmkgbyBtZW5vLiAKVGFsZSBwcm9ibGVtYSBwdcOyIGVzc2VyZSByaXNvbHRvIGNyZWFuZG8gdW5hIGZ1bnppb25lIGNoZSByaXRvcm5hIGBUUlVFYCBzZSBpIHZhbG9yaSBwYXNzYXRpIGFsbGEgZnVuemlvbmUgc29ubyBkaXNwYXJpIGUgYEZBTFNFYCBhbHRyaW1lbnRpLgoKYGBge3J9CmlzX29kZCA8LSBmdW5jdGlvbih4KSB7CiAgcmV0dXJuKHggJSUgMiAhPSAwKQp9IApgYGAKCk1lZGlhbnRlIGxhIGZ1bnppb25lIGBpc19vZGQoKWAgcG9zc2lhbW8gb3JhIHNlbGV6aW9uYXJlIGdsaSBldmVudGkgZWxlbWVudGFyaSBkaSAkUyQgcGVyIGkgcXVhbGkgbGEgc29tbWEgZGVpIGR1ZSBkYWRpIMOoIGRpc3BhcmksIGRlZmluZW5kbyBpbiBxdWVzdG8gbW9kbyBsJ2V2ZW50byAkQiQuCgpgYGB7cn0KQiA8LSBzdWJzZXQoUywgaXNfb2RkKFgyKSkKQgpgYGAKClN0YW1waWFtbyBzdWxsYSBjb25zb2xlIGRpIFxSXCwgbCdldmVudG8gY2hlIGNvcnJpc3BvbmRlIGFsbCd1bmlvbmUgZGkgJEEkIGUgJEIkLCBwZXIgdmVyaWZpY2FyZSBjaGUgbm9uIGNpIHNpYW5vIGVycm9yaS4KCmBgYHtyfQp1bmlvbihBLCBCKQpgYGAKCkNhbGNvbGlhbW8gb3JhIGxhIHByb2JhYmlsaXTDoCAkUChBIFxjdXAgQikkLgoKYGBge3J9ClByb2IodW5pb24oQSwgQikpCmBgYAoKIyMjIEVzZXJjaXppbyA4IChpbnRlcnNlemlvbmUgZGkgZXZlbnRpKSAKClNpIGNvbnNpZGVyaSBsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgZGVmaW5pdG8gbmVsbCdlc2VyY2l6aW8gNiBlIHNpIGNhbGNvbGkgbGEgcHJvYmFiaWxpdMOgIGNoZSBpbCBsYW5jaW8gZGVsIHByaW1vIGRhZG8gcHJvZHVjYSB1biBudW1lcm8gbWlub3JlIGRpIDMgZSBpbCBsYW5jaW8gZGVsIHNlY29uZG8gZGFkbyBwcm9kdWNhIHVuIG51bWVybyBkaXNwYXJpLiBTaSBub3RpIGNoZSwgbWVudHJlIGwndW5pb25lIGRpIGR1ZSBldmVudGkgc2kgZGVzY3JpdmUgbWVkaWFudGUgaWwgY29ubmV0dGl2byAibyIsIGwnaW50ZXJzZXppb25lIGRpIGR1ZSBldmVudGkgdmllbmUgZm9ybXVsYXRhIGNvbiBsJ3VzbyBkZWwgY29ubmV0dGl2byAiZSIuIAoKVXRpbGl6emFuZG8gZ2xpIGV2ZW50aSAkQSQgZSAkQiQgY2hlIHNvbm8gc3RhdGkgZGVmaW5pdGkgaW4gcHJlY2VkZW56YSwgcG9zc2lhbW8gY2FsY29sYXJlIGxhIHByb2JhYmlsaXTDoCAkUChBIFxjYXAgQikkIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9CmludGVyc2VjdChBLCBCKQpgYGAKCmBgYHtyfQpQcm9iKGludGVyc2VjdChBLCBCKSkKYGBgCgoKIyMjIEVzZXJjaXppbyA5IChwcm9iYWJpbGl0w6AgbWFyZ2luYWxlKSAKClNpIGNvbnNpZGVyaSBsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgZGVmaW5pdG8gbmVsbCdlc2VyY2l6aW8gNiBlIHNpIGNhbGNvbGkgbGEgcHJvYmFiaWxpdMOgIGRpIG90dGVuZXJlIDMgY29uIGlsIGxhbmNpbyBkZWwgcHJpbW8gZGFkby4KCl9Tb2x1emlvbmUuXwoKRGVmaW5pYW1vIGwnZXZlbnRvICRDJAoKYGBge3J9CkMgPC0gc3Vic2V0KFMsIFgxID09IDMpCkMKYGBgCgpMYSBwcm9iYWJpbGl0w6AgJFAoQykkIMOoIHVndWFsZSBhOgoKYGBge3J9ClByb2IoQykKYGBgCgoKIyMjIEVzZXJjaXppbyAxMCAocHJvYmFiaWxpdMOgIGNvbmRpemlvbmF0YSkgCgpTaSBjb25zaWRlcmkgbCdlc3BlcmltZW50byBjYXN1YWxlIGRlZmluaXRvIG5lbGwnZXNlcmNpemlvIDYgZSBzaSBjYWxjb2xpIGxhIHByb2JhYmlsaXTDoCBkaSBvdHRlbmVyZSAzIGNvbiBpbCBzZWNvbmRvIGRhZG8sIGRhdG8gY2hlIGlsIHByaW1vIGRhZG8gaGEgcHJvZG90dG8gbCdlc2l0byA0LgoKX1NvbHV6aW9uZS5fCgpJbml6aWFtbyBhIGRlZmluaXJlIGwnZXZlbnRvICREJCA9ICJpbCBwcmltbyBkYWRvIHByb2R1Y2UgNCIuCgpgYGB7cn0KRCA8LSBzdWJzZXQoUywgWDEgPT0gNCkKRApgYGAKCkRlZmluaWFtbyBsJ2V2ZW50byAkRSQgPSAiaWwgc2Vjb25kbyBkYWRvIHByb2R1Y2UgMyIuCgpgYGB7cn0KRSA8LSBzdWJzZXQoUywgWDIgPT0gMykKRQpgYGAKCkNhbGNvbGlhbW8gJFAoRSBcbWlkIEQpJC4KCmBgYHtyfQpQcm9iKEUsIGdpdmVuID0gRCkKYGBgCgpTaSBub3RpIGNoZSwgcGVyIGNhbGNvbGFyZSBsYSBwcm9iYWJpbGl0w6AgZGkgdW4gZXZlbnRvIGNvbmRpemlvbmF0bywgw6ggc3VmZmljaWVudGUgdmFsdXRhcm5lIGxhIGNhcmRpbmFsaXTDoCBhbGwnaW50ZXJubyBkZWxsbyBzcGF6aW8gY2FtcGlvbmFyaW8gcmlzdHJldHRvIGRlZmluaXRvIGRhbGwnZXZlbnRvIGNvbmRpemlvbmFudGUgZSBkaXZpZGVyZSBwZXIgbGEgY2FyZGluYWxpdMOgIGRlbGwnZXZlbnRvIGNvbmRpemlvbmFudGUuCk92dmVybwoKYGBge3J9ClByb2IoaW50ZXJzZWN0KEQsIEUpKSAvIFByb2IoRCkKYGBgCgoKIyMgSW5mb3JtYXppb25pIHN1bGxhIHNlc3Npb25lIGRpIGxhdm9ybwoKYGBge3J9CnV0aWxzOjpzZXNzaW9uSW5mbygpCmBgYAoKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDA3LjAxIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKCklsIHBhY2NoZXR0byBgcHJvYmAgZGkgJFx0ZXh0c2Z7Un0kIHN2aWx1cHBhdG8gZGEgRy4gSmF5IEtlcm5zIGNvbnRpZW5lIHVuYSBzZXJpZSBkaSBmdW56aW9uaSBjaGUgcG9zc29ubyBlc3NlcmUgdXNhdGUgcGVyIGlsIGNhbGNvbG8gZGVsbGUgcHJvYmFiaWxpdMOgIG5lbCBjYXNvIGRpIHNwYXppIGNhbXBpb25hcmkgZmluaXRpLiAKCmBgYHtyfQpzdXBwcmVzc1BhY2thZ2VTdGFydHVwTWVzc2FnZXMoewogIGxpYnJhcnkoInByb2IiKQp9KQoKc2V0LnNlZWQoODQ3MzUpCgprbml0cjo6b3B0c19jaHVuayRzZXQoCiAgZmlnLmFsaWduID0gImNlbnRlciIsCiAgZmlnLmFzcCA9IDAuNjE4LCAjIDEgLyBwaGkKICBmaWcucG9zID0gImgiLAogIGNvbW1lbnQgPSAiIz4iLAogIHRpZHkub3B0cyA9IGxpc3Qod2lkdGguY3V0b2ZmID0gNzApLAogIHRpZHkgPSAic3R5bGVyIgopCmBgYAoKTGEgcmFnaW9uZSBkaSB1c2FyZSAkXHRleHRzZntSfSQgaW4gcXVlc3RvIGNhc28sIGUgaW4gdHV0dGkgZ2xpIGFsdHJpIGNhc2ksIG5vbiDDqCBxdWVsbGEgZGkgcG90ZXJlIHJpc29sdmVyZSBpbiBtYW5pZXJhIG1lY2NhbmljYSB1biBlc2VyY2l6aW8gY29zw6wgZGEgZXZpdGFyZSBsYSBmYXRpY2EgZGkgZG92ZXJlIGNvbXByZW5kZXJlIGxhIGxvZ2ljYSBzb3R0b3N0YW50ZS4gTGEgcmFnaW9uZSDDqCBpbnZlY2UgcXVlbGxhIGRpIGV2aXRhcmUgZGkgZG92ZXJlIGZhcmUgaSBjYWxjb2xpICJhIG1hbm8iLCBpbiBtb2RvIGRhIGF2ZXJlIHBpw7kgdGVtcG8gcGVyIGNpw7IgY2hlIMOoIGltcG9ydGFudGUsIG92dmVybyBpbCByYWdpb25hbWVudG8gbG9naWNvIGNoZSDDqCByaWNoaWVzdG8gcGVyIHJpc29sdmVyZSBpbCBwcm9ibGVtYS4gCgpGYWNjaWFtbyB1biBlc2VtcGlvLiBMbyBzcGF6aW8gY2FtcGlvbmFyaW8gZGVsbOKAmWVzcGVyaW1lbnRvIGNhc3VhbGUgY29ycmlzcG9uZGVudGUgYWwgbGFuY2lvIGRpIGR1ZSBkYWRpIHNpIGNyZWEgbmVsIG1vZG8gc2VndWVudGU6CgpgYGB7cn0KdG9zc2NvaW4oMikKYGBgCgpVbmEgdm9sdGEgc3BlY2lmaWNhdG8gbG8gc3BhemlvIGNhbXBpb25hcmlvICRcbWF0aGNhbHtTfSQgZGVsbCdlc3BlcmltZW50byBjYXN1YWxlIMOoIG5lY2Vzc2FyaW8gYXNzb2NpYXJlIHVuYSBwcm9iYWJpbGl0w6AgYSBjaWFzY3VuIGV2ZW50byBlbGVtZW50YXJlIGRpICRcbWF0aGNhbHtTfSQuIApRdWVzdG8gcmlzdWx0YXRvIHNpIG90dGllbmUgdXNhbmRvIGxhIGZ1bnppb25lIGBwcm9ic3BhY2UoKWAuIApOZWwgY2FzbyBkaSBkdWUgbW9uZXRlIGVxdWlsaWJyYXRlIGFiYmlhbW86CgpgYGB7cn0KUyA8LSB0b3NzY29pbigyKQpwcm9ic3BhY2UoUykKYGBgCgpDb25zaWRlcmlhbW8gYWxjdW5pIGVzZW1waSBkZWxsJ3VzbyBkZWxsZSBmdW56aW9uaSBjb250ZW51dGUgbmVsIHBhY2NoZXR0byAkXHRleHR0dHtwcm9ifSQgcGVyIGxhIHNvbHV6aW9uZSBkaSBwcm9ibGVtaSByZWxhdGl2aSBhbGxhIHByb2JhYmlsaXTDoCBkaXNjcmV0YS4KCgojIyBFc2VyY2l6aSBjb24gaWwgcGFjY2hldHRvICRcdGV4dHR0e3Byb2J9JAoKIyMjIEVzZXJjaXppbyAxCgpTaSBjb25zaWRlcmkgbCdlc3BlcmltZW50byBjaGUgY29uc2lzdGUgbmVsIGxhbmNpbyBkaSBkdWUgbW9uZXRlLiAKU3VwcG9uaWFtbyBjaGUgZ2xpIGV2ZW50aSBkZWxsbyBzcGF6aW8gY2FtcGlvbmFyaW8gJFxtYXRoY2Fse1N9ID0gXHtUVCwgVEMsIENULCBDQ1x9JCBzaWFubyBlcXVpcHJvYmFiaWxpLiBRdWFsIMOoIGxhIHByb2JhYmlsaXTDoCBkZWxsJ2V2ZW50byAidGVzdGEgbmVsIHByaW1vIGxhbmNpbyI/CgpfU29sdXppb25lLl8KCkdsaSBldmVudGkgJFx7VFRcfSQgZSAkXHtUQ1x9JCBzb25vIGluY29tcGF0aWJpbGkgZSBsYSBwcm9iYWJpbGl0w6AgZGVsbCdldmVudG8gJEEgPSBce1x0ZXh0e3Rlc3RhIG5lbCBwcmltbyBsYW5jaW99XH0gPSBce1RULCBUQ1x9JCDDqCBkYXRhIGRhbGxhIHNvbW1hIGRlbGxlIHByb2JhYmlsaXTDoCBkZWdsaSBldmVudGkgZWxlbWVudGFyaSBjaGUgbG8gY29zdGl0dWlzY29uby4gTGEgcHJvYmFiaWxpdMOgIGNlcmNhdGEgw6ggZHVucXVlIHVndWFsZSBhCgokJFAoVFQgXGN1cCBUQykgPSBQKFRUKSBgIFAoVEMpID0gMC4yNSBgIDAuMjUgPSAwLjUwLiQkCgpVc2FuZG8gbGUgZnVuemlvbmkgZGVsIHBhY2NoZXR0byBgcHJvYmAsIGlsIHByb2JsZW1hIHNpIGFmZnJvbnRhIG5lbCBtb2RvIHNlZ3VlbnRlLgpJbml6aWFtbyBhIHNwZWNpZmljYXJlIGxvIHNwYXppbyBjYW1waW9uYXJpbyBkZWxsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgZSBhc3NvY2lhbW8gdW5hIHByb2JhYmlsaXTDoCBhIGNpYXNjdW4gZXZlbnRvIGVsZW1lbnRhcmUgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvLgoKYGBge3J9ClMgPC0gdG9zc2NvaW4oMiwgbWFrZXNwYWNlID0gVFJVRSkKUwpgYGAKClNlbGV6aW9uaWFtbyBvcmEgdW4gc290dG9pbnNpZW1lIGRlbGxvIHNwYXppbyBjYW1waW9uYXJpbywgb3Z2ZXJvIGwnaW5zaWVtZSBkZWdsaSBldmVudGkgZWxlbWVudGFyaSBjaGUgY29ycmlzcG9uZG9ubyBhbGwnZXZlbnRvICRBJC4KCmBgYHtyfQpBIDwtIHN1YnNldChTLCB0b3NzMSA9PSAiSCIpCkEKYGBgCgpMJ3VsdGltbyBwYXNzbyDDqCBxdWVsbG8gZGkgc29tbWFyZSBsZSBwcm9iYWJpbGl0w6AgYXNzb2NpYXRlIGEgdHV0dGkgZ2xpIGV2ZW50aSBlbGVtZW50YXJpIGluICRBJC4KCmBgYHtyfQpQcm9iKEEpCmBgYAoKIyMjIEVzZXJjaXppbyAyCgpWZW5nb25vIGxhbmNpYXRlIGR1ZSBtb25ldGUgZXF1aWxpYnJhdGUuIFNpYW5vICRBJCBsJ2V2ZW50byAiY3JvY2UgbmVsIHByaW1vIGxhbmNpbyIgZSAkQiQgbCdldmVudG8gImR1ZSB2b2x0ZSB0ZXN0YSIuIFNpIHRyb3ZpIGxhIHByb2JhYmlsaXTDoCAkUChBIFxjdXAgQikkLgoKX1NvbHV6aW9uZS5fCgpHbGkgZXZlbnRpICRBID0gXHtDQywgQ1RcfSQgZSAkQiA9IFx7VFRcfSQgc29ubyBkaXNnaXVudGkuIExhIHByb2JhYmlsaXTDoCBkaSAkUChBIFxjdXAgQikkIMOoIAoKJCRQKEEgXGN1cCBCKSA9IFAoQSkgKyBQKEIpID0gMC41MCArIDAuMjUgPSAwLjc1LiQkCgpQb3NzaWFtbyByZXBsaWNhcmUgaWwgcmlzdWx0YXRvIHVzYW5kbyBsZSBmdW56aW9uaSBgdG9zc2NvaW4oKWAsIGBzdWJzZXQoKWAsIGBQcm9iKClgIGUgYHVuaW9uKClgIGRlbCBwYWNjaGV0dG8gYHByb2JgLiBJbml6aWFtbyBhIGNyZWFyZSBsbyBzcGF6aW8gY2FtcGlvbmFyaW8gZGVsbCdlc3BlcmltZW50byBjYXN1YWxlLgoKYGBge3J9ClMgPC0gdG9zc2NvaW4oMiwgbWFrZXNwYWNlID0gVFJVRSkgClMKYGBgCgpTcGVjaWZpY2hpYW1vIGwnaW5zaWVtZSBkZWdsaSBldmVudGkgZWxlbWVudGFyaSBjaGUgY29zdGl0dWlzY29ubyBsJ2V2ZW50byAkQSQuCgpgYGB7cn0KQSA8LSBzdWJzZXQoUywgdG9zczEgPT0gIkgiKQpBCmBgYAoKU3BlY2lmaWNoaWFtbyBsJ2luc2llbWUgZGVnbGkgZXZlbnRpIGVsZW1lbnRhcmkgY2hlIGNvc3RpdHVpc2Nvbm8gbCdldmVudG8gJEIkLgoKYGBge3J9CkIgPC0gc3Vic2V0KFMsIHRvc3MxID09ICJIIiAmIHRvc3MyID09ICJIIikKQgpgYGAKCkNhbGNvbGlhbW8gb3JhIGxhIHByb2JhYmlsaXTDoCBkZWxsJ2V2ZW50byAkUChBIFxjdXAgQikkLgoKYGBge3J9ClByb2IodW5pb24oQSwgQikpCmBgYAoKU2kgbm90aSBsJ3VzbyBkZWdsaSBvcGVyYXRvcmkgbG9naWNpLiBMYSBmdW56aW9uZSBgc3Vic2V0KClgIGNyZWEgdW4gc290dG9pbnNpZW1lIGRlbGxvIHNwYXppbyBjYW1waW9uYXJpbyBzdWxsYSBiYXNlIGRlbGxlIGNvbmRpemlvbmkgbG9naWNoZSBjaGUgdmVuZ29ubyBzcGVjaWZpY2F0ZSBjaGUgc29ubyBhcHBsaWNhdGUgYSBjaWFzY3VuYSByaWdhIGRpIGBTYC4gUGVyIGVzZW1waW8sIGwnaXN0cnV6aW9uZSBgc3Vic2V0KFMsIHRvc3MxID09ICJIIiAmIHRvc3MyID09ICJIIilgIGlkZW50aWZpY2EgbCdpbnNpZW1lIGRlbGxlIHJpZ2hlIG5lbGxlIHF1YWxpIGxhIGNvbG9ubmEgYHRvc3MxYCBhc3N1bWUgaWwgdmFsb3JlIGBIYCBlIGxhIGNvbG9ubmEgYHRvc3MyYCBhc3N1bWUgaWwgdmFsb3JlIGBIYC4gTGEgZnVuemlvbmUgYHVuaW9uKClgIGNyZWEgdW4gb2dnZXR0byBjaGUgw6ggbCd1bmlvbmUgZGVpIGR1ZSBvZ2dldHRpICBzcGVjaWZpY2F0aSBjb21lIGFyZ29tZW50aS4gIEluZmluZSwgbGEgZnVuemlvbmUgYFByb2IoKWAgc29tbWEgaSB2YWxvcmkgY29udGVudXRpIG5lbGxhIGNvbG9ubmEgYHByb2JzYCBkZWxsJ29nZ2V0dG8gY3JlYXRvIGRhIGB1bmlvbigpYC4gCgojIyMgRXNlcmNpemlvIDMKCkVzdHJhZW5kbyB1bmEgY2FydGEgZGEgdW4gbWF6em8gZGkgNTIsIHF1YWwgw6ggbGEgcHJvYmFiaWxpdMOgIGNoZSBlc2NhIHVuYSBmaWd1cmEgZGkgY3Vvcmk/IFNhcGVuZG8gY2hlIGlsIHNlbWUgZGVsbGEgY2FydGEgZXN0cmF0dGEgw6ggY3VvcmksIHF1YWwgw6ggbGEgcHJvYmFiaWxpdMOgIGNoZSBpbCB2YWxvcmUgbnVtZXJpY28gZGVsbGEgY2FydGEgc2lhIDcsIDgsIG8gOT8KCl9Tb2x1emlvbmUuXwoKQ2kgc29ubyAxMyBjYXJ0ZSBkaSBjdW9yaSBzdSA1MiwgZHVucXVlIGxhIHJpc3Bvc3RhIGFsbGEgcHJpbWEgZG9tYW5kYSDDqCAxLzQuIApQZXIgcmlzcG9uZGVyZSBhbGxhIHNlY29uZGEgZG9tYW5kYSBjb25zaWRlcmlhbW8gc29sbyBsZSAxMyBjYXJ0ZSBkaSBjdW9yaS4gIExhIHByb2JhYmlsaXTDoCBjZXJjYXRhIMOoIGR1bnF1ZSAzLzEzID0gMC4yMzA4LgoKSW5pemlhbW8gYSBzcGVjaWZpY2FyZSBsbyBzcGF6aW8gY2FtcGlvbmFyaW8gZGVsbCdlc3BlcmltZW50byBjYXN1YWxlIGNvbiBsYSBmdW56aW9uZSAgYGNhcmRzKClgLiAKCmBgYHtyfQpTIDwtIGNhcmRzKG1ha2VzcGFjZSA9IFRSVUUpClMKYGBgCgpMJ2luc2llbWUgYEFgIHZpZW5lIGNyZWF0byBxdWFsZSBzb3R0b2luc2llbWUgZGkgYFNgIHVzYW5kbyBsYSBmdW56aW9uZSBgc3Vic2V0KClgIGUgc3BlY2lmaWNhbmRvIGNoZSBsYSBjb2xvbm5hIGBzdWl0YCAoc2VtZSkgZGV2ZSBhc3N1bWVyZSBpbCB2YWxvcmUgYEhhcnRgIChjdW9yaSkuIAoKYGBge3J9CkEgPC0gc3Vic2V0KFMsIHN1aXQgPT0gIkhlYXJ0IikKQQpgYGAKClBlciBjcmVhcmUgbCdpbnNpZW1lIGBCYCwgbmVsbGEgZnVuemlvbmUgYHN1YnNldCgpYCB1c2lhbW8gbCdvcGVyYXRvcmUgbG9naWNvIGAlaW4lYCBwZXIgaWRlbnRpZmljYXJlIGxlIHJpZ2hlIGRpIGBTYCBuZWxsZSBxdWFsaSBsYSBjb2xvbm5hIGByYW5rYCAodmFsb3JlIG51bWVyaWNvKSDDqCA3IG8gOCBvIDkuIAoKYGBge3J9CkIgPC0gc3Vic2V0KFMsIHJhbmsgJWluJSA3OjkpCkIKYGBgCgpDYWxjb2xpYW1vIGxhIHByb2JhYmlsaXTDoCBkaSB1bmEgY2FydGEgZGkgY3VvcmkuCgpgYGB7cn0KUHJvYihTLCBzdWl0ID09ICJIZWFydCIpCmBgYAoKTCdhcmdvbWVudG8gYGdpdmVuYCBwYXNzYXRvIGFsbGEgZnVuemlvbmUgYFByb2IoKWAgdmllbmUgdXNhdG8gcGVyIHNwZWNpZmljYXJlIGxhIHByb2JhYmlsaXTDoCBjb25kaXppb25hdGEuCgpgYGB7cn0KUHJvYihCLCBnaXZlbiA9IEEpCmBgYAoKIyMjIEVzZXJjaXppbyA0IChQYXJhZG9zc28gZGVpIGR1ZSBiYW1iaW5pKSAKClVuYSBjb3BwaWEgaGEgZHVlIGJhbWJpbmkuIEFsbWVubyB1bm8gZGVpIGR1ZSDDqCB1bmEgZmVtbWluYS4gUXVhbCDDqCBsYSBwcm9iYWJpbGl0w6AgY2hlIHNpYW5vIGVudHJhbWJlIGZlbW1pbmU/IFF1YWwgw6ggbGEgcHJvYmFiaWxpdMOgIGNoZSBzaWFubyBlbnRyYW1iZSBmZW1taW5lLCBzYXBlbmRvIGNoZSBpbCBwcmltb2dlbml0byDDqCB1bmEgZmVtbWluYT8KCl9Tb2x1emlvbmUuXwoKTmVsbCdpcG90ZXNpIGNoZSBtYXNjaGkgZSBmZW1taW5lIGFiYmlhbm8gbGEgc3Rlc3NhIHByb2JhYmlsaXTDoCBkaSBuYXNjZXJlLCBzaSBoYSBjaGUKClxiZWdpbnthbGlnbn0KJlAoXHRleHR7ZW50cmFtYmUgZmVtbWluZX0gXCxcdmVydFwsIFx0ZXh0e2FsbWVubyB1bmEgZmVtbWluYX0pID1cbm90YWdcXCAmXGZyYWN7UChcdGV4dHtlbnRyYW1iZSBmZW1taW5lfSBcY2FwIFx0ZXh0e2FsbWVubyB1bmEgZmVtbWluYX0pfXtQKFx0ZXh0e2FsbWVubyB1bmEgZmVtbWluYX0pfSA9IFxmcmFjezEvNH17My80fSA9IDEvMyxcbm90YWdcXAomUChcdGV4dHtlbnRyYW1iZSBmZW1taW5lfSBcLFx2ZXJ0XCwgXHRleHR7cHJpbW9nZW5pdGEgZmVtbWluYX0pID1cbm90YWdcXCAmXGZyYWN7UChcdGV4dHtlbnRyYW1iZSBmZW1taW5lfSBcY2FwIFx0ZXh0e3ByaW1vZ2VuaXRhIGZlbW1pbmF9KX17UChcdGV4dHtwcmltb2dlbml0YSBmZW1taW5hfSl9ID0gXGZyYWN7MS80fXsxLzJ9ID0gMS8yLlxub3RhZwpcZW5ke2FsaWdufQoKSW4gcmVhbHTDoCwgbmVsbGEgbWFnZ2lvciBwYXJ0ZSBkZWkgcGFlc2kgbGEgcHJvYmFiaWxpdMOgIGNoZSB1biBuZW9uYXRvIHNpYSBtYXNjaGlvIMOoIHBhcmkgYSAwLjUxLCBxdWluZGkgbGEgc29sdXppb25lIHByZWNlZGVudGUgw6ggYXBwcm9zc2ltYXRhLgoKUmlzb2x2aWFtbyBvcmEgaWwgcGFyYWRvc3NvIGRlaSBkdWUgYmFtYmluaSB1c2FuZG8gbGUgZnVuemlvbmkgZGVsIHBhY2NoZXR0byBgcHJvYmAuIApVc2lhbW8gbGEgZnVuemlvbmUgYHRvc3Njb2luKClgIGFzc2VnbmFuZG8gYWQgYEhgIGlsIHNpZ25pZmljYXRvICJmZW1taW5hIi4gTGEgcHJpbWEgZG9tYW5kYSBkaXZlbnRhIGR1bnF1ZSBsYSBzZWd1ZW50ZTogcXVhbCDDqCBsYSBwcm9iYWJpbGl0w6AgZGkgb3NzZXJ2YXJlIGR1ZSB0ZXN0ZSBpbiBkdWUgbGFuY2kgZGkgdW5hIG1vbmV0YSwgc2FwZW5kbyBjaGUgw6ggc3RhdGEgb3R0ZW51dGEgdGVzdGEgYWxtZW5vIHVuYSB2b2x0YS4gCgpgYGB7cn0KIyBGZW1taW5hID0gSC4KUyA8LSB0b3NzY29pbigyLCBtYWtlc3BhY2UgPSBUUlVFKQpTCmBgYAoKU3BlY2lmaWNoaWFtbyAkQSQgPSBlbnRyYW1iZSBmZW1taW5lLgoKYGBge3J9CkEgPC0gc3Vic2V0KFMsIHRvc3MxID09ICJIIiAmIHRvc3MyID09ICJIIikKQQpgYGAKClNwZWNpZmljaGlhbW8gbCdldmVudG8gJEIkID0gYWxtZW5vIHVuYSBmZW1taW5hLCBvdnZlcm8gIm5vbiBlbnRyYW1iaSBtYXNjaGkiLgoKYGBge3J9CkIgPC0gc3Vic2V0KFMsICEodG9zczEgPT0gIlQiICYgdG9zczIgPT0gIlQiKSkKQgpgYGAKClBvc3NpYW1vIG9yYSBjYWxjb2xhcmUgbGEgcHJvYmFiaWxpdMOgICRQKEEgXG1pZCBCKSQ6CgpgYGB7cn0KUHJvYihBLCBnaXZlbiA9IEIpCmBgYAoKTGEgc2Vjb25kYSBkb21hbmRhIGNvcnJpc3BvbmRlIGFsbGEgcHJvYmFiaWxpdMOgIGRpIGR1ZSB0ZXN0ZSAoImZlbW1pbmUiKSwgZGF0byBjaGUgaWwgcHJpbW8gbGFuY2lvIGhhIHByb2RvdHRvIHRlc3RhICgiZmVtbWluYSIpLiBJbml6aWFtbyBhIGRlZmluaXJlIGwnZXZlbnRvICRDJCA9IHByaW1vZ2VuaXRvIGZlbW1pbmEuCgpgYGB7cn0KQyA8LSBzdWJzZXQoUywgdG9zczEgPT0gIkgiKQpDCmBgYAoKUG9zc2lhbW8gb3JhIGNhbGNvbGFyZSBsYSBwcm9iYWJpbGl0w6AgJFAoQSBcbWlkIEMpJC4KCmBgYHtyfQpQcm9iKEEsIGdpdmVuID0gQykKYGBgCgoKIyMjIEVzZXJjaXppbyA1CgpTaSBjb25zaWRlcmkgbCdlc3BlcmltZW50byBjYXN1YWxlIGNoZSBjb25zaXN0ZSBuZWwgbGFuY2lvIGRpIGR1ZSBkYWRpIGJpbGFuY2lhdGkuIERlZmluaWFtbyBpIHNlZ3VlbnRpIGV2ZW50aTogJEE9XHskZXNjZSB1biAxIG8gdW4gMiBuZWwgcHJpbW8gbGFuY2lvJFx9JCBlICRCPVx7JGlsIHB1bnRlZ2dpbyB0b3RhbGUgw6ggOCRcfSQuIENpIGNoaWVkaWFtbzogZ2xpIGV2ZW50aSAkQSQgZSAkQiQgc29ubyBzdGF0aXN0aWNhbWVudGUgaW5kaXBlbmRlbnRpPwoKX1NvbHV6aW9uZS5fCgpHbGkgZXZlbnRpICRBJCBlICRCJCBub24gc29ubyBpbmRpcGVuZGVudGkgaW4gcXVhbnRvIGxlIGxvcm8gcHJvYmFiaWxpdMOgIHZhbGdvbm8gJFAoQSkgPSAxMi8zNiQgZSAkUChCKSA9IDUvMzYkIGUgbGEgcHJvYmFiaWxpdMOgIGRlbGxhIGxvcm8gaW50ZXJzZXppb25lIHZhbGUgJFAoQSBcY2FwIEIpID0gMS8zNiA9IDMvMTA4IFxuZXEgUChBKVAoQikgPSA1LzEwOCQuCgpVc2lhbW8gb3JhIGxlIGZ1bnppb25pIGRlbCBwYWNjaGV0dG8gYHByb2JgIHBlciBvdHRlbmVyZSBpbCByaXN1bHRhdG8gZGVzY3JpdHRvIHNvcHJhLiBJbml6aWFtbyBhIGRlZmluaXJlIGxvIHNwYXppbyBjYW1waW9uYXJpbyBgU2AgZGVsbCdlc3BlcmltZW50byBjYXN1YWxlIGNvcnJpc3BvbmRlbnRlIGFsIGxhbmNpbyBkaSBkdWUgZGFkaSBlcXVpbGlicmF0aS4KCmBgYHtyfQpTIDwtIHJvbGxkaWUoMiwgbWFrZXNwYWNlID0gVFJVRSkKUwpgYGAKClNwZWNpZmljaGlhbW8gaWwgc290dG9pbnNpZW1lIGRlbGxvIHNwYXppbyBjYW1waW9uYXJpbyAkUyQgY2hlIGNvcnJpc3BvbmRlIGFsbCdldmVudG8gJEEkLgoKYGBge3J9CkEgPC0gc3Vic2V0KFMsIFgxICVpbiUgYygxLCAyKSkKQQpgYGAKCgpDYWxjb2xpYW1vICRQKEEpJDoKCmBgYHtyfQpQcm9iKEEpCmBgYAoKU3BlY2lmaWNoaWFtbyBpbCBzb3R0b2luc2llbWUgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvICRTJCBjaGUgY29ycmlzcG9uZGUgYWxsJ2V2ZW50byAkQiQuCgpgYGB7cn0KQiA8LSBzdWJzZXQoUywgKFgxICsgWDIpID09IDgpCkIKYGBgCgpDYWxjb2xpYW1vICRQKEIpJDoKCmBgYHtyfQpQcm9iKEIpCmBgYAoKQ2FsY29saWFtbyAkUChBIFxjYXAgQikkOgoKYGBge3J9ClByb2IoaW50ZXJzZWN0KEEsQikpCmBgYAoKQ2FsY29saWFtbyBpbCBwcm9kb3R0byAkUChBKSBQKEIpJDoKCmBgYHtyfQpQcm9iKEEpICogUHJvYihCKQpgYGAKCkRhdG8gY2hlICRQKEEgXGNhcCBCKSBcbmVxIFAoQSkgUChCKSQsIGkgZHVlIGV2ZW50aSAkQSQgZSAkQiQgbm9uIHNvbm8gaW5kaXBlbmRlbnRpLgoKIyMjIEVzZXJjaXppbyA2CgpDb25zaWRlcmlhbW8gaWwgZmVub21lbm8gY2F1c2FsZSBjb25zaXN0ZW50ZSBuZWxsJ29zc2VydmF6aW9uZSBkZWkgcHVudGkgb3R0ZW51dGkgZGFsIGxhbmNpbyBkaSB1bmEgY29wcGlhIGRpIGRhZGkgYSBzZWkgZmFjY2UuICBTdXBwb25pYW1vIGNoZSBpIGRhZGkgc2lhbm8gdHJ1Y2NhdGkgZSBwb25pYW1vIHN1ICRTID0gXHsgKGksIGopIFxtaWQgaSwgaiBcaW4gXHsxLCAyLCAzLCA0LCA1LCA2XH0gXH0kIGxhIHByb2JhYmlsaXTDoCAgJFx7MC4zLCAwLjMsIDAuMSwgMC4xLCAwLjEsIDAuMVx9JC4gIEluZGljaGlhbW8gY29uICRYXzEkIGlsIHZhbG9yZSBkZWwgIGxhbmNpbyBkZWwgcHJpbW8gZGFkbywgY2lvw6ggJFhfMShpLGopID0gaSQgcGVyIG9nbmkgJChpLGopIFxpbiBTJCwgZSBjb24gJFhfMiQgaWwgdmFsb3JlIGRlbCBsYW5jaW8gZGVsIHNlY29uZG8gZGFkbywgY2lvw6ggJFhfMihpLGopID0gaiQgcGVyIG9nbmkgJChpLGopIFxpbiBcbWF0aGNhbHtTfSQuCgpQZXIgY3JlYXJlIGxvIHNwYXppbyBjYW1waW9uYXJpbyBkZWxsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgZG9iYmlhbW8gaW5uYW56aXR1dHRvIGRlZmluaXJlIGxhIGRpc3RyaWJ1emlvbmUgZGkgcHJvYmFiaWxpdMOgIGRpIG1hc3NhIGNoZSBjb3JyaXNwb25kZSBhaSA2IHBvc3NpYmlsaSB2YWxvcmkgY2hlIHBvc3Nvbm8gZXNzZXJlIG9zc2VydmF0aSBuZWwgY2FzbyBkZWwgbGFuY2lvIGRpIHVuIGRhZG8uCgpgYGB7cn0KcCA8LSBjKDAuMywgMC4zLCAwLjEsIDAuMSwgMC4xLCAwLjEpCmBgYAoKQWRlc3NvIGRvYmJpYW1vIGNhbGNvbGFyZSBsZSBwcm9iYWJpbGl0w6AgZGEgYXNzb2NpYXJlIGEgY2lhc2N1bm8gZGVpICQ2IFx0aW1lcyA2JCBldmVudGkgZWxlbWVudGFyaSBkZWxsbyBzcGF6aW8gY2FtcGlvbmFyaW8uIEEgcXVlc3RvIGZpbmUgdXRpbGl6emlhbW8gbGEgZnVuemlvbmUgYGlpZHNwYWNlKClgIGNoZSBkZWZpbmlzY2UgbG8gc3BhemlvIGNhbXBpb25hcmlvIGNvcnJpc3BvbmRlbnRlIGFkIHVuIGluc2llbWUgZGkgZXNwZXJpbWVudGkgaW5kaXBlbmRlbnRpIGUgYXZlbnRpIGxhIG1lZGVzaW1hIGRpc3RyaWJ1emlvbmUgZGkgcHJvYmFiaWxpdMOgLiBUYWxpIGNvbmRpemlvbmkgY29ycmlzcG9uZG9ubyBhbCBjYXNvIHByZXNlbnRlIGluIGN1aSBhYmJpYW1vIGR1ZSBkYWRpIHNiaWxhbmNpYXRpIGNoZSBzb25vIHRyYSBsb3JvIGluZGlwZW5kZW50aSBlIGNpYXNjdW5vIGNvbiBsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBkZWZpbml0YSBzb3ByYS4gSWwgcHJpbW8gYXJnb21lbnRvIGRpIGBpaWRzcGFjZSgpYCBzcGVjaWZpY2EgaSB2YWxvcmkgcHJvZG90dGkgZGFsIGxhbmNpbyBkaSB1bm8gZGVpIGR1ZSBkYWRpLCBvdnZlcm8gaSB2YWxvcmkgcHJvZG90dGkgZGEgdW5vIGRlaSBkdWUgZXNwZXJpbWVudGkgY2FzdWFsaSwgbCdhcmdvbWVudG8gYG50cmlhbHNgIGRlZmluaXNjZSBpbCBudW1lcm8gZGkgZGFkaSwgb3Z2ZXJvIGlsIG51bWVybyBkaSBlc3BlcmltZW50aSBjYXN1YWxpIGluZGlwZW5kZW50aSBjaGUgdmVuZ29ubyBlc2VndWl0aSBlIGluZmluZSBsJ2FyZ29tZW50byBgcHJvYnNgIHNwZWNpZmljYSBsYSBkaXN0cmlidXppb25lIGRpIG1hc3NhIGRpIHByb2JhYmlsaXTDoCBwZXIgaSB2YWxvcmkgZGVsIGxhbmNpbyBkZWwgZGFkby4KCmBgYHtyfQpTIDwtIGlpZHNwYWNlKDE6NiwgbnRyaWFscyA9IDIsIHByb2JzID0gcCkKUwpgYGAKCkluIHF1ZXN0byBlc2VtcGlvLCBnbGkgZXZlbnRpICRYXzEkIGUgJFhfMiQgc29ubyBpbmRpcGVuZGVudGkuIER1bnF1ZSwgbGEgcHJvYmFiaWxpdMOgIGNoZSBzaSB2ZXJpZmljaGlubyBlbnRyYW1iaSwgb3Z2ZXJvICRQKFx7WF8xID0gaCBcY2FwIFhfMiA9IGtcfSkkLCDDqCB1Z3VhbGUgYWwgcHJvZG90dG8gJFAoXHtYXzEgPSBoXH0pIFAoXHtYXzIgPSBrXH0pJC4gUGVyIGVzZW1waW8sIAoKJCRQKFx7WF8xID0gMSBcY2FwIFhfMiA9IDFcfSA9IDAuMyBcdGltZXMgMC4zID0gMC45JCQKCmUgY29zw6wgdmlhLiBQcm9jZWRlbmRvIGluIHF1ZXN0byBtb2RvIHNpIGNvc3RydWlzY2UgbGEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AgY2hlIMOoIHN0YXRhIGZvcm5pdGEgZGEgYGlpZHNwYWNlKClgLgoKSW5pemlhbW8gb3JhIGEgcG9yY2kgdW5hIGRvbWFuZGEgc2VtcGxpY2UuIFF1YWwgw6ggbGEgcHJvYmFiaWxpdMOgIGNoZSBsYSBzb21tYSBkZWkgcHVudGkgb3R0ZW51dGkgbmVsIGxhbmNpbyBkZWkgZHVlIGRhZGkgc2lhIHVndWFsZSBhIDc/CgoKTCdldmVudG8gXGVucXVvdGV7c29tbWEgdWd1YWxlIGEgN30gw6ggbCd1bmlvbmUgZGVnbGkgZXZlbnRpICQoMSw2KSQsICQoMiw1KSQsICQoMyw0KSQsICQoNCwzKSQsICQoNSwyKSQgZSAkKDYsMSkkLiBEdW5xdWUgaWwgcmlzdWx0YXRvIGNlcmNhdG8gw6gKClxiZWdpbnthbGlnbn0KUChcdGV4dHtzb21tYSBkZWkgZHVlIGRhZGkgdWd1YWxlIGEgN30pICY9IDAuMDMgKyAwLjAzICsgMC4wMSArIDAuMDEgKyAwLjAzICsgMC4wMyBcbm90YWdcXAomPSAwLjE0Llxub3RhZwpcZW5ke2FsaWdufQoKVHJvdmlhbW8gb3JhIHRhbGUgcmlzdWx0YXRvIHV0aWxpenphbmRvIGxlIGZ1bnppb25pIGRlbCBwYWNjaGV0dG8gJFx0ZXh0dHR7cHJvYn0kLgpEZWZpbmlhbW8gbCdldmVudG8gJEEkIHNwZWNpZmljYW5kbyBsYSBjb25kaXppb25lIGxvZ2ljYSBzZWNvbmRvIGxhIHF1YWxlIGxhIHNvbW1hIGRpICRYMSQgZSBkaSAkWDIkIGRldmUgZXNzZXJlIHVndWFsZSBhIDcKCmBgYHtyfQpBIDwtIHN1YnNldChTLCAoWDEgKyBYMikgPT0gNykKQQpgYGAKClBvc3NpYW1vIG9yYSBjYWxjb2xhcmUgJFAoQSkkOgoKYGBge3J9ClByb2IoQSkKYGBgCgoKIyMjIEVzZXJjaXppbyA3IChVbmlvbmUgZGkgZXZlbnRpKSAKClNpIGNvbnNpZGVyaSBsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgZGVmaW5pdG8gbmVsbCdlc2VyY2l6aW8gNiBlIHNpIGNhbGNvbGkgbGEgcHJvYmFiaWxpdMOgIGRlbCBzZWd1ZW50ZSBldmVudG86IGlsIGxhbmNpbyBkZWwgcHJpbW8gZGFkbyBwcm9kdWNlIHVuIG51bWVybyBtaW5vcmUgZGkgMyBvcHB1cmUgaWwgbGFuY2lvIGRlbCBzZWNvbmRvIGRhZG8gcHJvZHVjZSB1biBudW1lcm8gZGlzcGFyaS4gICAgCgpfU29sdXppb25lLl8KCkRlZmluaWFtbyBsJ2V2ZW50byAkQSQuCgpgYGB7cn0KQSA8LSBzdWJzZXQoUywgWDEgPCAzKQpBCmBgYAoKUGVyIGRlZmluaXJlIGwnZXZlbnRvICRCJCDDqCBuZWNlc3NhcmlvIHZlcmlmaWNhcmUgc2UgdW4gbnVtZXJvIHNpYSBkaXNwYXJpIG8gbWVuby4gClRhbGUgcHJvYmxlbWEgcHXDsiBlc3NlcmUgcmlzb2x0byBjcmVhbmRvIHVuYSBmdW56aW9uZSBjaGUgcml0b3JuYSBgVFJVRWAgc2UgaSB2YWxvcmkgcGFzc2F0aSBhbGxhIGZ1bnppb25lIHNvbm8gZGlzcGFyaSBlIGBGQUxTRWAgYWx0cmltZW50aS4KCmBgYHtyfQppc19vZGQgPC0gZnVuY3Rpb24oeCkgewogIHJldHVybih4ICUlIDIgIT0gMCkKfSAKYGBgCgpNZWRpYW50ZSBsYSBmdW56aW9uZSBgaXNfb2RkKClgIHBvc3NpYW1vIG9yYSBzZWxlemlvbmFyZSBnbGkgZXZlbnRpIGVsZW1lbnRhcmkgZGkgJFMkIHBlciBpIHF1YWxpIGxhIHNvbW1hIGRlaSBkdWUgZGFkaSDDqCBkaXNwYXJpLCBkZWZpbmVuZG8gaW4gcXVlc3RvIG1vZG8gbCdldmVudG8gJEIkLgoKYGBge3J9CkIgPC0gc3Vic2V0KFMsIGlzX29kZChYMikpCkIKYGBgCgpTdGFtcGlhbW8gc3VsbGEgY29uc29sZSBkaSBcUlwsIGwnZXZlbnRvIGNoZSBjb3JyaXNwb25kZSBhbGwndW5pb25lIGRpICRBJCBlICRCJCwgcGVyIHZlcmlmaWNhcmUgY2hlIG5vbiBjaSBzaWFubyBlcnJvcmkuCgpgYGB7cn0KdW5pb24oQSwgQikKYGBgCgpDYWxjb2xpYW1vIG9yYSBsYSBwcm9iYWJpbGl0w6AgJFAoQSBcY3VwIEIpJC4KCmBgYHtyfQpQcm9iKHVuaW9uKEEsIEIpKQpgYGAKCiMjIyBFc2VyY2l6aW8gOCAoaW50ZXJzZXppb25lIGRpIGV2ZW50aSkgCgpTaSBjb25zaWRlcmkgbCdlc3BlcmltZW50byBjYXN1YWxlIGRlZmluaXRvIG5lbGwnZXNlcmNpemlvIDYgZSBzaSBjYWxjb2xpIGxhIHByb2JhYmlsaXTDoCBjaGUgaWwgbGFuY2lvIGRlbCBwcmltbyBkYWRvIHByb2R1Y2EgdW4gbnVtZXJvIG1pbm9yZSBkaSAzIGUgaWwgbGFuY2lvIGRlbCBzZWNvbmRvIGRhZG8gcHJvZHVjYSB1biBudW1lcm8gZGlzcGFyaS4gU2kgbm90aSBjaGUsIG1lbnRyZSBsJ3VuaW9uZSBkaSBkdWUgZXZlbnRpIHNpIGRlc2NyaXZlIG1lZGlhbnRlIGlsIGNvbm5ldHRpdm8gIm8iLCBsJ2ludGVyc2V6aW9uZSBkaSBkdWUgZXZlbnRpIHZpZW5lIGZvcm11bGF0YSBjb24gbCd1c28gZGVsIGNvbm5ldHRpdm8gImUiLiAKClV0aWxpenphbmRvIGdsaSBldmVudGkgJEEkIGUgJEIkIGNoZSBzb25vIHN0YXRpIGRlZmluaXRpIGluIHByZWNlZGVuemEsIHBvc3NpYW1vIGNhbGNvbGFyZSBsYSBwcm9iYWJpbGl0w6AgJFAoQSBcY2FwIEIpJCBuZWwgbW9kbyBzZWd1ZW50ZToKCmBgYHtyfQppbnRlcnNlY3QoQSwgQikKYGBgCgpgYGB7cn0KUHJvYihpbnRlcnNlY3QoQSwgQikpCmBgYAoKCiMjIyBFc2VyY2l6aW8gOSAocHJvYmFiaWxpdMOgIG1hcmdpbmFsZSkgCgpTaSBjb25zaWRlcmkgbCdlc3BlcmltZW50byBjYXN1YWxlIGRlZmluaXRvIG5lbGwnZXNlcmNpemlvIDYgZSBzaSBjYWxjb2xpIGxhIHByb2JhYmlsaXTDoCBkaSBvdHRlbmVyZSAzIGNvbiBpbCBsYW5jaW8gZGVsIHByaW1vIGRhZG8uCgpfU29sdXppb25lLl8KCkRlZmluaWFtbyBsJ2V2ZW50byAkQyQKCmBgYHtyfQpDIDwtIHN1YnNldChTLCBYMSA9PSAzKQpDCmBgYAoKTGEgcHJvYmFiaWxpdMOgICRQKEMpJCDDqCB1Z3VhbGUgYToKCmBgYHtyfQpQcm9iKEMpCmBgYAoKCiMjIyBFc2VyY2l6aW8gMTAgKHByb2JhYmlsaXTDoCBjb25kaXppb25hdGEpIAoKU2kgY29uc2lkZXJpIGwnZXNwZXJpbWVudG8gY2FzdWFsZSBkZWZpbml0byBuZWxsJ2VzZXJjaXppbyA2IGUgc2kgY2FsY29saSBsYSBwcm9iYWJpbGl0w6AgZGkgb3R0ZW5lcmUgMyBjb24gaWwgc2Vjb25kbyBkYWRvLCBkYXRvIGNoZSBpbCBwcmltbyBkYWRvIGhhIHByb2RvdHRvIGwnZXNpdG8gNC4KCl9Tb2x1emlvbmUuXwoKSW5pemlhbW8gYSBkZWZpbmlyZSBsJ2V2ZW50byAkRCQgPSAiaWwgcHJpbW8gZGFkbyBwcm9kdWNlIDQiLgoKYGBge3J9CkQgPC0gc3Vic2V0KFMsIFgxID09IDQpCkQKYGBgCgpEZWZpbmlhbW8gbCdldmVudG8gJEUkID0gImlsIHNlY29uZG8gZGFkbyBwcm9kdWNlIDMiLgoKYGBge3J9CkUgPC0gc3Vic2V0KFMsIFgyID09IDMpCkUKYGBgCgpDYWxjb2xpYW1vICRQKEUgXG1pZCBEKSQuCgpgYGB7cn0KUHJvYihFLCBnaXZlbiA9IEQpCmBgYAoKU2kgbm90aSBjaGUsIHBlciBjYWxjb2xhcmUgbGEgcHJvYmFiaWxpdMOgIGRpIHVuIGV2ZW50byBjb25kaXppb25hdG8sIMOoIHN1ZmZpY2llbnRlIHZhbHV0YXJuZSBsYSBjYXJkaW5hbGl0w6AgYWxsJ2ludGVybm8gZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIHJpc3RyZXR0byBkZWZpbml0byBkYWxsJ2V2ZW50byBjb25kaXppb25hbnRlIGUgZGl2aWRlcmUgcGVyIGxhIGNhcmRpbmFsaXTDoCBkZWxsJ2V2ZW50byBjb25kaXppb25hbnRlLgpPdnZlcm8KCmBgYHtyfQpQcm9iKGludGVyc2VjdChELCBFKSkgLyBQcm9iKEQpCmBgYAoKCiMjIEluZm9ybWF6aW9uaSBzdWxsYSBzZXNzaW9uZSBkaSBsYXZvcm8KCmBgYHtyfQp1dGlsczo6c2Vzc2lvbkluZm8oKQpgYGAKCgo=</div>
 
 
 

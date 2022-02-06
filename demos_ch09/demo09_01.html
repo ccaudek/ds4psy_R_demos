@@ -11,7 +11,7 @@
 
 <meta name="author" content="Corrado Caudek" />
 
-<meta name="date" content="2022-02-05" />
+<meta name="date" content="2022-02-06" />
 
 <title>Data science per psicologi - demo 09.01</title>
 
@@ -475,17 +475,28 @@ pre code {
 <h1 class="title toc-ignore">Data science per psicologi - demo
 09.01</h1>
 <h4 class="author">Corrado Caudek</h4>
-<h4 class="date">2022-02-05</h4>
+<h4 class="date">2022-02-06</h4>
 
 </div>
 
 
-<div id="esercizi-sulle-variabili-casuali" class="section level1">
-<h1>Esercizi sulle variabili casuali</h1>
 <pre class="r"><code>suppressPackageStartupMessages({
   library(&quot;tidyverse&quot;)
   library(&quot;prob&quot;)
-})</code></pre>
+})
+
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  fig.align = &quot;center&quot;,
+  fig.asp = 0.618, # 1 / phi
+  fig.pos = &quot;h&quot;,
+  comment = &quot;#&gt;&quot;,
+  tidy.opts = list(width.cutoff = 70),
+  tidy = &quot;styler&quot;
+)</code></pre>
+<div id="esercizi-sulle-variabili-casuali" class="section level1">
+<h1>Esercizi sulle variabili casuali</h1>
 <div id="esercizio-1" class="section level2">
 <h2>Esercizio 1</h2>
 <p>Conosciamo già esperimenti casuali, spazi campionari e gli eventi.
@@ -502,34 +513,34 @@ X3\)</span>.</p>
 <pre class="r"><code>S &lt;- rolldie(3, nsides = 4, makespace = TRUE) 
 S &lt;- addrv(S, U = X1 - X2 + X3)
 head(S)</code></pre>
-<pre><code>##   X1 X2 X3 U    probs
-## 1  1  1  1 1 0.015625
-## 2  2  1  1 2 0.015625
-## 3  3  1  1 3 0.015625
-## 4  4  1  1 4 0.015625
-## 5  1  2  1 0 0.015625
-## 6  2  2  1 1 0.015625</code></pre>
+<pre><code>#&gt;   X1 X2 X3 U    probs
+#&gt; 1  1  1  1 1 0.015625
+#&gt; 2  2  1  1 2 0.015625
+#&gt; 3  3  1  1 3 0.015625
+#&gt; 4  4  1  1 4 0.015625
+#&gt; 5  1  2  1 0 0.015625
+#&gt; 6  2  2  1 1 0.015625</code></pre>
 <p>Calcoliamo la funzione di massa di <span class="math inline">\(U\)</span>:</p>
 <pre class="r"><code>Prob(S, U == -2)</code></pre>
-<pre><code>## [1] 0.015625</code></pre>
+<pre><code>#&gt; [1] 0.015625</code></pre>
 <pre class="r"><code>Prob(S, U == -1)</code></pre>
-<pre><code>## [1] 0.046875</code></pre>
+<pre><code>#&gt; [1] 0.046875</code></pre>
 <pre class="r"><code>Prob(S, U == 0)</code></pre>
-<pre><code>## [1] 0.09375</code></pre>
+<pre><code>#&gt; [1] 0.09375</code></pre>
 <pre class="r"><code>Prob(S, U == 1)</code></pre>
-<pre><code>## [1] 0.15625</code></pre>
+<pre><code>#&gt; [1] 0.15625</code></pre>
 <pre class="r"><code>Prob(S, U == 2)</code></pre>
-<pre><code>## [1] 0.1875</code></pre>
+<pre><code>#&gt; [1] 0.1875</code></pre>
 <pre class="r"><code>Prob(S, U == 3)</code></pre>
-<pre><code>## [1] 0.1875</code></pre>
+<pre><code>#&gt; [1] 0.1875</code></pre>
 <pre class="r"><code>Prob(S, U == 4)</code></pre>
-<pre><code>## [1] 0.15625</code></pre>
+<pre><code>#&gt; [1] 0.15625</code></pre>
 <pre class="r"><code>Prob(S, U == 5)</code></pre>
-<pre><code>## [1] 0.09375</code></pre>
+<pre><code>#&gt; [1] 0.09375</code></pre>
 <pre class="r"><code>Prob(S, U == 6)</code></pre>
-<pre><code>## [1] 0.046875</code></pre>
+<pre><code>#&gt; [1] 0.046875</code></pre>
 <pre class="r"><code>Prob(S, U == 7)</code></pre>
-<pre><code>## [1] 0.015625</code></pre>
+<pre><code>#&gt; [1] 0.015625</code></pre>
 <p>Controlliamo:</p>
 <pre class="r"><code>Prob(S, U == -2) +
 Prob(S, U == -1) +
@@ -541,10 +552,10 @@ Prob(S, U == 4) +
 Prob(S, U == 5) +
 Prob(S, U == 6) +
 Prob(S, U == 7) </code></pre>
-<pre><code>## [1] 1</code></pre>
+<pre><code>#&gt; [1] 1</code></pre>
 <p>La probabilità <span class="math inline">\(P(U &gt; 5)\)</span> è</p>
 <pre class="r"><code>Prob(S, U &gt; 5)</code></pre>
-<pre><code>## [1] 0.0625</code></pre>
+<pre><code>#&gt; [1] 0.0625</code></pre>
 <p>Creiamo due altre variabili casuali definite come il massimo delle
 tre variabili originarie, o come la loro somma:</p>
 <pre class="r"><code>S &lt;- addrv(S, FUN = max, invars = c(&quot;X1&quot;, &quot;X2&quot;, &quot;X3&quot;), name = &quot;V&quot;)
@@ -552,34 +563,34 @@ S &lt;- addrv(S, FUN = sum, invars = c(&quot;X1&quot;, &quot;X2&quot;, &quot;X3&
 <p>La distribuzione marginale di <span class="math inline">\(V\)</span>
 è</p>
 <pre class="r"><code>marginal(S, vars = &quot;V&quot;)</code></pre>
-<pre><code>##   V    probs
-## 1 1 0.015625
-## 2 2 0.109375
-## 3 3 0.296875
-## 4 4 0.578125</code></pre>
+<pre><code>#&gt;   V    probs
+#&gt; 1 1 0.015625
+#&gt; 2 2 0.109375
+#&gt; 3 3 0.296875
+#&gt; 4 4 0.578125</code></pre>
 <p>La distribuzione congiunta di <span class="math inline">\(V\)</span>
 e <span class="math inline">\(W\)</span> è</p>
 <pre class="r"><code>J &lt;- marginal(S, vars = c(&quot;V&quot;, &quot;W&quot;))
 J</code></pre>
-<pre><code>##    V  W    probs
-## 1  1  3 0.015625
-## 2  2  4 0.046875
-## 3  2  5 0.046875
-## 4  3  5 0.046875
-## 5  2  6 0.015625
-## 6  3  6 0.093750
-## 7  4  6 0.046875
-## 8  3  7 0.093750
-## 9  4  7 0.093750
-## 10 3  8 0.046875
-## 11 4  8 0.140625
-## 12 3  9 0.015625
-## 13 4  9 0.140625
-## 14 4 10 0.093750
-## 15 4 11 0.046875
-## 16 4 12 0.015625</code></pre>
+<pre><code>#&gt;    V  W    probs
+#&gt; 1  1  3 0.015625
+#&gt; 2  2  4 0.046875
+#&gt; 3  2  5 0.046875
+#&gt; 4  3  5 0.046875
+#&gt; 5  2  6 0.015625
+#&gt; 6  3  6 0.093750
+#&gt; 7  4  6 0.046875
+#&gt; 8  3  7 0.093750
+#&gt; 9  4  7 0.093750
+#&gt; 10 3  8 0.046875
+#&gt; 11 4  8 0.140625
+#&gt; 12 3  9 0.015625
+#&gt; 13 4  9 0.140625
+#&gt; 14 4 10 0.093750
+#&gt; 15 4 11 0.046875
+#&gt; 16 4 12 0.015625</code></pre>
 <pre class="r"><code>sum(J$probs)</code></pre>
-<pre><code>## [1] 1</code></pre>
+<pre><code>#&gt; [1] 1</code></pre>
 <p>Troviamo, ad esempio, la probabilità dell’evento <span class="math inline">\(V &gt; 2\)</span> e <span class="math inline">\(W
 &lt; 7\)</span>:</p>
 <pre class="r"><code>J1 &lt;- J %&gt;% 
@@ -588,52 +599,54 @@ J</code></pre>
     W &lt; 7
   )
 sum(J1$probs)</code></pre>
-<pre><code>## [1] 0.1875</code></pre>
+<pre><code>#&gt; [1] 0.1875</code></pre>
 </div>
 <div id="informazioni-sulla-sessione-di-lavoro" class="section level2">
 <h2>Informazioni sulla sessione di lavoro</h2>
 <pre class="r"><code>utils::sessionInfo()</code></pre>
-<pre><code>## R version 4.1.2 (2021-11-01)
-## Platform: x86_64-apple-darwin17.0 (64-bit)
-## Running under: macOS Big Sur 10.16
-## 
-## Matrix products: default
-## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
-## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
-## 
-## locale:
-## [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8
-## 
-## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
-## 
-## other attached packages:
-##  [1] prob_1.0-1            fAsianOptions_3042.82 fOptions_3042.86     
-##  [4] fBasics_3042.89.1     timeSeries_3062.100   timeDate_3043.102    
-##  [7] combinat_0.0-8        forcats_0.5.1         stringr_1.4.0        
-## [10] dplyr_1.0.7           purrr_0.3.4           readr_2.1.2          
-## [13] tidyr_1.2.0           tibble_3.1.6          ggplot2_3.3.5        
-## [16] tidyverse_1.3.1      
-## 
-## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.8       lubridate_1.8.0  assertthat_0.2.1 digest_0.6.29   
-##  [5] utf8_1.2.2       R6_2.5.1         cellranger_1.1.0 backports_1.4.1 
-##  [9] reprex_2.0.1     evaluate_0.14    httr_1.4.2       pillar_1.7.0    
-## [13] rlang_1.0.1      spatial_7.3-15   readxl_1.3.1     rstudioapi_0.13 
-## [17] jquerylib_0.1.4  rmarkdown_2.11   munsell_0.5.0    broom_0.7.12    
-## [21] compiler_4.1.2   modelr_0.1.8     xfun_0.29        pkgconfig_2.0.3 
-## [25] htmltools_0.5.2  tidyselect_1.1.1 fansi_1.0.2      crayon_1.4.2    
-## [29] tzdb_0.2.0       dbplyr_2.1.1     withr_2.4.3      grid_4.1.2      
-## [33] jsonlite_1.7.3   gtable_0.3.0     lifecycle_1.0.1  DBI_1.1.2       
-## [37] magrittr_2.0.2   scales_1.1.1     cli_3.1.1        stringi_1.7.6   
-## [41] fs_1.5.2         xml2_1.3.3       bslib_0.3.1      ellipsis_0.3.2  
-## [45] generics_0.1.2   vctrs_0.3.8      tools_4.1.2      glue_1.6.1      
-## [49] hms_1.1.1        fastmap_1.1.0    yaml_2.2.2       colorspace_2.0-2
-## [53] rvest_1.0.2      knitr_1.37       haven_2.4.3      sass_0.4.0</code></pre>
+<pre><code>#&gt; R version 4.1.2 (2021-11-01)
+#&gt; Platform: x86_64-apple-darwin17.0 (64-bit)
+#&gt; Running under: macOS Big Sur 10.16
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt;  [1] prob_1.0-1            fAsianOptions_3042.82 fOptions_3042.86     
+#&gt;  [4] fBasics_3042.89.1     timeSeries_3062.100   timeDate_3043.102    
+#&gt;  [7] combinat_0.0-8        forcats_0.5.1         stringr_1.4.0        
+#&gt; [10] dplyr_1.0.7           purrr_0.3.4           readr_2.1.2          
+#&gt; [13] tidyr_1.2.0           tibble_3.1.6          ggplot2_3.3.5        
+#&gt; [16] tidyverse_1.3.1      
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] Rcpp_1.0.8        lubridate_1.8.0   assertthat_0.2.1  digest_0.6.29    
+#&gt;  [5] utf8_1.2.2        R6_2.5.1          cellranger_1.1.0  backports_1.4.1  
+#&gt;  [9] reprex_2.0.1      evaluate_0.14     httr_1.4.2        pillar_1.7.0     
+#&gt; [13] rlang_1.0.1       spatial_7.3-15    readxl_1.3.1      rstudioapi_0.13  
+#&gt; [17] jquerylib_0.1.4   R.utils_2.11.0    R.oo_1.24.0       styler_1.6.2     
+#&gt; [21] rmarkdown_2.11    munsell_0.5.0     broom_0.7.12      compiler_4.1.2   
+#&gt; [25] modelr_0.1.8      xfun_0.29         pkgconfig_2.0.3   htmltools_0.5.2  
+#&gt; [29] tidyselect_1.1.1  fansi_1.0.2       crayon_1.4.2      tzdb_0.2.0       
+#&gt; [33] dbplyr_2.1.1      withr_2.4.3       R.methodsS3_1.8.1 grid_4.1.2       
+#&gt; [37] jsonlite_1.7.3    gtable_0.3.0      lifecycle_1.0.1   DBI_1.1.2        
+#&gt; [41] magrittr_2.0.2    scales_1.1.1      cli_3.1.1         stringi_1.7.6    
+#&gt; [45] fs_1.5.2          xml2_1.3.3        bslib_0.3.1       ellipsis_0.3.2   
+#&gt; [49] generics_0.1.2    vctrs_0.3.8       tools_4.1.2       R.cache_0.15.0   
+#&gt; [53] glue_1.6.1        hms_1.1.1         fastmap_1.1.0     yaml_2.2.2       
+#&gt; [57] colorspace_2.0-2  rvest_1.0.2       knitr_1.37        haven_2.4.3      
+#&gt; [61] sass_0.4.0</code></pre>
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDA5LjAxIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKIyBFc2VyY2l6aSBzdWxsZSB2YXJpYWJpbGkgY2FzdWFsaQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJwcm9iIikKfSkKYGBgCgojIyBFc2VyY2l6aW8gMQoKQ29ub3NjaWFtbyBnacOgIGVzcGVyaW1lbnRpIGNhc3VhbGksIHNwYXppIGNhbXBpb25hcmkgZSBnbGkgZXZlbnRpLiBPcmEgY2kgcHJlb2NjdXBpYW1vIGRpIGFzc29jaWFyZSB1biBudW1lcm8gYWdsaSBldmVudGkgZGVsbCdlc3BlcmltZW50byBjYXN1YWxlLiBFc2VndWlhbW8gdW4gZXNwZXJpbWVudG8gY2FzdWFsZSBlLCBkb3BvIGF2ZXIgb3NzZXJ2YXRvIGlsIHJpc3VsdGF0byAkXG9tZWdhJCwgY2FsY29saWFtbyB1biBudW1lcm8gJFgkLiBDaW/DqCwgYWQgb2duaSByaXN1bHRhdG8gJFxvbWVnYSQgbmVsbG8gc3BhemlvIGNhbXBpb25hcmlvIGFzc29jaWFtbyB1biBudW1lcm8gJFgoXG9tZWdhKSA9IHgkLgoKQSB0aXRvbG8gZGkgZXNlbXBpbywgbGFuY2lhbW8gdHJlIHZvbHRlIHVuIGRhZG8gYSA0IGZhY2NlIGUgZGVmaW5pYW1vIGxhIHZhcmlhYmlsZSBjYXN1YWxlICRVID0gWDEg4oiSIFgyICsgWDMkLgoKYGBge3J9ClMgPC0gcm9sbGRpZSgzLCBuc2lkZXMgPSA0LCBtYWtlc3BhY2UgPSBUUlVFKSAKUyA8LSBhZGRydihTLCBVID0gWDEgLSBYMiArIFgzKQpoZWFkKFMpCmBgYAoKQ2FsY29saWFtbyBsYSBmdW56aW9uZSBkaSBtYXNzYSBkaSAkVSQ6CgpgYGB7cn0KUHJvYihTLCBVID09IC0yKQpQcm9iKFMsIFUgPT0gLTEpClByb2IoUywgVSA9PSAwKQpQcm9iKFMsIFUgPT0gMSkKUHJvYihTLCBVID09IDIpClByb2IoUywgVSA9PSAzKQpQcm9iKFMsIFUgPT0gNCkKUHJvYihTLCBVID09IDUpClByb2IoUywgVSA9PSA2KQpQcm9iKFMsIFUgPT0gNykKYGBgCgpDb250cm9sbGlhbW86CgpgYGB7cn0KUHJvYihTLCBVID09IC0yKSArClByb2IoUywgVSA9PSAtMSkgKwpQcm9iKFMsIFUgPT0gMCkgKwpQcm9iKFMsIFUgPT0gMSkgKwpQcm9iKFMsIFUgPT0gMikgKwpQcm9iKFMsIFUgPT0gMykgKwpQcm9iKFMsIFUgPT0gNCkgKwpQcm9iKFMsIFUgPT0gNSkgKwpQcm9iKFMsIFUgPT0gNikgKwpQcm9iKFMsIFUgPT0gNykgCmBgYAoKTGEgcHJvYmFiaWxpdMOgICRQKFUgPiA1KSQgw6gKCmBgYHtyfQpQcm9iKFMsIFUgPiA1KQpgYGAKCkNyZWlhbW8gZHVlIGFsdHJlIHZhcmlhYmlsaSBjYXN1YWxpIGRlZmluaXRlIGNvbWUgaWwgbWFzc2ltbyBkZWxsZSB0cmUgdmFyaWFiaWxpIG9yaWdpbmFyaWUsIG8gY29tZSBsYSBsb3JvIHNvbW1hOgoKYGBge3J9ClMgPC0gYWRkcnYoUywgRlVOID0gbWF4LCBpbnZhcnMgPSBjKCJYMSIsICJYMiIsICJYMyIpLCBuYW1lID0gIlYiKQpTIDwtIGFkZHJ2KFMsIEZVTiA9IHN1bSwgaW52YXJzID0gYygiWDEiLCAiWDIiLCAiWDMiKSwgbmFtZSA9ICJXIikKYGBgCgpMYSBkaXN0cmlidXppb25lIG1hcmdpbmFsZSBkaSAkViQgw6ggCgpgYGB7cn0KbWFyZ2luYWwoUywgdmFycyA9ICJWIikKYGBgCgpMYSBkaXN0cmlidXppb25lIGNvbmdpdW50YSBkaSAkViQgZSAkVyQgw6gKCmBgYHtyfQpKIDwtIG1hcmdpbmFsKFMsIHZhcnMgPSBjKCJWIiwgIlciKSkKSgpgYGAKCmBgYHtyfQpzdW0oSiRwcm9icykKYGBgCgpUcm92aWFtbywgYWQgZXNlbXBpbywgbGEgcHJvYmFiaWxpdMOgIGRlbGwnZXZlbnRvICRWID4gMiQgZSAkVyA8IDckOgoKYGBge3J9CkoxIDwtIEogJT4lIAogIGRwbHlyOjpmaWx0ZXIoCiAgICBWID4gMiwKICAgIFcgPCA3CiAgKQpzdW0oSjEkcHJvYnMpCmBgYAoKCiMjIEluZm9ybWF6aW9uaSBzdWxsYSBzZXNzaW9uZSBkaSBsYXZvcm8KCmBgYHtyfQp1dGlsczo6c2Vzc2lvbkluZm8oKQpgYGAKCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDA5LjAxIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJwcm9iIikKfSkKCnNldC5zZWVkKDg0NzM1KQoKa25pdHI6Om9wdHNfY2h1bmskc2V0KAogIGZpZy5hbGlnbiA9ICJjZW50ZXIiLAogIGZpZy5hc3AgPSAwLjYxOCwgIyAxIC8gcGhpCiAgZmlnLnBvcyA9ICJoIiwKICBjb21tZW50ID0gIiM+IiwKICB0aWR5Lm9wdHMgPSBsaXN0KHdpZHRoLmN1dG9mZiA9IDcwKSwKICB0aWR5ID0gInN0eWxlciIKKQpgYGAKCiMgRXNlcmNpemkgc3VsbGUgdmFyaWFiaWxpIGNhc3VhbGkKCiMjIEVzZXJjaXppbyAxCgpDb25vc2NpYW1vIGdpw6AgZXNwZXJpbWVudGkgY2FzdWFsaSwgc3BhemkgY2FtcGlvbmFyaSBlIGdsaSBldmVudGkuIE9yYSBjaSBwcmVvY2N1cGlhbW8gZGkgYXNzb2NpYXJlIHVuIG51bWVybyBhZ2xpIGV2ZW50aSBkZWxsJ2VzcGVyaW1lbnRvIGNhc3VhbGUuIEVzZWd1aWFtbyB1biBlc3BlcmltZW50byBjYXN1YWxlIGUsIGRvcG8gYXZlciBvc3NlcnZhdG8gaWwgcmlzdWx0YXRvICRcb21lZ2EkLCBjYWxjb2xpYW1vIHVuIG51bWVybyAkWCQuIENpb8OoLCBhZCBvZ25pIHJpc3VsdGF0byAkXG9tZWdhJCBuZWxsbyBzcGF6aW8gY2FtcGlvbmFyaW8gYXNzb2NpYW1vIHVuIG51bWVybyAkWChcb21lZ2EpID0geCQuCgpBIHRpdG9sbyBkaSBlc2VtcGlvLCBsYW5jaWFtbyB0cmUgdm9sdGUgdW4gZGFkbyBhIDQgZmFjY2UgZSBkZWZpbmlhbW8gbGEgdmFyaWFiaWxlIGNhc3VhbGUgJFUgPSBYMSDiiJIgWDIgKyBYMyQuCgpgYGB7cn0KUyA8LSByb2xsZGllKDMsIG5zaWRlcyA9IDQsIG1ha2VzcGFjZSA9IFRSVUUpIApTIDwtIGFkZHJ2KFMsIFUgPSBYMSAtIFgyICsgWDMpCmhlYWQoUykKYGBgCgpDYWxjb2xpYW1vIGxhIGZ1bnppb25lIGRpIG1hc3NhIGRpICRVJDoKCmBgYHtyfQpQcm9iKFMsIFUgPT0gLTIpClByb2IoUywgVSA9PSAtMSkKUHJvYihTLCBVID09IDApClByb2IoUywgVSA9PSAxKQpQcm9iKFMsIFUgPT0gMikKUHJvYihTLCBVID09IDMpClByb2IoUywgVSA9PSA0KQpQcm9iKFMsIFUgPT0gNSkKUHJvYihTLCBVID09IDYpClByb2IoUywgVSA9PSA3KQpgYGAKCkNvbnRyb2xsaWFtbzoKCmBgYHtyfQpQcm9iKFMsIFUgPT0gLTIpICsKUHJvYihTLCBVID09IC0xKSArClByb2IoUywgVSA9PSAwKSArClByb2IoUywgVSA9PSAxKSArClByb2IoUywgVSA9PSAyKSArClByb2IoUywgVSA9PSAzKSArClByb2IoUywgVSA9PSA0KSArClByb2IoUywgVSA9PSA1KSArClByb2IoUywgVSA9PSA2KSArClByb2IoUywgVSA9PSA3KSAKYGBgCgpMYSBwcm9iYWJpbGl0w6AgJFAoVSA+IDUpJCDDqAoKYGBge3J9ClByb2IoUywgVSA+IDUpCmBgYAoKQ3JlaWFtbyBkdWUgYWx0cmUgdmFyaWFiaWxpIGNhc3VhbGkgZGVmaW5pdGUgY29tZSBpbCBtYXNzaW1vIGRlbGxlIHRyZSB2YXJpYWJpbGkgb3JpZ2luYXJpZSwgbyBjb21lIGxhIGxvcm8gc29tbWE6CgpgYGB7cn0KUyA8LSBhZGRydihTLCBGVU4gPSBtYXgsIGludmFycyA9IGMoIlgxIiwgIlgyIiwgIlgzIiksIG5hbWUgPSAiViIpClMgPC0gYWRkcnYoUywgRlVOID0gc3VtLCBpbnZhcnMgPSBjKCJYMSIsICJYMiIsICJYMyIpLCBuYW1lID0gIlciKQpgYGAKCkxhIGRpc3RyaWJ1emlvbmUgbWFyZ2luYWxlIGRpICRWJCDDqCAKCmBgYHtyfQptYXJnaW5hbChTLCB2YXJzID0gIlYiKQpgYGAKCkxhIGRpc3RyaWJ1emlvbmUgY29uZ2l1bnRhIGRpICRWJCBlICRXJCDDqAoKYGBge3J9CkogPC0gbWFyZ2luYWwoUywgdmFycyA9IGMoIlYiLCAiVyIpKQpKCmBgYAoKYGBge3J9CnN1bShKJHByb2JzKQpgYGAKClRyb3ZpYW1vLCBhZCBlc2VtcGlvLCBsYSBwcm9iYWJpbGl0w6AgZGVsbCdldmVudG8gJFYgPiAyJCBlICRXIDwgNyQ6CgpgYGB7cn0KSjEgPC0gSiAlPiUgCiAgZHBseXI6OmZpbHRlcigKICAgIFYgPiAyLAogICAgVyA8IDcKICApCnN1bShKMSRwcm9icykKYGBgCgoKIyMgSW5mb3JtYXppb25pIHN1bGxhIHNlc3Npb25lIGRpIGxhdm9ybwoKYGBge3J9CnV0aWxzOjpzZXNzaW9uSW5mbygpCmBgYAoKCg==</div>
 
 
 

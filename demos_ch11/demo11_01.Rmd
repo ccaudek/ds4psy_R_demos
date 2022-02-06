@@ -8,15 +8,25 @@ output:
     code_download: true
 ---
 
-# Esercizi sul valore atteso e sulla varianza
-
 ```{r}
 suppressPackageStartupMessages({
   library("tidyverse")
   library("prob")
   library("distrEx")
 })
+
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  fig.align = "center",
+  fig.pos = "h",
+  comment = "#>",
+  tidy.opts = list(width.cutoff = 70),
+  tidy = "styler"
+)
 ```
+
+# Esercizi sul valore atteso e sulla varianza
 
 ## Esercizio 1
 
