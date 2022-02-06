@@ -110,6 +110,61 @@ J1 <- J %>%
 sum(J1$probs)
 ```
 
+## Esercizio 2
+
+Consideriamo l'esperimento casuale corrispondente al lancio di tre monete equilibrate. Siano
+
+- X = numero di realizzazioni con il risultato testa nei tre lanci,
+- Y = numero di realizzazioni con il risultato testa nel primo lancio.
+
+Si trovi la densità discreta congiunta (o funzione di massa di probabilità congiunta) $p_{XY}$; si trovino le distribuzioni di probabilità marginali $p_X$ e $p_Y$.
+
+```{r}
+S <- tosscoin(3, makespace = TRUE)
+S
+
+S <- S %>% 
+  mutate(
+    t1 = ifelse(toss1 == "H", 1, 0),
+    t2 = ifelse(toss2 == "H", 1, 0),
+    t3 = ifelse(toss3 == "H", 1, 0)
+  )
+S
+```
+
+```{r}
+S <- S %>% 
+  mutate(
+    x = t1 + t2 + t3,
+    y = t1
+  )
+S
+```
+
+```{r}
+freq <- table(S$x, S$y)
+freq
+
+sum(freq)
+
+prop <- freq / sum(freq)
+prop
+
+sum(prop)
+```
+
+```{r}
+# RV Y:
+marg_col <- colSums(prop) 
+marg_col
+```
+
+```{r}
+# RV X:
+marg_row <- rowSums(prop) 
+marg_row
+```
+
 
 ## Informazioni sulla sessione di lavoro
 

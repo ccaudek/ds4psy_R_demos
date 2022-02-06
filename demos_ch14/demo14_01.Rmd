@@ -1,0 +1,117 @@
+---
+title: "Data science per psicologi - demo 14.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("scales")
+  library("bayesplot")
+  library("distrEx")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Verosimiglianza della gaussiana
+
+Consideriamo un campione iid di 30 osservazioni, ciascuna delle quali può essere considerata come una realizzazione di una variabile casuale gaussiana di media comune sconosciuta e di deviazione standard 15.
+
+```{r}
+n <- 30 
+# Population standard deviation. This parameter is assumed to be known.
+true_sigma <- 15 
+```
+
+Generiamo i dati
+
+```{r}
+set.seed(123)
+# Population mean. This is the unknown parameter.
+true_mu <- 100 
+x <- rnorm(n, true_mu, true_sigma)
+```
+
+La media del campione è la stima di massima verosimiglianza:
+
+```{r}
+mean(x)
+```
+
+Costruiamo ora la funzione di verosimiglianza allo scopo di trovare il massimo della funzione.  Lavoriamo con la log-verosimiglianza.
+
+```{r}
+log_likelihood <- function(x, mu, sigma = true_sigma) {
+  sum(dnorm(x, mu, sigma, log = TRUE))
+}
+```
+
+Per creare un grafico, decidiamo di utiliazzare
+
+```{r}
+# number of points of the plot
+nrep <- 1e4
+# Values of the parameter mu for which the LL function will be evaluated.
+mu <- seq(90, 110, length.out = nrep)
+```
+
+Per ciascun possibile valore del parametro $\mu$ calcoliamo il valore della funzione congiunta di verosimiglianza di tutte le 30 osservazioni. Salviamo i risultati nel vettore `ll`.
+
+```{r}
+ll <- rep(NA, nrep)
+for (i in 1:nrep) {
+  ll[i] <- log_likelihood(x, mu[i], true_sigma)
+}
+```
+
+Creaiamo un grafico della funzione di log-verosimiglianza.
+
+```{r}
+ggplot(
+  data.frame(mu, ll),
+  aes(x = mu, y = ll)
+) +
+  geom_line() +
+  vline_at(mean(x), color = "red", linetype="dashed") +
+  labs(
+    y = "Log-verosimiglianza",
+    x = c("Parametro \u03BC")
+  ) 
+```
+
+## Stima di massima verosimiglianza
+
+Troviamo ora la stima di massima verosimiglianza. Tale stima deve coincidere con la media del campione.
+
+```{r}
+mu[which.max(ll)]
+mean(x)
+```
+
+L'approssimazione deriva dal fatto che abbiamo utilizzato un numero finito di punti.
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
