@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Funzioni $\textsf{R}$ per il calcolo delle probabilità 
+# Funzioni R per il calcolo delle probabilità 
 
 Il pacchetto `prob` di $\textsf{R}$ sviluppato da G. Jay Kerns contiene una serie di funzioni che possono essere usate per il calcolo delle probabilità nel caso di spazi campionari finiti. 
 
