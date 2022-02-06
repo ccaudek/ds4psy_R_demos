@@ -1,0 +1,134 @@
+---
+title: "Data science per psicologi - demo 12.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("scales")
+  library("bayesplot")
+  library("distr")
+  library("distrEx")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Esercizi sulla distribuzione binomiale
+
+## Esercizio 1
+
+Consideriamo una famiglia di cinque figli. Ogni bambino può essere femmina o maschio. Per semplicità supponiamo che $P(femmina) = P(maschio) = 1/2$ e che il genere di ciascun bambino sia indipendentemente da quello degli altri bambini. Sia $X$ il numero di bambine. Allora $X \sim \mbox{Bin}(n = 5, p = 1/2)$. Si trovino $P(X = 2)$ e $P(X <= 2)$. Si fornisca una rappresentazione grafica della distribuzione di massa di probabilità e della funzione di distribuzione della variabile casuale $X$.
+
+La distribuzione di massa di probabilità di $X$ è
+
+```{r}
+dbinom(x = 0:5, size = 5, prob = 0.5)
+```
+
+Ovviamente, $P(X = 2)$ è
+
+```{r}
+dbinom(x = 2, size = 5, prob = 0.5)
+```
+
+Per trovare la funzione di distribuzione di $X$ possiamo usare il pacchetto `distr`.
+
+```{r}
+X <- Binom(size = 5, prob = 1/2)
+p(X)(0:5)
+```
+
+Lo stesso risultato si ottiene nel modo seguente:
+
+```{r}
+cumsum(dbinom(x = 0:5, size = 5, prob = 0.5))
+```
+
+Quindi, la probabilità di non più di due femmine, ovvero, $P(X <= 2)$, è  
+
+
+```{r}
+cumsum(dbinom(x = 0:5, size = 5, prob = 0.5))[3]
+```
+
+oppure
+
+```{r}
+p(X)(2)
+```
+
+Le variabili casuali create con le funzioni del pacchetto `distr` possono essere rappresentate graficamente usando la funzione `plot()`:
+
+```{r}
+plot(X)
+```
+
+## Esercizio 2
+
+Calcoliamo il valore atteso e la varianza della variabile casuale $X$ definita nel'esercizio 1.
+
+
+Svolgendo i calcoli, per il valore atteso troviamo:
+
+```{r}
+x <- 0:5
+px <- dbinom(x = 0:5, size = 5, prob = 0.5)
+sum(x * px)
+```
+
+Questo risultato si replica usando le funzioni del pacchetto `distrEx`:
+
+```{r}
+X <- Binom(size = 5, prob = 0.5) 
+E(X)
+```
+
+Calcoliamo ora la varianza:
+
+```{r}
+sum(x^2 * px) - (sum(x * px))^2
+```
+
+oppure
+
+```{r}
+var(X)
+```
+
+La deviazione standard si trova con
+
+```{r}
+sqrt(sum(x^2 * px) - (sum(x * px))^2)
+```
+
+oppure con
+
+```{r}
+sd(X)
+```
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
+

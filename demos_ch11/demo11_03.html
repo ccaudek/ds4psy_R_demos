@@ -494,12 +494,10 @@ bayesplot::color_scheme_set(&quot;gray&quot;)
 set.seed(84735)
 
 knitr::opts_chunk$set(
-  fig.align = &quot;center&quot;,
-  fig.asp = 0.618, # 1 / phi
-  fig.pos = &quot;h&quot;,
-  comment = &quot;#&gt;&quot;,
-  tidy.opts = list(width.cutoff = 70),
-  tidy = &quot;styler&quot;
+  collapse = TRUE,
+  tidy = &#39;styler&#39;,
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
 )</code></pre>
 <div id="la-covarianza-di-due-variabili-aleatorie-discrete" class="section level1">
 <h1>La covarianza di due variabili aleatorie discrete</h1>
@@ -517,45 +515,45 @@ altrimenti.</li>
 <p>Possiamo ottenere un elenco di tutti gli eventi elementari dello
 spazio campionario usando le istruzioni seguenti:</p>
 <pre class="r"><code>S &lt;- rolldie(2, nsides = 6, makespace = TRUE)
-S &lt;- addrv(S, U = X1+X2, V = ifelse(X1 &lt; 4, 1, 0))
-S</code></pre>
-<pre><code>#&gt;    X1 X2  U V      probs
-#&gt; 1   1  1  2 1 0.02777778
-#&gt; 2   2  1  3 1 0.02777778
-#&gt; 3   3  1  4 1 0.02777778
-#&gt; 4   4  1  5 0 0.02777778
-#&gt; 5   5  1  6 0 0.02777778
-#&gt; 6   6  1  7 0 0.02777778
-#&gt; 7   1  2  3 1 0.02777778
-#&gt; 8   2  2  4 1 0.02777778
-#&gt; 9   3  2  5 1 0.02777778
-#&gt; 10  4  2  6 0 0.02777778
-#&gt; 11  5  2  7 0 0.02777778
-#&gt; 12  6  2  8 0 0.02777778
-#&gt; 13  1  3  4 1 0.02777778
-#&gt; 14  2  3  5 1 0.02777778
-#&gt; 15  3  3  6 1 0.02777778
-#&gt; 16  4  3  7 0 0.02777778
-#&gt; 17  5  3  8 0 0.02777778
-#&gt; 18  6  3  9 0 0.02777778
-#&gt; 19  1  4  5 1 0.02777778
-#&gt; 20  2  4  6 1 0.02777778
-#&gt; 21  3  4  7 1 0.02777778
-#&gt; 22  4  4  8 0 0.02777778
-#&gt; 23  5  4  9 0 0.02777778
-#&gt; 24  6  4 10 0 0.02777778
-#&gt; 25  1  5  6 1 0.02777778
-#&gt; 26  2  5  7 1 0.02777778
-#&gt; 27  3  5  8 1 0.02777778
-#&gt; 28  4  5  9 0 0.02777778
-#&gt; 29  5  5 10 0 0.02777778
-#&gt; 30  6  5 11 0 0.02777778
-#&gt; 31  1  6  7 1 0.02777778
-#&gt; 32  2  6  8 1 0.02777778
-#&gt; 33  3  6  9 1 0.02777778
-#&gt; 34  4  6 10 0 0.02777778
-#&gt; 35  5  6 11 0 0.02777778
-#&gt; 36  6  6 12 0 0.02777778</code></pre>
+S &lt;- addrv(S, U = X1 + X2, V = ifelse(X1 &lt; 4, 1, 0))
+S
+##    X1 X2  U V      probs
+## 1   1  1  2 1 0.02777778
+## 2   2  1  3 1 0.02777778
+## 3   3  1  4 1 0.02777778
+## 4   4  1  5 0 0.02777778
+## 5   5  1  6 0 0.02777778
+## 6   6  1  7 0 0.02777778
+## 7   1  2  3 1 0.02777778
+## 8   2  2  4 1 0.02777778
+## 9   3  2  5 1 0.02777778
+## 10  4  2  6 0 0.02777778
+## 11  5  2  7 0 0.02777778
+## 12  6  2  8 0 0.02777778
+## 13  1  3  4 1 0.02777778
+## 14  2  3  5 1 0.02777778
+## 15  3  3  6 1 0.02777778
+## 16  4  3  7 0 0.02777778
+## 17  5  3  8 0 0.02777778
+## 18  6  3  9 0 0.02777778
+## 19  1  4  5 1 0.02777778
+## 20  2  4  6 1 0.02777778
+## 21  3  4  7 1 0.02777778
+## 22  4  4  8 0 0.02777778
+## 23  5  4  9 0 0.02777778
+## 24  6  4 10 0 0.02777778
+## 25  1  5  6 1 0.02777778
+## 26  2  5  7 1 0.02777778
+## 27  3  5  8 1 0.02777778
+## 28  4  5  9 0 0.02777778
+## 29  5  5 10 0 0.02777778
+## 30  6  5 11 0 0.02777778
+## 31  1  6  7 1 0.02777778
+## 32  2  6  8 1 0.02777778
+## 33  3  6  9 1 0.02777778
+## 34  4  6 10 0 0.02777778
+## 35  5  6 11 0 0.02777778
+## 36  6  6 12 0 0.02777778</code></pre>
 <p>Le istruzioni precedenti specificano, in corrispondenza di ogni punto
 dello spazio campionario (ovvero, in ciascuna riga del data.frame che
 viene generato), il valore assunto dalle due variabili aleatorie che
@@ -565,81 +563,81 @@ corretta: questo esperimento casuale produce infatti 6 <span class="math inline"
 possibili. Ma si noti che alcune righe del data.frame si ripetono più
 volte. Possiamo dunque semplificare tale descrizione nel modo
 seguente:</p>
-<pre class="r"><code>UV &lt;- marginal(S, vars = c(&quot;U&quot;, &quot;V&quot;)) 
-UV</code></pre>
-<pre><code>#&gt;     U V      probs
-#&gt; 1   5 0 0.02777778
-#&gt; 2   6 0 0.05555556
-#&gt; 3   7 0 0.08333333
-#&gt; 4   8 0 0.08333333
-#&gt; 5   9 0 0.08333333
-#&gt; 6  10 0 0.08333333
-#&gt; 7  11 0 0.05555556
-#&gt; 8  12 0 0.02777778
-#&gt; 9   2 1 0.02777778
-#&gt; 10  3 1 0.05555556
-#&gt; 11  4 1 0.08333333
-#&gt; 12  5 1 0.08333333
-#&gt; 13  6 1 0.08333333
-#&gt; 14  7 1 0.08333333
-#&gt; 15  8 1 0.05555556
-#&gt; 16  9 1 0.02777778</code></pre>
+<pre class="r"><code>UV &lt;- marginal(S, vars = c(&quot;U&quot;, &quot;V&quot;))
+UV
+##     U V      probs
+## 1   5 0 0.02777778
+## 2   6 0 0.05555556
+## 3   7 0 0.08333333
+## 4   8 0 0.08333333
+## 5   9 0 0.08333333
+## 6  10 0 0.08333333
+## 7  11 0 0.05555556
+## 8  12 0 0.02777778
+## 9   2 1 0.02777778
+## 10  3 1 0.05555556
+## 11  4 1 0.08333333
+## 12  5 1 0.08333333
+## 13  6 1 0.08333333
+## 14  7 1 0.08333333
+## 15  8 1 0.05555556
+## 16  9 1 0.02777778</code></pre>
 <p>L’elenco dei valori che le due variabili aleatorie <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span> possono assumere, insieme alla
 probabilità del loro verificarsi, costituisce la <em>distribuzione di
 probabilità congiunta</em> delle due variabili aleatorie. È anche
 possibile presentare la distribuzione di probabilità congiunta in forma
 tabulare. A tale fine possiamo utilizzare la funzione
 <code>xtabs()</code>:</p>
-<pre class="r"><code>xtabs(round(probs, 3) ~ U + V, data = UV)</code></pre>
-<pre><code>#&gt;     V
-#&gt; U        0     1
-#&gt;   2  0.000 0.028
-#&gt;   3  0.000 0.056
-#&gt;   4  0.000 0.083
-#&gt;   5  0.028 0.083
-#&gt;   6  0.056 0.083
-#&gt;   7  0.083 0.083
-#&gt;   8  0.083 0.056
-#&gt;   9  0.083 0.028
-#&gt;   10 0.083 0.000
-#&gt;   11 0.056 0.000
-#&gt;   12 0.028 0.000</code></pre>
+<pre class="r"><code>xtabs(round(probs, 3) ~ U + V, data = UV)
+##     V
+## U        0     1
+##   2  0.000 0.028
+##   3  0.000 0.056
+##   4  0.000 0.083
+##   5  0.028 0.083
+##   6  0.056 0.083
+##   7  0.083 0.083
+##   8  0.083 0.056
+##   9  0.083 0.028
+##   10 0.083 0.000
+##   11 0.056 0.000
+##   12 0.028 0.000</code></pre>
 <p>Ripetiamo ora il processo precedente chiedendo alla funzione
 <code>marginal()</code> di calcolare le due distribuzioni marginali
 univariate:</p>
 <pre class="r"><code>pu &lt;- marginal(S, vars = &quot;U&quot;)
-pu</code></pre>
-<pre><code>#&gt;     U      probs
-#&gt; 1   2 0.02777778
-#&gt; 2   3 0.05555556
-#&gt; 3   4 0.08333333
-#&gt; 4   5 0.11111111
-#&gt; 5   6 0.13888889
-#&gt; 6   7 0.16666667
-#&gt; 7   8 0.13888889
-#&gt; 8   9 0.11111111
-#&gt; 9  10 0.08333333
-#&gt; 10 11 0.05555556
-#&gt; 11 12 0.02777778</code></pre>
+pu
+##     U      probs
+## 1   2 0.02777778
+## 2   3 0.05555556
+## 3   4 0.08333333
+## 4   5 0.11111111
+## 5   6 0.13888889
+## 6   7 0.16666667
+## 7   8 0.13888889
+## 8   9 0.11111111
+## 9  10 0.08333333
+## 10 11 0.05555556
+## 11 12 0.02777778</code></pre>
 <p>e</p>
 <pre class="r"><code>pv &lt;- marginal(S, vars = &quot;V&quot;)
-pv</code></pre>
-<pre><code>#&gt;   V probs
-#&gt; 1 0   0.5
-#&gt; 2 1   0.5</code></pre>
+pv
+##   V probs
+## 1 0   0.5
+## 2 1   0.5</code></pre>
 <p>In maniera equivalente, lo stesso risultato si trova applicando le
 funzioni <code>rowSums()</code> e <code>colSums()</code> all’oggetto
 creato da <code>xtabs()</code>:</p>
 <pre class="r"><code>temp &lt;- xtabs(probs ~ U + V, data = UV)
-rowSums(temp)</code></pre>
-<pre><code>#&gt;          2          3          4          5          6          7          8 
-#&gt; 0.02777778 0.05555556 0.08333333 0.11111111 0.13888889 0.16666667 0.13888889 
-#&gt;          9         10         11         12 
-#&gt; 0.11111111 0.08333333 0.05555556 0.02777778</code></pre>
+rowSums(temp)
+##          2          3          4          5          6          7          8 
+## 0.02777778 0.05555556 0.08333333 0.11111111 0.13888889 0.16666667 0.13888889 
+##          9         10         11         12 
+## 0.11111111 0.08333333 0.05555556 0.02777778</code></pre>
 <p>e</p>
-<pre class="r"><code>colSums(temp)</code></pre>
-<pre><code>#&gt;   0   1 
-#&gt; 0.5 0.5</code></pre>
+<pre class="r"><code>colSums(temp)
+##   0   1 
+## 0.5 0.5</code></pre>
 <div id="valore-atteso" class="section level2">
 <h2>Valore atteso</h2>
 <p>Calcoliamo ora il valore atteso delle due variabili aleatorie.
@@ -652,13 +650,13 @@ valore della funzione di massa di probabilità. Mediante la funzione
 <code>U</code>:</p>
 <pre class="r"><code>U &lt;- DiscreteDistribution(supp = pu$U, prob = pu$probs)
 mu_u &lt;- E(U)
-mu_u</code></pre>
-<pre><code>#&gt; [1] 7</code></pre>
+mu_u
+## [1] 7</code></pre>
 <p>Inoltre, il valore atteso di <code>V</code> è:</p>
 <pre class="r"><code>V &lt;- DiscreteDistribution(supp = pv$V, prob = pv$probs)
 mu_v &lt;- E(V)
-mu_v</code></pre>
-<pre><code>#&gt; [1] 0.5</code></pre>
+mu_v
+## [1] 0.5</code></pre>
 </div>
 <div id="covarianza" class="section level2">
 <h2>Covarianza</h2>
@@ -670,15 +668,15 @@ covarianza tra <span class="math inline">\(U\)</span> e <span class="math inline
 \]</span></p>
 <p>può essere implementata in <code>R</code> nel modo seguente:</p>
 <pre class="r"><code>s_uv &lt;- sum((UV$U - mu_u) * (UV$V - mu_v) * UV$probs)
-s_uv</code></pre>
-<pre><code>#&gt; [1] -0.75</code></pre>
+s_uv
+## [1] -0.75</code></pre>
 <p>Lo stesso risultato si ottiene usando la formula alternativa per il
 calcolo della covarianza:</p>
 <p><span class="math display">\[
 \sigma_{xy} = \mathbb{E}(xy) -\mathbb{E}(x)\mathbb{E}(y)
 \]</span> ovvero</p>
-<pre class="r"><code>sum((UV$U * UV$V) * UV$probs) - mu_u * mu_v</code></pre>
-<pre><code>#&gt; [1] -0.75</code></pre>
+<pre class="r"><code>sum((UV$U * UV$V) * UV$probs) - mu_u * mu_v
+## [1] -0.75</code></pre>
 </div>
 <div id="correlazione" class="section level2">
 <h2>Correlazione</h2>
@@ -691,69 +689,69 @@ correlazione infatti è una covarianza standardizzata:</p>
 Iniziamo dunque a calcolare le varianze delle due variabili aleatorie
 <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span>:</p>
 <pre class="r"><code>v_u &lt;- sum((pu$U - mu_u)^2 * pu$probs)
-v_u</code></pre>
-<pre><code>#&gt; [1] 5.833333</code></pre>
-<pre class="r"><code>v_v &lt;- sum((pv$V - mu_v)^2 * pv$probs)
-v_v</code></pre>
-<pre><code>#&gt; [1] 0.25</code></pre>
+v_u
+## [1] 5.833333
+v_v &lt;- sum((pv$V - mu_v)^2 * pv$probs)
+v_v
+## [1] 0.25</code></pre>
 <p>oppure, in maniera equivalente</p>
-<pre class="r"><code>var(U)</code></pre>
-<pre><code>#&gt; [1] 5.833333</code></pre>
-<pre class="r"><code>var(V)</code></pre>
-<pre><code>#&gt; [1] 0.25</code></pre>
+<pre class="r"><code>var(U)
+## [1] 5.833333
+var(V)
+## [1] 0.25</code></pre>
 <p>Abbiamo ora tutte le informazioni necessarie per il calcolo della
 correlazione:</p>
-<pre class="r"><code>s_uv / sqrt(var(U) * var(V))</code></pre>
-<pre><code>#&gt; [1] -0.621059</code></pre>
+<pre class="r"><code>s_uv / sqrt(var(U) * var(V))
+## [1] -0.621059</code></pre>
 </div>
 <div id="informazioni-sulla-sessione-di-lavoro" class="section level2">
 <h2>Informazioni sulla sessione di lavoro</h2>
-<pre class="r"><code>utils::sessionInfo()</code></pre>
-<pre><code>#&gt; R version 4.1.2 (2021-11-01)
-#&gt; Platform: x86_64-apple-darwin17.0 (64-bit)
-#&gt; Running under: macOS Big Sur 10.16
-#&gt; 
-#&gt; Matrix products: default
-#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
-#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
-#&gt; 
-#&gt; locale:
-#&gt; [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8
-#&gt; 
-#&gt; attached base packages:
-#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
-#&gt; 
-#&gt; other attached packages:
-#&gt;  [1] distrEx_2.8.0         distr_2.8.0           sfsmisc_1.1-12       
-#&gt;  [4] startupmsg_0.9.6      prob_1.0-1            fAsianOptions_3042.82
-#&gt;  [7] fOptions_3042.86      fBasics_3042.89.1     timeSeries_3062.100  
-#&gt; [10] timeDate_3043.102     combinat_0.0-8        bayesplot_1.8.1      
-#&gt; [13] scales_1.1.1          forcats_0.5.1         stringr_1.4.0        
-#&gt; [16] dplyr_1.0.7           purrr_0.3.4           readr_2.1.2          
-#&gt; [19] tidyr_1.2.0           tibble_3.1.6          ggplot2_3.3.5        
-#&gt; [22] tidyverse_1.3.1       here_1.0.1           
-#&gt; 
-#&gt; loaded via a namespace (and not attached):
-#&gt;  [1] httr_1.4.2        sass_0.4.0        jsonlite_1.7.3    R.utils_2.11.0   
-#&gt;  [5] modelr_0.1.8      bslib_0.3.1       assertthat_0.2.1  cellranger_1.1.0 
-#&gt;  [9] yaml_2.2.2        pillar_1.7.0      backports_1.4.1   glue_1.6.1       
-#&gt; [13] digest_0.6.29     rvest_1.0.2       colorspace_2.0-2  R.oo_1.24.0      
-#&gt; [17] htmltools_0.5.2   plyr_1.8.6        pkgconfig_2.0.3   broom_0.7.12     
-#&gt; [21] haven_2.4.3       tzdb_0.2.0        styler_1.6.2      generics_0.1.2   
-#&gt; [25] spatial_7.3-15    ellipsis_0.3.2    withr_2.4.3       cli_3.1.1        
-#&gt; [29] magrittr_2.0.2    crayon_1.4.2      readxl_1.3.1      evaluate_0.14    
-#&gt; [33] R.methodsS3_1.8.1 fs_1.5.2          fansi_1.0.2       R.cache_0.15.0   
-#&gt; [37] MASS_7.3-55       xml2_1.3.3        tools_4.1.2       hms_1.1.1        
-#&gt; [41] lifecycle_1.0.1   munsell_0.5.0     reprex_2.0.1      compiler_4.1.2   
-#&gt; [45] jquerylib_0.1.4   rlang_1.0.1       grid_4.1.2        ggridges_0.5.3   
-#&gt; [49] rstudioapi_0.13   rmarkdown_2.11    gtable_0.3.0      DBI_1.1.2        
-#&gt; [53] R6_2.5.1          lubridate_1.8.0   knitr_1.37        fastmap_1.1.0    
-#&gt; [57] utf8_1.2.2        rprojroot_2.0.2   stringi_1.7.6     Rcpp_1.0.8       
-#&gt; [61] vctrs_0.3.8       dbplyr_2.1.1      tidyselect_1.1.1  xfun_0.29</code></pre>
+<pre class="r"><code>utils::sessionInfo()
+## R version 4.1.2 (2021-11-01)
+## Platform: x86_64-apple-darwin17.0 (64-bit)
+## Running under: macOS Big Sur 10.16
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] distrEx_2.8.0         distr_2.8.0           sfsmisc_1.1-12       
+##  [4] startupmsg_0.9.6      prob_1.0-1            fAsianOptions_3042.82
+##  [7] fOptions_3042.86      fBasics_3042.89.1     timeSeries_3062.100  
+## [10] timeDate_3043.102     combinat_0.0-8        bayesplot_1.8.1      
+## [13] scales_1.1.1          forcats_0.5.1         stringr_1.4.0        
+## [16] dplyr_1.0.7           purrr_0.3.4           readr_2.1.2          
+## [19] tidyr_1.2.0           tibble_3.1.6          ggplot2_3.3.5        
+## [22] tidyverse_1.3.1       here_1.0.1           
+## 
+## loaded via a namespace (and not attached):
+##  [1] httr_1.4.2        sass_0.4.0        jsonlite_1.7.3    R.utils_2.11.0   
+##  [5] modelr_0.1.8      bslib_0.3.1       assertthat_0.2.1  cellranger_1.1.0 
+##  [9] yaml_2.2.2        pillar_1.7.0      backports_1.4.1   glue_1.6.1       
+## [13] digest_0.6.29     rvest_1.0.2       colorspace_2.0-2  R.oo_1.24.0      
+## [17] htmltools_0.5.2   plyr_1.8.6        pkgconfig_2.0.3   broom_0.7.12     
+## [21] haven_2.4.3       tzdb_0.2.0        styler_1.6.2      generics_0.1.2   
+## [25] spatial_7.3-15    ellipsis_0.3.2    withr_2.4.3       cli_3.1.1        
+## [29] magrittr_2.0.2    crayon_1.4.2      readxl_1.3.1      evaluate_0.14    
+## [33] R.methodsS3_1.8.1 fs_1.5.2          fansi_1.0.2       R.cache_0.15.0   
+## [37] MASS_7.3-55       xml2_1.3.3        tools_4.1.2       hms_1.1.1        
+## [41] lifecycle_1.0.1   munsell_0.5.0     reprex_2.0.1      compiler_4.1.2   
+## [45] jquerylib_0.1.4   rlang_1.0.1       grid_4.1.2        ggridges_0.5.3   
+## [49] rstudioapi_0.13   rmarkdown_2.11    gtable_0.3.0      DBI_1.1.2        
+## [53] R6_2.5.1          lubridate_1.8.0   knitr_1.37        fastmap_1.1.0    
+## [57] utf8_1.2.2        rprojroot_2.0.2   stringi_1.7.6     Rcpp_1.0.8       
+## [61] vctrs_0.3.8       dbplyr_2.1.1      tidyselect_1.1.1  xfun_0.29</code></pre>
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDExLjAyIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgiaGVyZSIpCiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJzY2FsZXMiKQogIGxpYnJhcnkoImJheWVzcGxvdCIpCiAgbGlicmFyeSgicHJvYiIpCiAgbGlicmFyeSgiZGlzdHJFeCIpCn0pCgp0aGVtZV9zZXQoYmF5ZXNwbG90Ojp0aGVtZV9kZWZhdWx0KGJhc2Vfc2l6ZSA9IDEyKSkKYmF5ZXNwbG90Ojpjb2xvcl9zY2hlbWVfc2V0KCJncmF5IikKc2V0LnNlZWQoODQ3MzUpCgprbml0cjo6b3B0c19jaHVuayRzZXQoCiAgZmlnLmFsaWduID0gImNlbnRlciIsCiAgZmlnLmFzcCA9IDAuNjE4LCAjIDEgLyBwaGkKICBmaWcucG9zID0gImgiLAogIGNvbW1lbnQgPSAiIz4iLAogIHRpZHkub3B0cyA9IGxpc3Qod2lkdGguY3V0b2ZmID0gNzApLAogIHRpZHkgPSAic3R5bGVyIgopCmBgYAoKIyBMYSBjb3ZhcmlhbnphIGRpIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGRpc2NyZXRlCgpQb25pYW1vY2kgaWwgcHJvYmxlbWEgZGkgY2FsY29sYXJlIGxhIGNvdmFyaWFuemEgZSBsYSBjb3JyZWxhemlvbmUgZGkgZHVlIHZhcmlhYmlsaSBhbGVhdG9yaWUgZGlzY3JldGUgdXRpbGl6emFuZG8gbCdpbmZvcm1hemlvbmUgZm9ybml0YSBkYWxsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGEuICAKCkNvbnNpZGVyaWFtbyBsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgY2hlIGNvcnJpc3BvbmRlIGFsIGxhbmNpbyBkaSBkdWUgZGFkaSBiaWxhbmNpYXRpLiBDcmVpYW1vIGxvIHNwYXppbyBjYW1waW9uYXJpbyBkaSBxdWVzdG8gZXNwZXJpbWVudG8gY2FzdWFsZSBlIGRlZmluaWFtbyBzdSBkaSBlc3NvIGxlIHNlZ3VlbnRpIHZhcmlhYmlsaSBhbGVhdG9yaWU6CgotIFU6IHNvbW1hIGRlaSBwdW50aSBkZWkgZHVlIGRhZGksCi0gVjogMSBzZSBpIHB1bnRpIGRlbCBsYW5jaW8gZGVsIHByaW1vIGRhZG8gc29ubyBtaW5vcmkgZGkgNCwgMCBhbHRyaW1lbnRpLgoKUG9zc2lhbW8gb3R0ZW5lcmUgdW4gZWxlbmNvIGRpIHR1dHRpIGdsaSBldmVudGkgZWxlbWVudGFyaSBkZWxsbyBzcGF6aW8gY2FtcGlvbmFyaW8gdXNhbmRvIGxlIGlzdHJ1emlvbmkgc2VndWVudGk6CgpgYGB7cn0KUyA8LSByb2xsZGllKDIsIG5zaWRlcyA9IDYsIG1ha2VzcGFjZSA9IFRSVUUpClMgPC0gYWRkcnYoUywgVSA9IFgxK1gyLCBWID0gaWZlbHNlKFgxIDwgNCwgMSwgMCkpClMKYGBgCgpMZSBpc3RydXppb25pIHByZWNlZGVudGkgc3BlY2lmaWNhbm8sIGluIGNvcnJpc3BvbmRlbnphIGRpIG9nbmkgcHVudG8gZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIChvdnZlcm8sIGluIGNpYXNjdW5hIHJpZ2EgZGVsIGRhdGEuZnJhbWUgY2hlIHZpZW5lIGdlbmVyYXRvKSwgaWwgdmFsb3JlIGFzc3VudG8gZGFsbGUgZHVlIHZhcmlhYmlsaSBhbGVhdG9yaWUgY2hlIHNvbm8gc3RhdGUgZGVmaW5pdGUuCgpMYSBkZXNjcml6aW9uZSBkZWxsbyBzcGF6aW8gY2FtcGlvbmFyaW8gZm9ybml0YSBkYSBgUmAgw6ggY29ycmV0dGE6IHF1ZXN0byBlc3BlcmltZW50byBjYXN1YWxlIHByb2R1Y2UgaW5mYXR0aSA2ICRcdGltZXMkIDYgZXNpdGkgKGV2ZW50aSBlbGVtZW50YXJpKSBwb3NzaWJpbGkuIE1hIHNpIG5vdGkgY2hlIGFsY3VuZSByaWdoZSBkZWwgZGF0YS5mcmFtZSBzaSByaXBldG9ubyBwacO5IHZvbHRlLiBQb3NzaWFtbyBkdW5xdWUgc2VtcGxpZmljYXJlIHRhbGUgZGVzY3JpemlvbmUgbmVsIG1vZG8gc2VndWVudGU6CgpgYGB7cn0KVVYgPC0gbWFyZ2luYWwoUywgdmFycyA9IGMoIlUiLCAiViIpKSAKVVYKYGBgCgpMJ2VsZW5jbyBkZWkgdmFsb3JpIGNoZSBsZSBkdWUgdmFyaWFiaWxpIGFsZWF0b3JpZSAkVSQgZSAkViQgcG9zc29ubyBhc3N1bWVyZSwgaW5zaWVtZSBhbGxhIHByb2JhYmlsaXTDoCBkZWwgbG9ybyB2ZXJpZmljYXJzaSwgY29zdGl0dWlzY2UgbGEgX2Rpc3RyaWJ1emlvbmUgZGkgcHJvYmFiaWxpdMOgIGNvbmdpdW50YV8gZGVsbGUgZHVlIHZhcmlhYmlsaSBhbGVhdG9yaWUuIMOIIGFuY2hlIHBvc3NpYmlsZSBwcmVzZW50YXJlIGxhIGRpc3RyaWJ1emlvbmUgZGkgcHJvYmFiaWxpdMOgIGNvbmdpdW50YSBpbiBmb3JtYSB0YWJ1bGFyZS4gQSB0YWxlIGZpbmUgcG9zc2lhbW8gdXRpbGl6emFyZSBsYSBmdW56aW9uZSBgeHRhYnMoKWA6CgpgYGB7cn0KeHRhYnMocm91bmQocHJvYnMsIDMpIH4gVSArIFYsIGRhdGEgPSBVVikKYGBgCgpSaXBldGlhbW8gb3JhIGlsIHByb2Nlc3NvIHByZWNlZGVudGUgY2hpZWRlbmRvIGFsbGEgZnVuemlvbmUgYG1hcmdpbmFsKClgIGRpIGNhbGNvbGFyZSBsZSBkdWUgZGlzdHJpYnV6aW9uaSBtYXJnaW5hbGkgdW5pdmFyaWF0ZToKCmBgYHtyfQpwdSA8LSBtYXJnaW5hbChTLCB2YXJzID0gIlUiKQpwdQpgYGAKCmUKCmBgYHtyfQpwdiA8LSBtYXJnaW5hbChTLCB2YXJzID0gIlYiKQpwdgpgYGAKCkluIG1hbmllcmEgZXF1aXZhbGVudGUsIGxvIHN0ZXNzbyByaXN1bHRhdG8gc2kgdHJvdmEgYXBwbGljYW5kbyBsZSBmdW56aW9uaSBgcm93U3VtcygpYCBlIGBjb2xTdW1zKClgIGFsbCdvZ2dldHRvIGNyZWF0byBkYSBgeHRhYnMoKWA6CgpgYGB7cn0KdGVtcCA8LSB4dGFicyhwcm9icyB+IFUgKyBWLCBkYXRhID0gVVYpCnJvd1N1bXModGVtcCkKYGBgCgplCgpgYGB7cn0KY29sU3Vtcyh0ZW1wKQpgYGAKCiMjIFZhbG9yZSBhdHRlc28KCkNhbGNvbGlhbW8gb3JhIGlsIHZhbG9yZSBhdHRlc28gZGVsbGUgZHVlIHZhcmlhYmlsaSBhbGVhdG9yaWUuIFV0aWxpenppYW1vIGxhIGZ1bnppb25lIGBEaXNjcmV0ZURpc3RyaWJ1dGlvbigpYC4gSWwgcHJpbW8gYXJnb21lbnRvIHJpY2hpZWRlIHVuIHZldHRvcmUgY2hlIHNwZWNpZmljYSBpbCBzdXBwb3J0byBkZWxsYSB2YXJpYWJpbGUgY2FzdWFsZSBkaXNjcmV0YS4gSWwgc2Vjb25kbyBhcmdvbWVudG8gw6ggdW4gdmV0dG9yZSBjaGUsIHBlciBjaWFzdW4gdmFsb3JlIGRlbGxhIHZhcmlhYmlsZSBjYXN1YWxlIGRpc2NyZXRhLCBzcGVjaWZpY2EgaWwgY29ycmlzcG9uZGVudGUgdmFsb3JlIGRlbGxhIGZ1bnppb25lIGRpIG1hc3NhIGRpIHByb2JhYmlsaXTDoC4gTWVkaWFudGUgbGEgZnVuemlvbmUgYERpc2NyZXRlRGlzdHJpYnV0aW9uKClgIG90dGVuaWFtbyBpbCB2YWxvcmUgYXR0ZXNvIGRpIGBVYDoKCmBgYHtyfQpVIDwtIERpc2NyZXRlRGlzdHJpYnV0aW9uKHN1cHAgPSBwdSRVLCBwcm9iID0gcHUkcHJvYnMpCm11X3UgPC0gRShVKQptdV91CmBgYAoKSW5vbHRyZSwgaWwgdmFsb3JlIGF0dGVzbyBkaSBgVmAgw6g6CgpgYGB7cn0KViA8LSBEaXNjcmV0ZURpc3RyaWJ1dGlvbihzdXBwID0gcHYkViwgcHJvYiA9IHB2JHByb2JzKQptdV92IDwtIEUoVikKbXVfdgpgYGAKCgojIyBDb3ZhcmlhbnphCgpVdGlsaXp6YW5kbyBsZSBpbmZvcm1hemlvbmkgcHJlY2VkZW50aSBwb3NzaWFtbyBjYWxjb2xhcmUgbGEgY292YXJpYW56YSB0cmEgJFUkIGUgJFYkLiBMYSBmb3JtdWxhIGRlbGxhIGNvdmFyaWFuemEKCiQkClxzaWdtYV97eHl9ID0gXHN1bV9pIFxiaWcoeF9pIC0gXG1hdGhiYntFfSh4KVxiaWcpXGJpZyh5X2kgLSBcbWF0aGJie0V9KHkpXGJpZykgXGNkb3QgcF9pKHgseSkKJCQKCnB1w7IgZXNzZXJlIGltcGxlbWVudGF0YSBpbiBgUmAgbmVsIG1vZG8gc2VndWVudGU6CgpgYGB7cn0Kc191diA8LSBzdW0oKFVWJFUgLSBtdV91KSAqIChVViRWIC0gbXVfdikgKiBVViRwcm9icykKc191dgpgYGAKCkxvIHN0ZXNzbyByaXN1bHRhdG8gc2kgb3R0aWVuZSB1c2FuZG8gbGEgZm9ybXVsYSBhbHRlcm5hdGl2YSBwZXIgaWwgY2FsY29sbyBkZWxsYSBjb3ZhcmlhbnphOgoKJCQKXHNpZ21hX3t4eX0gPSBcbWF0aGJie0V9KHh5KSAtXG1hdGhiYntFfSh4KVxtYXRoYmJ7RX0oeSkKJCQKb3Z2ZXJvIAoKYGBge3J9CnN1bSgoVVYkVSAqIFVWJFYpICogVVYkcHJvYnMpIC0gbXVfdSAqIG11X3YKYGBgCgoKIyMgQ29ycmVsYXppb25lCgpDb25vc2NlbmRvIGxhIGNvdmFyaWFuemEgw6ggcG9zc2liaWxlIGNhbGNvbGFyZSBsYSBjb3JyZWxhemlvbmUuIExhIGNvcnJlbGF6aW9uZSBpbmZhdHRpIMOoIHVuYSBjb3ZhcmlhbnphIHN0YW5kYXJkaXp6YXRhOgoKJCQKXHJob197eHl9ID0gXGZyYWN7XHNpZ21hX3t4eX19e1xzaWdtYV94XHNpZ21hX3l9CiQkCgpQZXIgc3RhbmRhcmRpenphcmUgZG9iYmlhbW8gZGl2aWRlcmUgcGVyIGxlIGR1ZSBkZXZpYXppb25pIHN0YW5kYXJkLiBJbml6aWFtbyBkdW5xdWUgYSBjYWxjb2xhcmUgbGUgdmFyaWFuemUgZGVsbGUgZHVlIHZhcmlhYmlsaSBhbGVhdG9yaWUgJFUkIGUgJFYkOgoKYGBge3J9CnZfdSA8LSBzdW0oKHB1JFUgLSBtdV91KV4yICogcHUkcHJvYnMpCnZfdQp2X3YgPC0gc3VtKChwdiRWIC0gbXVfdileMiAqIHB2JHByb2JzKQp2X3YKYGBgCgpvcHB1cmUsIGluIG1hbmllcmEgZXF1aXZhbGVudGUKCmBgYHtyfQp2YXIoVSkKdmFyKFYpCmBgYAoKQWJiaWFtbyBvcmEgdHV0dGUgbGUgaW5mb3JtYXppb25pIG5lY2Vzc2FyaWUgcGVyIGlsIGNhbGNvbG8gZGVsbGEgY29ycmVsYXppb25lOgoKYGBge3J9CnNfdXYgLyBzcXJ0KHZhcihVKSAqIHZhcihWKSkKYGBgCgojIyBJbmZvcm1hemlvbmkgc3VsbGEgc2Vzc2lvbmUgZGkgbGF2b3JvCgpgYGB7cn0KdXRpbHM6OnNlc3Npb25JbmZvKCkKYGBgCgoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDExLjAyIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgiaGVyZSIpCiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJzY2FsZXMiKQogIGxpYnJhcnkoImJheWVzcGxvdCIpCiAgbGlicmFyeSgicHJvYiIpCiAgbGlicmFyeSgiZGlzdHJFeCIpCn0pCgp0aGVtZV9zZXQoYmF5ZXNwbG90Ojp0aGVtZV9kZWZhdWx0KGJhc2Vfc2l6ZSA9IDEyKSkKYmF5ZXNwbG90Ojpjb2xvcl9zY2hlbWVfc2V0KCJncmF5IikKc2V0LnNlZWQoODQ3MzUpCgprbml0cjo6b3B0c19jaHVuayRzZXQoCiAgY29sbGFwc2UgPSBUUlVFLAogIHRpZHkgPSAnc3R5bGVyJywKICBmaWcud2lkdGggPSA2LAogIGZpZy5hc3AgPSAwLjYxOCAjIDEgLyBwaGkKKQpgYGAKCiMgTGEgY292YXJpYW56YSBkaSBkdWUgdmFyaWFiaWxpIGFsZWF0b3JpZSBkaXNjcmV0ZQoKUG9uaWFtb2NpIGlsIHByb2JsZW1hIGRpIGNhbGNvbGFyZSBsYSBjb3ZhcmlhbnphIGUgbGEgY29ycmVsYXppb25lIGRpIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGRpc2NyZXRlIHV0aWxpenphbmRvIGwnaW5mb3JtYXppb25lIGZvcm5pdGEgZGFsbGEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AgY29uZ2l1bnRhLiAgCgpDb25zaWRlcmlhbW8gbCdlc3BlcmltZW50byBjYXN1YWxlIGNoZSBjb3JyaXNwb25kZSBhbCBsYW5jaW8gZGkgZHVlIGRhZGkgYmlsYW5jaWF0aS4gQ3JlaWFtbyBsbyBzcGF6aW8gY2FtcGlvbmFyaW8gZGkgcXVlc3RvIGVzcGVyaW1lbnRvIGNhc3VhbGUgZSBkZWZpbmlhbW8gc3UgZGkgZXNzbyBsZSBzZWd1ZW50aSB2YXJpYWJpbGkgYWxlYXRvcmllOgoKLSBVOiBzb21tYSBkZWkgcHVudGkgZGVpIGR1ZSBkYWRpLAotIFY6IDEgc2UgaSBwdW50aSBkZWwgbGFuY2lvIGRlbCBwcmltbyBkYWRvIHNvbm8gbWlub3JpIGRpIDQsIDAgYWx0cmltZW50aS4KClBvc3NpYW1vIG90dGVuZXJlIHVuIGVsZW5jbyBkaSB0dXR0aSBnbGkgZXZlbnRpIGVsZW1lbnRhcmkgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIHVzYW5kbyBsZSBpc3RydXppb25pIHNlZ3VlbnRpOgoKYGBge3J9ClMgPC0gcm9sbGRpZSgyLCBuc2lkZXMgPSA2LCBtYWtlc3BhY2UgPSBUUlVFKQpTIDwtIGFkZHJ2KFMsIFUgPSBYMStYMiwgViA9IGlmZWxzZShYMSA8IDQsIDEsIDApKQpTCmBgYAoKTGUgaXN0cnV6aW9uaSBwcmVjZWRlbnRpIHNwZWNpZmljYW5vLCBpbiBjb3JyaXNwb25kZW56YSBkaSBvZ25pIHB1bnRvIGRlbGxvIHNwYXppbyBjYW1waW9uYXJpbyAob3Z2ZXJvLCBpbiBjaWFzY3VuYSByaWdhIGRlbCBkYXRhLmZyYW1lIGNoZSB2aWVuZSBnZW5lcmF0byksIGlsIHZhbG9yZSBhc3N1bnRvIGRhbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGNoZSBzb25vIHN0YXRlIGRlZmluaXRlLgoKTGEgZGVzY3JpemlvbmUgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIGZvcm5pdGEgZGEgYFJgIMOoIGNvcnJldHRhOiBxdWVzdG8gZXNwZXJpbWVudG8gY2FzdWFsZSBwcm9kdWNlIGluZmF0dGkgNiAkXHRpbWVzJCA2IGVzaXRpIChldmVudGkgZWxlbWVudGFyaSkgcG9zc2liaWxpLiBNYSBzaSBub3RpIGNoZSBhbGN1bmUgcmlnaGUgZGVsIGRhdGEuZnJhbWUgc2kgcmlwZXRvbm8gcGnDuSB2b2x0ZS4gUG9zc2lhbW8gZHVucXVlIHNlbXBsaWZpY2FyZSB0YWxlIGRlc2NyaXppb25lIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9ClVWIDwtIG1hcmdpbmFsKFMsIHZhcnMgPSBjKCJVIiwgIlYiKSkgClVWCmBgYAoKTCdlbGVuY28gZGVpIHZhbG9yaSBjaGUgbGUgZHVlIHZhcmlhYmlsaSBhbGVhdG9yaWUgJFUkIGUgJFYkIHBvc3Nvbm8gYXNzdW1lcmUsIGluc2llbWUgYWxsYSBwcm9iYWJpbGl0w6AgZGVsIGxvcm8gdmVyaWZpY2Fyc2ksIGNvc3RpdHVpc2NlIGxhIF9kaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGFfIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllLiDDiCBhbmNoZSBwb3NzaWJpbGUgcHJlc2VudGFyZSBsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGEgaW4gZm9ybWEgdGFidWxhcmUuIEEgdGFsZSBmaW5lIHBvc3NpYW1vIHV0aWxpenphcmUgbGEgZnVuemlvbmUgYHh0YWJzKClgOgoKYGBge3J9Cnh0YWJzKHJvdW5kKHByb2JzLCAzKSB+IFUgKyBWLCBkYXRhID0gVVYpCmBgYAoKUmlwZXRpYW1vIG9yYSBpbCBwcm9jZXNzbyBwcmVjZWRlbnRlIGNoaWVkZW5kbyBhbGxhIGZ1bnppb25lIGBtYXJnaW5hbCgpYCBkaSBjYWxjb2xhcmUgbGUgZHVlIGRpc3RyaWJ1emlvbmkgbWFyZ2luYWxpIHVuaXZhcmlhdGU6CgpgYGB7cn0KcHUgPC0gbWFyZ2luYWwoUywgdmFycyA9ICJVIikKcHUKYGBgCgplCgpgYGB7cn0KcHYgPC0gbWFyZ2luYWwoUywgdmFycyA9ICJWIikKcHYKYGBgCgpJbiBtYW5pZXJhIGVxdWl2YWxlbnRlLCBsbyBzdGVzc28gcmlzdWx0YXRvIHNpIHRyb3ZhIGFwcGxpY2FuZG8gbGUgZnVuemlvbmkgYHJvd1N1bXMoKWAgZSBgY29sU3VtcygpYCBhbGwnb2dnZXR0byBjcmVhdG8gZGEgYHh0YWJzKClgOgoKYGBge3J9CnRlbXAgPC0geHRhYnMocHJvYnMgfiBVICsgViwgZGF0YSA9IFVWKQpyb3dTdW1zKHRlbXApCmBgYAoKZQoKYGBge3J9CmNvbFN1bXModGVtcCkKYGBgCgojIyBWYWxvcmUgYXR0ZXNvCgpDYWxjb2xpYW1vIG9yYSBpbCB2YWxvcmUgYXR0ZXNvIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllLiBVdGlsaXp6aWFtbyBsYSBmdW56aW9uZSBgRGlzY3JldGVEaXN0cmlidXRpb24oKWAuIElsIHByaW1vIGFyZ29tZW50byByaWNoaWVkZSB1biB2ZXR0b3JlIGNoZSBzcGVjaWZpY2EgaWwgc3VwcG9ydG8gZGVsbGEgdmFyaWFiaWxlIGNhc3VhbGUgZGlzY3JldGEuIElsIHNlY29uZG8gYXJnb21lbnRvIMOoIHVuIHZldHRvcmUgY2hlLCBwZXIgY2lhc3VuIHZhbG9yZSBkZWxsYSB2YXJpYWJpbGUgY2FzdWFsZSBkaXNjcmV0YSwgc3BlY2lmaWNhIGlsIGNvcnJpc3BvbmRlbnRlIHZhbG9yZSBkZWxsYSBmdW56aW9uZSBkaSBtYXNzYSBkaSBwcm9iYWJpbGl0w6AuIE1lZGlhbnRlIGxhIGZ1bnppb25lIGBEaXNjcmV0ZURpc3RyaWJ1dGlvbigpYCBvdHRlbmlhbW8gaWwgdmFsb3JlIGF0dGVzbyBkaSBgVWA6CgpgYGB7cn0KVSA8LSBEaXNjcmV0ZURpc3RyaWJ1dGlvbihzdXBwID0gcHUkVSwgcHJvYiA9IHB1JHByb2JzKQptdV91IDwtIEUoVSkKbXVfdQpgYGAKCklub2x0cmUsIGlsIHZhbG9yZSBhdHRlc28gZGkgYFZgIMOoOgoKYGBge3J9ClYgPC0gRGlzY3JldGVEaXN0cmlidXRpb24oc3VwcCA9IHB2JFYsIHByb2IgPSBwdiRwcm9icykKbXVfdiA8LSBFKFYpCm11X3YKYGBgCgoKIyMgQ292YXJpYW56YQoKVXRpbGl6emFuZG8gbGUgaW5mb3JtYXppb25pIHByZWNlZGVudGkgcG9zc2lhbW8gY2FsY29sYXJlIGxhIGNvdmFyaWFuemEgdHJhICRVJCBlICRWJC4gTGEgZm9ybXVsYSBkZWxsYSBjb3ZhcmlhbnphCgokJApcc2lnbWFfe3h5fSA9IFxzdW1faSBcYmlnKHhfaSAtIFxtYXRoYmJ7RX0oeClcYmlnKVxiaWcoeV9pIC0gXG1hdGhiYntFfSh5KVxiaWcpIFxjZG90IHBfaSh4LHkpCiQkCgpwdcOyIGVzc2VyZSBpbXBsZW1lbnRhdGEgaW4gYFJgIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9CnNfdXYgPC0gc3VtKChVViRVIC0gbXVfdSkgKiAoVVYkViAtIG11X3YpICogVVYkcHJvYnMpCnNfdXYKYGBgCgpMbyBzdGVzc28gcmlzdWx0YXRvIHNpIG90dGllbmUgdXNhbmRvIGxhIGZvcm11bGEgYWx0ZXJuYXRpdmEgcGVyIGlsIGNhbGNvbG8gZGVsbGEgY292YXJpYW56YToKCiQkClxzaWdtYV97eHl9ID0gXG1hdGhiYntFfSh4eSkgLVxtYXRoYmJ7RX0oeClcbWF0aGJie0V9KHkpCiQkCm92dmVybyAKCmBgYHtyfQpzdW0oKFVWJFUgKiBVViRWKSAqIFVWJHByb2JzKSAtIG11X3UgKiBtdV92CmBgYAoKCiMjIENvcnJlbGF6aW9uZQoKQ29ub3NjZW5kbyBsYSBjb3ZhcmlhbnphIMOoIHBvc3NpYmlsZSBjYWxjb2xhcmUgbGEgY29ycmVsYXppb25lLiBMYSBjb3JyZWxhemlvbmUgaW5mYXR0aSDDqCB1bmEgY292YXJpYW56YSBzdGFuZGFyZGl6emF0YToKCiQkClxyaG9fe3h5fSA9IFxmcmFje1xzaWdtYV97eHl9fXtcc2lnbWFfeFxzaWdtYV95fQokJAoKUGVyIHN0YW5kYXJkaXp6YXJlIGRvYmJpYW1vIGRpdmlkZXJlIHBlciBsZSBkdWUgZGV2aWF6aW9uaSBzdGFuZGFyZC4gSW5pemlhbW8gZHVucXVlIGEgY2FsY29sYXJlIGxlIHZhcmlhbnplIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllICRVJCBlICRWJDoKCmBgYHtyfQp2X3UgPC0gc3VtKChwdSRVIC0gbXVfdSleMiAqIHB1JHByb2JzKQp2X3UKdl92IDwtIHN1bSgocHYkViAtIG11X3YpXjIgKiBwdiRwcm9icykKdl92CmBgYAoKb3BwdXJlLCBpbiBtYW5pZXJhIGVxdWl2YWxlbnRlCgpgYGB7cn0KdmFyKFUpCnZhcihWKQpgYGAKCkFiYmlhbW8gb3JhIHR1dHRlIGxlIGluZm9ybWF6aW9uaSBuZWNlc3NhcmllIHBlciBpbCBjYWxjb2xvIGRlbGxhIGNvcnJlbGF6aW9uZToKCmBgYHtyfQpzX3V2IC8gc3FydCh2YXIoVSkgKiB2YXIoVikpCmBgYAoKIyMgSW5mb3JtYXppb25pIHN1bGxhIHNlc3Npb25lIGRpIGxhdm9ybwoKYGBge3J9CnV0aWxzOjpzZXNzaW9uSW5mbygpCmBgYAoKCg==</div>
 
 
 

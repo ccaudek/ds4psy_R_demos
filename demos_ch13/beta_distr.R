@@ -1,5 +1,5 @@
-library(shiny)
-library(bayesrules)  
+library("shiny")
+library("bayesrules")  
 
 # Build the server
 server1 <- function(input, output) {
@@ -18,9 +18,7 @@ ui1 <- fluidPage(
     sidebarPanel(
       h4("Funzione Beta(alpha, beta):"), 
       sliderInput("aPrior", "alpha", min = 0, max = 100, value = 1),
-      sliderInput("bPrior", "beta", min = 0, max = 100, value = 1),
-      h4("Limite dell'asse y:"), 
-      sliderInput("ymax", "", min = 1, max = 40, value = 10)
+      sliderInput("bPrior", "beta", min = 0, max = 100, value = 1)
     ),
     mainPanel(
       h4("Grafico della funzione di densità:"), 

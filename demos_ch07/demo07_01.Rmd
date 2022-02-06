@@ -8,9 +8,6 @@ output:
     code_download: true
 ---
 
-
-Il pacchetto `prob` di $\textsf{R}$ sviluppato da G. Jay Kerns contiene una serie di funzioni che possono essere usate per il calcolo delle probabilità nel caso di spazi campionari finiti. 
-
 ```{r}
 suppressPackageStartupMessages({
   library("prob")
@@ -19,14 +16,16 @@ suppressPackageStartupMessages({
 set.seed(84735)
 
 knitr::opts_chunk$set(
-  fig.align = "center",
-  fig.asp = 0.618, # 1 / phi
-  fig.pos = "h",
-  comment = "#>",
-  tidy.opts = list(width.cutoff = 70),
-  tidy = "styler"
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
 )
 ```
+
+# Funzioni $\textsf{R}$ per il calcolo delle probabilità 
+
+Il pacchetto `prob` di $\textsf{R}$ sviluppato da G. Jay Kerns contiene una serie di funzioni che possono essere usate per il calcolo delle probabilità nel caso di spazi campionari finiti. 
 
 La ragione di usare $\textsf{R}$ in questo caso, e in tutti gli altri casi, non è quella di potere risolvere in maniera meccanica un esercizio così da evitare la fatica di dovere comprendere la logica sottostante. La ragione è invece quella di evitare di dovere fare i calcoli "a mano", in modo da avere più tempo per ciò che è importante, ovvero il ragionamento logico che è richiesto per risolvere il problema. 
 

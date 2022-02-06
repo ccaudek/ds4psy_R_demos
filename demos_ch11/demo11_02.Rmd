@@ -21,12 +21,10 @@ bayesplot::color_scheme_set("gray")
 set.seed(84735)
 
 knitr::opts_chunk$set(
-  fig.align = "center",
-  fig.asp = 0.618, # 1 / phi
-  fig.pos = "h",
-  comment = "#>",
-  tidy.opts = list(width.cutoff = 70),
-  tidy = "styler"
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
 )
 ```
 
