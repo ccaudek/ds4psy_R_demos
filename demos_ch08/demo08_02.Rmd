@@ -1,0 +1,246 @@
+---
+title: "Data science per psicologi - demo 08.02"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("tidyverse")
+  library("prob")
+  library("bayesplot")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Detezione degli anticorpi di contrasto al virus
+
+Riporto qui un esercizio che avevo creato durante il lockdown.
+
+Ricavo queste informazioni da un articolo tratto da [il Giornale](https://www.ilgiornale.it/news/mondo/coronavirus-pechino-test-diagnosi-pronto-15-minuti-1840041.html) del 12/03/2020 che riporto qui con piccole modifiche: _"a Pechino si sviluppano strumenti diagnostici in grado di rilevare la positività al Covid-19 in tempi record. Stando a quanto riferisce l'agenzia stampa [Agenzia Nova](https://www.agenzianova.com/), un gruppo di scienziati cinesi avrebbe approntato un test rapido in grado di diagnosticare il coronavirus in soli 15 minuti isolando gli anticorpi di contrasto alla malattia da una goccia di sangue prelevata sulla punta delle dita. Una task force guidata dal pneumologo cinese Zhou Nanshan, agli onori delle cronache per le brillanti intuizioni durante l'epidemia Sars del 2003, ha affermato che il test degli anticorpi mira ad offrire un metodo accurato per identificare rapidamente i pazienti infetti e i portatori asintomatici del nuovo virus. Rispetto al tampone faringeo -- test Rt-Pcr dell'acido nucleico -- che impiega approssimativamente 3/4 ore per evidenziare la positività al Covid-19, il kit sperimentale riesce a rilevare il gli anticorpi di contrasto al virus entro 15 minuti e con una **sensibilità**  dell'88.6 per cento e una **specificità** del 90.63 per cento."_
+
+# Teorema di Bayes
+
+Utilizziamo queste informazioni per un esercizio su teorema di Bayes. Useremo la seguente notazione:
+
+$$
+\mbox{P}(+ \mid C=1)=0.8860, \qquad \mbox{P}(- \mid C=0)=0.9063 
+$$
+
+dove $+$ significa un test positivo e $C$ indica se il Covid-19 è presente (1) o assente (0).
+
+La domanda è la stessa che abbiamo già incontrato in precedenza. Supponiamo di selezionare una persona a caso e di sottoporla al test. Dato che il test rapido dà un risultato positivo, qual è la probabilità che la persona in questione abbia effettivamente contratto il Covid-19? Quello che vogliamo conoscere è $\mbox{P}(C=1 \mid +)$.
+
+Per rispondere a questa domanda, dobbiamo conoscere il tasso di prevalenza del Covid-19 nella popolazione. Ovviamente nessuno conosce questo numero.  Inoltre, esso cambia continuamente. Facciamo due ipotesi.  Oggi (22 marzo 2020) sappiamo che ci sono 42681 individui attualmente positivi. Questo è ovviamente un limite minimo che corrisponde ad una prevalenza pari a
+
+```{r}
+42681 / 60000000
+```
+ovvero, $\mbox{P}(C=1)=0.00071135$ e $\mbox{P}(C=0)= 1 - 0.00071135 = 0.9992887$. 
+Solo per gli scopi di questo esercizio, considereremo il caso secondo il quale la prevalenza è molto maggiore. Ma per ora concentriamoci su questi dati.
+
+La risposta che cerchiamo è fornita dal teorema di Bayes:
+$$
+\mbox{P}(A \mid B)  =  \frac{\mbox{P}(B \mid A)\mbox{P}(A)}{\mbox{P}(B)} 
+$$
+
+Applicando il teorema di Bayes alla situazione del problema che stiamo considerando, otteniamo
+$$
+\begin{align*}
+\mbox{P}(C=1 \mid +) & =  \frac{P(+ \mid C=1) \cdot P(C=1)} {\mbox{P}(+)} \\
+& =  \frac{\mbox{P}(+ \mid C=1)\cdot P(C=1)} {\mbox{P}(+ \mid C=1) \cdot P(C=1) + \mbox{P}(+ \mid C=0) \mbox{P}(C=0)} 
+\end{align*}
+$$
+
+Inserendo i numeri del problema nella formula otteniamo:
+
+```{r}
+prevalence <- 42681 / 6e7
+
+sensibility <- 0.8860
+specificity <- 0.9063
+
+pr_corona_given_positive <- (sensibility * prevalence) / 
+  (sensibility * prevalence + (1 - specificity) * (1 - prevalence))
+pr_corona_given_positive
+```
+
+Quindi, se la prevalenza fosse così bassa (speriamo!) il test ci darebbe un risultato quasi del tutto inutile. 
+
+Supponiamo ora, per continuare l'esercizio, che la prevalenza sia 100 volte maggiore di quella indicata sopra e ripetiamo i calcoli:
+
+```{r}
+prevalence <- 100 * 42681 / 6e7
+
+sensitivity <- 0.8860
+specificity <- 0.9063
+
+pr_corona_given_positive <- (sensitivity * prevalence) / 
+  (sensitivity * prevalence + (1 - specificity) * (1 - prevalence))
+pr_corona_given_positive
+```
+I risultati sono migliori ma, anche in questo caso, non tanto buoni. Se si usassero questi dati per determinare chi deve stare in quarantena, data la stima molto alta della prevalenza, allora in più del 50% di casi  andrebbero in quarantena delle persone che, in realtà, non hanno il Covid-19.
+
+# Valore predittivo del test negativo
+
+Ma forse questo non è un prezzo troppo alto da pagare. Quello che vogliamo evitare è che il Covid-19 sia presente quando il risultato è negativo -- in quel caso, ovviamente, non si arginerebbe la diffusione del contagio. Per valutare questo, iniziamo a calcolare il valore predittivo del test negativo, ovvero la probabilità che la malattia sia assente in un soggetto con un test negativo. A questo fine, consideriamo la stima più bassa della prevalenza.
+
+```{r}
+prevalence <- 42681 / 6e7
+
+sensitivity <- 0.8860
+specificity <- 0.9063
+
+pr_not_corona_given_negative <- (specificity) * (1 - prevalence) / 
+  (specificity * (1 - prevalence) + (1 - sensitivity) * prevalence)
+pr_not_corona_given_negative
+```
+Questa è evidentemente una probabilità molto alta.
+Avendo calcolato la probabilità che il Covid-19 sia assente quando il test è negativo, è facile trovare la probabilità dell'evento complementare, ovvero la probabilità che il Covid-19 sia *presente* quando il test è negativo:
+```{r}
+1 - pr_not_corona_given_negative
+```
+ovvero, quasi zero.
+Con questo test, dunque, tale probabilità è estremamente bassa. Il che illustra la potenziale utilità di questo test rapido per il Covid-19, se la prevalenza è molto bassa.
+
+Consideriamo infine una prevalenza maggiore.
+
+```{r}
+prevalence <- 100 * 42681 / 6e7
+
+sensitivity <- 0.8860
+specificity <- 0.9063
+
+pr_not_corona_given_negative <- (specificity) * (1 - prevalence) / 
+  (specificity * (1 - prevalence) + (1 - sensitivity) * prevalence)
+pr_not_corona_given_negative
+
+1 - pr_not_corona_given_negative
+```
+Anche in questo caso il test si dimostra utile: meno dell'1% dei casi sono tali per cui il Covid-19 è presente quando si ottiene un risultato negativo.
+
+
+Invece, se la prevalenza fosse altissima
+```{r}
+prevalence <- 1000 * 42681 / 6e7
+prevalence 
+```
+
+Il test si dimostrerebbe di poca utilità:
+
+```{r}
+sensitivity <- 0.8860
+specificity <- 0.9063
+
+pr_not_corona_given_negative <- (specificity) * (1 - prevalence) / 
+  (specificity * (1 - prevalence) + (1 - sensitivity) * prevalence)
+
+1 - pr_not_corona_given_negative
+```
+
+
+# Relazione tra prevalenza e potere predittivo del test
+
+Sviluppo ora la discussione precedente considerando la relazione tra prevalenza e potere predittivo del test. Assumiamo noti la prevalenza della malattia e la specificità e la sensibilità di un test diagnostico.
+
+Definisco una funzione che ritorna la probabilità a posteriori di malattia dato un risultato positivo del test diagnostico
+
+```{r}
+pred_val <- function(spec, sens, p_m) {
+  (sens * p_m) / (sens * p_m + (1 - spec) * (1 - p_m))
+}
+```
+
+Considero le seguenti proprietà del test diagnostico:
+
+```{r}
+specificity <- 0.95
+sensitivity <- 0.95
+```
+
+Genero valori diversi per la prevalenza della malattia nella popolazione
+
+```{r}
+p_m <- seq(0.0001, 0.40, length.out = 100)
+```
+
+Calcolo la probabilità a posteriori $p(m \mid +)$
+
+```{r}
+p_m_post <- pred_val(specificity, sensitivity, p_m)
+```
+
+Infine, produco un grafico con $p(m \mid +)$ in funzione della prevalenza $p(m)$
+
+```{r}
+p1 <- plot(
+  p_m, p_m_post,
+  ylim = c(0, 1),
+  type = "l",
+  bty = "l",
+  xlab = "Prevalenza",
+  ylab = "Valore predettto",
+  main = "Effetto della prevalenza\n sul potere predittivo del test"
+)
+p1
+```
+
+Considero ora un secondo test avente proprietà migliori del precedente:
+
+```{r}
+specificity2 <- 0.99
+sensitivity2 <- 0.99
+```
+
+```{r}
+p_m_post2 <- pred_val(specificity2, sensitivity2, p_m)
+```
+
+Rappresento sullo stesso grafico le proprietà dei due test:
+
+```{r}
+d <- tibble(
+  p_m, p_m_post, p_m_post2
+)
+
+d %>%
+  ggplot(
+    aes(x = p_m, y = p_m_post)
+  ) +
+  geom_line() +
+  geom_line(
+    aes(x = p_m, y = p_m_post2),
+    color = "black", linetype = "dashed"
+  ) +
+  labs(
+    x = "Prevalenza",
+    y = "Valore predettto",
+    title = "Effetto della prevalenza sul potere predittivo del test"
+  ) +
+  theme(legend.title = element_blank())
+```
+
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

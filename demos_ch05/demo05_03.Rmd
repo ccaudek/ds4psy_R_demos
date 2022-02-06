@@ -1,0 +1,421 @@
+---
+title: "Data science per psicologi - demo 05.03"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("tidyverse")
+  library("bayesplot")
+  library("here")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+#  Introduzione
+
+Prima di iniziare a sviluppare modelli statistici per l'inferenza statistica, è necessario comprendere le caratteristiche dei dati. Questo viene tipicamente fatto usando metodi numerici e grafici convenzionali. John Tukey (Tukey, 1977) ha sostenuto il ruolo dell'analisi esplorativa dei dati (EDA) come parte centrale del processo scientifico: _"No catalog of techniques can convey a willingness to look for what can be seen, whether or not anticipated. Yet this is at the heart of exploratory data analysis. The graph paper and transparencies are there, not as a technique, but rather as a recognition that the picture examining eye is the best finder we have of the wholly unanticipated."_
+
+Fortunatamente, possiamo fare a meno della carta millimetrata e dei lucidi e utilizzare software che facciano il lavoro di routine per lo sviluppo delle "immagini" (ad esempio, l'output grafico) e delle statistiche descrittive necessarie per esplorare i nostri dati.
+
+Le statistiche descrittive includono:
+
+ - **Media** - media aritmetica  
+ - **Mediana** - valore centrale  
+ - **Moda** - valore più frequente  
+ - **Deviatione Standard** - variazione attorno alla tendenza centrale  
+ - **Gamma Interquartile** - gamma di valori che comprende il 50% centrale della distribuzione  
+ - **Kurtosi** - l'addensamento della distribuzione attorno alla tendenza centrale  
+ - **Asimmetria** - la simmetria della distribuzione  
+
+I metodi grafici includono:  
+
+ - **Istogramma** - un diagramma a barre dove ciascuna barra rappresenta la frequenza delle osservazioni in un dato intervallo di valori
+ - **Stima densità di frequenza dei dati** - una stima della distribuzione della popolazione basata sui dati campionari
+ - **Plot Quantile-quantile** - un grafico dei quantili dei dati vs. i quantili di una distribuzione teorica di probabilità
+ - **Box plot** - una rappresentazione visiva della mediana, dei quartili, della simmetria, e dei valori anomali della distribuzione
+ - **Diagramma a dispersione** - rappresentazione grafica di una variabile rappresentata sull'asse $x$ e di una seconda variabile rappresentata sull'asse $y$
+
+#  Inspezione dei dati
+
+Prima di iniziare una EDA, è necessario controllare i dati e correggere tutti i refusi e gli errori grossolani. L'EDA può quindi essere utilizzata per identificare ulteriori errori come i valori anomali e aiutare a determinare quali possono essere le analisi statistiche maggiormente appropriate. Per questo esercizio utilizzeremo il set di dati di Mehr et al. (2016).
+
+```{r}
+mehr <- rio::import(here("data", "MehrSongSpelke_exp_1.csv"))
+```
+
+La funzione `summary ()` può essere utilizzata per riepilogare rapidamente un set di dati.  Tuttavia, anche per il nostro piccolo set di dati l'output può essere eccessivamente voluminoso. Pertanto, ci concentreremo qui solo su un sottoinsieme di variabili.
+
+```{r}
+d <- mehr %>% 
+  dplyr::filter(
+    exp1 == 1
+  ) %>% 
+  select(
+    id, female, Baseline_Proportion_Gaze_to_Singer, 
+    Familiarization_Gaze_to_Familiar, Familiarization_Gaze_to_Unfamiliar,
+    Test_Proportion_Gaze_to_Singer, Difference_in_Proportion_Looking,
+    Estimated_Total_Number_of_Song,  totskypesing,  stim, age
+  )
+
+d$id <- factor(d$id)
+d$stim <- factor(d$stim)
+d$Difference_in_Proportion_Looking[1] <- NA
+```
+
+Possiamo esaminare `d` con la funzione `glimpse()`:
+
+```{r}
+glimpse(d)
+```
+
+Ora possiamo usare `summary ()`. La funzione `summary ()` è conosciuta come una funzione R generica. Restituirà un sommario preprogrammato per qualsiasi oggetto R. Poiché `d` è un data frame, otteniamo un riepilogo di ogni colonna. I fattori saranno riepilogati in base alla frequenza (cioè numero di osservazioni) di ciascuna loro modalità, mentre per le variabili numeriche  avremo il riepilogo dei cinque numeri (min, max, mediana, I e III quartile) e per le variabili di classe character verrà fornita semplicemente la loro numerosità. Se ci sono dei dati mancanti, verrà anche stampato il numero di osservazioni mancanti per ciascuna variabile. 
+
+```{r}
+summary(d)
+```
+
+Quando ci sono dei dati mancanti e la funzione R che si desidera eseguire non viene eseguita, sono possibili le seguenti opzioni:
+
+1. **Escludere** tutte le righe o le colonne che contengono valori mancanti usando la funzione `na.exclude()`, come `d2 <- na.exclude (d)`. 
+2. **Sostituire** u valori mancanti con un altro valore, come zero, una costante globale o il valore medio o mediano per quella colonna, come 
+
+```{r}
+d$Difference_in_Proportion_Looking <-
+  ifelse(is.na(d$Difference_in_Proportion_Looking),
+    mean(d$Difference_in_Proportion_Looking, na.rm = TRUE),
+    d$Difference_in_Proportion_Looking
+  )
+```
+
+oppure `d[is.na(d$Difference_in_Proportion_Looking), ] <- 0`.
+
+È importante leggere il file di guida per la funzione che si sta tentando di utilizzare. Molte funzioni hanno argomenti addizionali per trattare valori mancanti, come `na.rm`.
+
+Con l'istruzione precedente abbiamo sostituito l'unico valore mancante di `Difference_in_Proportion_Looking` con la media di tale variabile. Controlliamo:
+
+```{r}
+summary(d$Difference_in_Proportion_Looking)
+```
+
+Un rapido controllo degli errori di battitura consiste nell'esaminare l'elenco delle modalità di una variabile qualitativa, come ad esempio:
+
+```{r}
+# for characters and factors
+sort(unique(d$stim)) 
+```
+
+## Statistiche descrittive
+
+```{r, echo = FALSE}
+desc <- data.frame(
+  Statistica = c("Media", "Mediana", "Moda", "Deviatione Standard", "Quantili"),
+  Descrizione = c(
+    "media aritmetica",
+    "50-esimo percentile",
+    "valore più frequente", "variazione attorno alla media",
+    "rango percentile dei valori"
+  ),
+  "Funzione R" = c("mean()", "median()", "sort(table(), decreasting = TRUE)[1]", "sd()", "quantile()"),
+  check.names = FALSE
+)
+knitr::kable(desc, caption = "Breve descrizione delle statistiche descrittive e delle corrispondenti funzioni R")
+```
+
+## Misure di tentenza centrale
+
+Queste misure vengono utilizzate per determinare il punto centrale dell'intervallo di valori osservati.  La media e la mediana sono le misure più comunemente utilizzate per tale scopo.
+
+**Media** - è la media aritmetica che tutti conosciamo, formalmente espressa come: 
+
+$$\bar{x} =\frac{\sum_{i=1}^{n}x_i}{n}$$ 
+
+nella quale vengono sommati ($\sum$) tutti i valori $X$ del campione per poi dividerli per il numero $n$ di osservazioni.  
+
+La media della variabile `d$Difference_in_Proportion_Looking` si trova con
+
+```{r}
+mean(d$Difference_in_Proportion_Looking, na.rm = TRUE)
+```
+
+Nel caso presente abbiamo già eliminato i valori mancanti, per cui non serve specificare `na.rm = TRUE`. 
+
+Calcoliamo la media *"a mano"*:
+
+```{r}
+x <- d$Difference_in_Proportion_Looking
+x
+```
+
+Il vettore $x$ è composto da 
+
+```{r}
+length(x)
+```
+
+elementi. Dobbiamo sommare i valori $x$ e dividere per $n$, ovvero
+
+```{r}
+sum(x) / length(x)
+```
+
+Per determinare la media in base a un gruppo o categoria, procediamo come segue:
+
+```{r}
+d %>% 
+  group_by(female) %>% 
+  summarise(
+    m = mean(Difference_in_Proportion_Looking, na.rm = TRUE), 
+    n = n()
+  )
+```
+
+Si noti l'uso dell'operatore *pipe*, `%>%`, che si può leggere *e poi*. L'operatore utilizza l'output della funzione precedente come input per la funzione seguente. Nel caso presente, `d` è un data frame che l'operatore `%>%` passa alla funzione `group_by()`. Tale funzione suddivide i dati in tanti gruppi quante sono le modalità della variabile utilizzata come argomento. In questo esempio, la variabile è `female`, con modalità 1 (sì) e 0 (no). Quindi le 32 ossevazioni (righe) vengono divise in due gruppi, un gruppo di 15 osservazioni (maschi) e un gruppo di 17 osservazioni (femmine). L'output di `group_by()` viene passato alla funzione `summarise()`. Gli argomenti di tale funzione specificano quali statistiche descrittive vogliamo calcolare, e su quali variabili.  Nel caso presente vogliamo calcolare la media (condizionata alle modalità di `female`) e la numerosità di ciascun gruppo.
+
+**Mediana**  La mediana è la misura centrale di un insieme di osservazioni, quando queste sono ordinate dall'osservazione più piccola alla più grande. Come tale è una stima più robusta della tendenza centrale rispetto alla media. La mediana è anche nota come il secondo quartile o il 50-esimo percentile, il che significa che vi è un numero uguale di osservazioni con valori inferiori e superiori alla mediana.
+
+La mediana dei dati presenti può essere determinata con la seguente istruzione:
+
+```{r}
+median(d$Difference_in_Proportion_Looking, na.rm = TRUE)
+```
+
+Calcoliamo anche il primo e il terzo quartile:
+
+```{r}
+quantile(
+  d$Difference_in_Proportion_Looking,
+  probs = c(0.25, 0.75),
+  na.rm = FALSE
+)
+```
+
+**Moda** - è il valore che compare più spesso nel campione. L'uso della moda è tipicamente riservato a fattori.
+
+**Frequenze**
+
+Per riassumere i fattori (variabili qualitative) e i vettori di stringhe alfanumeriche  possiamo esaminare la distribuzione di frequenze delle loro modalità. Questo si ottiene usando la funzione `table()`.
+
+```{r}
+table(d$stim)
+```
+
+
+## Misure di dispersione
+
+Queste sono le misure utilizzate per determinare la dispersione dei dati attorno al punto centrale. Sono utili per determinare se i dati molto variabili o concentrati vicino al punto centrale.
+
+**Varianza**  è un valore positivo che indica la media del quadrato dagli scarti dalla media: 
+
+$$s^2 = \frac{\sum_{i=1}^{n}(x_i - \bar{x})^2} {n - 1}$$ 
+
+Per esempio
+
+```{r}
+var(d$Difference_in_Proportion_Looking)
+```
+
+Calcoliamo *a mano* la varianza. Usiamo un nome più semplice 
+
+```{r}
+x <- d$Difference_in_Proportion_Looking
+```
+
+La variabile `x` è un vettore
+
+```{r}
+x
+```
+
+Sottraiamo da ciascun elemento del vettore la media:
+
+```{r}
+x - mean(x)
+```
+
+eleviamo al quadrato ciascuno scarto dalla media
+
+```{r}
+options(scipen = 999) # disable scientific notation
+(x - mean(x))^2
+```
+
+Non resta che fare la media dei 32 valori così ottenuti. Il numeratore è però $n-1$ e non $n$. Dunque
+
+```{r}
+vx <- sum((x - mean(x))^2) / (length(x) - 1)
+vx
+var(x)
+```
+
+**Deviazione standard **  è la radice quadrata della varianza: 
+
+$$s = \sqrt\frac{\sum_{i=1}^{n}(x_i - \bar{x})^2} {n - 1}$$
+
+Nel caso presente
+
+```{r}
+sd(x)
+sqrt(vx)
+```
+
+
+**Gamma** è la differenza tra il valore più grne e quello più piccolo della distribuzione.  Utilizzando i dati dell'esempio può essere determinata come:
+
+```{r}
+range(x)
+```
+
+che ritorna il minimo e il massimo; oppure
+
+```{r}
+diff(range(x))
+```
+
+ovvero
+
+```{r}
+max(x) - min(x)
+```
+
+** L'intervallo interquartile ** (IQR) è l'intervallo dal quartile superiore (75%) al quartile inferiore (25%). Questo rappresenta il 50% delle osservazioni che si verificano nella parte centrale della distribuzione. IQR è una misura robusta di dispersione, non influenzata dalla forma della distribuzione dei dati.  IQR può essere calcolato per i dati che usiamo come esempio nel modo seguente:
+
+```{r}
+IQR(d$Difference_in_Proportion_Looking)
+```
+
+Infatti
+
+```{r}
+quantile(d$Difference_in_Proportion_Looking, 0.75) -
+  quantile(d$Difference_in_Proportion_Looking, 0.25)
+```
+
+
+## Associazione tra variabili
+
+### Correlazione
+
+Una matrice di correlazione è una tabella dei coefficienti di correlazione calcolati tra tutte le coppie di variabili. 
+
+Oltre al risultato numerico, possiamo ottenere una rappresentazione grafica nel modo seguente:
+
+```{r}
+# Load the GGally package
+library("GGally")
+
+# Create a scatter plot matrix
+vars <- c(
+  "Baseline_Proportion_Gaze_to_Singer",
+  "Familiarization_Gaze_to_Familiar",
+  "Familiarization_Gaze_to_Unfamiliar",
+  "Test_Proportion_Gaze_to_Singer"
+)
+
+ggpairs(d[vars])
+```
+
+I nomi delle variabili sono troppo lunghi. Sarebbe meglio cambiarli prima di disegnare la figura.
+
+Consideriamo più da vicino la correlazione tra  `Baseline_Proportion_Gaze_to_Singer`
+e `Test_Proportion_Gaze_to_Singer`:
+
+```{r}
+cor(d$Baseline_Proportion_Gaze_to_Singer, d$Test_Proportion_Gaze_to_Singer)
+```
+
+Tale correlazione rappresenta l'intensità della relazione lineare tra le due variabili:
+
+```{r}
+d %>% 
+  ggplot(
+    aes(x = Baseline_Proportion_Gaze_to_Singer, 
+        y = Test_Proportion_Gaze_to_Singer)
+  ) +
+  geom_point()
+```
+
+I bambini che hanno una proporzione del tempo di fissazione più grande nella condizione baseline tendono ad avere una proprozione maggiore anche nella condizione di test.
+
+Nel grafico abbiamo rappresentato una delle due variabili sull'asse $x$ e l'altra sull'asse $y$, ma questo è arbitrario: la correlazione è un indice simmetrico
+$$
+cor(x, y) = cor (y, x)
+$$
+
+La formula della correlazione è la covarianza divisa per le due deviazioni standard.
+
+Iniziamo a calcolare la covarianza tra le due variabili.
+
+```{r}
+x <- d$Baseline_Proportion_Gaze_to_Singer
+y <- d$Test_Proportion_Gaze_to_Singer
+```
+
+La covarianza è la somma dei prodotto degli scarti dalla media di ciascuna due variabili, divisa per le due deviazioni standard:
+
+$$
+s_{xy} = \frac{\sum_{i=1}^n(x_i - \bar{x}) \cdot (y_i - \bar{y})}{n-1}
+$$
+
+In R è facile calcolare gli scarti dalla media delle due variabili e fare il prodotto:
+
+```{r}
+x - mean(x)
+y - mean(y)
+(x - mean(x)) * (y - mean(y))
+```
+
+Poi dobbiamo sommare il risultato ottenuto:
+
+```{r}
+sum((x - mean(x)) * (y - mean(y)))
+```
+
+e dividere per $n-1$:
+
+```{r}
+s_xy <- (sum((x - mean(x)) * (y - mean(y)))) / (length(x) - 1)
+s_xy
+```
+
+La covarianza va poi divisa per le due deviazioni standard
+
+$$
+r_{xy} = \frac{s_{xy}}{s_x \cdot s_y}
+$$
+
+```{r}
+s_xy / (sd(x) * sd(y))
+```
+
+ovvero
+
+```{r}
+cor(x, y)
+```
+
+La correlazione quantifica l'associazione lineare tra le due proporzioni del tempo di fissazione: all'aumentare di ciò che accade nella condizione baseline tende ad aumentare anche ciò che accade nella condizione test. La correlazione ci dice che tale associazione lineare non è perfetta (altrimenti $r = 1$), ma con un valore di 0.5 dà luogo ad una tendenza che si può ben notare nel diagramma a dispersione.
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

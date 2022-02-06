@@ -1,0 +1,287 @@
+---
+title: "Data science per psicologi - demo 12.02"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("scales")
+  library("bayesplot")
+  library("distr")
+  library("distrEx")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Esercizi sulla distribuzione binomiale
+
+## Esercizio 1
+
+Il coefficiente binomiale rappresenta il numero di sottoinsiemi di $k$ elementi che si possono estrarre da un insieme di $n$ elementi, ignorando l'ordine.
+
+Quante coppie distinte si possono estrarre da un insieme di 4 elementi?
+
+La riposta è data dal coefficiente binomiale:
+
+$$
+\frac{n!}{k!(n - k)!}
+$$
+
+In $\textsf{R}$ si calcola nel modo seguente:
+
+```{r}
+n <- 4
+k <- 2
+factorial(n) / (factorial(k) * factorial(n-k))
+```
+
+Oppure con
+
+```{r}
+choose(n, k)
+```
+
+
+## Esercizio 2
+
+Creare una funzione $\textsf{R}$ che genera la distribuzione binomiale di parametri $n$ e $y$.
+
+```{r}
+binomial <- function(n, k, p) {
+  choose(n, k) * p^k * (1 - p)^(n - k)
+}
+```
+
+Verifichiamo:
+
+```{r}
+tibble(
+  my_binom = binomial(5, 0:5, 0.3),
+  r_binom = dbinom(0:5, 5, 0.3)
+)
+```
+
+## Esercizio 3
+
+Creare un grafico per la distribuzione binomiale dell'esercizio 2.
+
+```{r}
+n <- 5
+x1 <- 0:n
+p <- 0.3
+
+tibble(
+  x = x1,
+  p = dbinom(x1, n, p)
+  ) %>%
+  ggplot(aes(x = x, y = p)) +
+  geom_bar(stat = "identity") +
+  labs(
+    x = "Numero di successi",
+    y = "Probabilità",
+    title = "Distribuzione Binomiale",
+    subtitle = "Parametri N = 5, p = 0.3"
+  )
+```
+
+## Esercizio 4
+
+Un dado viene lanciato 3 volte. Qual è la probabilità che non escano cinque?
+
+```{r}
+dbinom(0, 3, 1/6)
+```
+
+## Esercizio 5
+
+Un dado viene lanciato 3 volte. Qual è la probabilità di 1 cinque?
+
+```{r}
+dbinom(1, 3, 1/6)
+```
+
+## Esercizio 6
+
+Un dado viene lanciato 3 volte. Qual è la probabilità di 3 cinque?
+
+```{r}
+dbinom(3, 3, 1/6)
+(1/6)^3
+```
+
+## Esercizio 7
+
+Le cartelle cliniche mostrano quella dei pazienti che soffrono di una certa malattia, il 75% ne muore. Qual è la probabilità che di 6 pazienti selezionati a caso, 4 guariranno?
+
+```{r}
+dbinom(4, 6, 0.25)
+```
+
+## Esercizio 8
+
+Ai vecchi tempi, c'era una probabilità di successo pari a 0.8 in ogni tentativo di fare una telefonata. Si trovi la probabilità di 7 successi in 10 tentativi.
+
+```{r}
+dbinom(7, 10, 0.8)
+```
+
+## Esercizio 9
+
+Un tiratore scelto (bendato) scopre che in media colpisce il bersaglio 4 volte su 5. Se spara 4 colpi, qual è la probabilità di più di 2 centri?
+
+```{r}
+dbinom(3, 4, 4/5) + dbinom(4, 4, 4/5)
+1 - pbinom(2, 4, 4/5)
+```
+
+## Esercizio 10
+
+Se spara 4 colpi, qual è la probabilità di almeno 3 errori?
+
+```{r}
+dbinom(3, 4, 1/5) + dbinom(4, 4, 1/5)
+1 - pbinom(2, 4, 1/5)
+```
+
+## Esercizio 11
+
+In un certo gioco da tavolo il turno di un giocatore inizia con tre lanci di un paio di dadi. Una penalità viene assegnata se il giocatore ottiene un numero doppio in tutti e tre i lanci. Si trovi la probabilità di ottenere un numero doppio tutte tre volte su tre lanci.
+
+La probabilità di ottenere lo stesso numero nel singolo lancio di una coppia
+di dadi bilanciati è 1/6. Dunque,
+
+```{r}
+dbinom(3, 3, 1/6)
+```
+
+## Esercizio 12
+
+Uno psicologo rileva che, in media, il 72% dei suoi pazienti si lamenta di un disturbo collegato al lavoro. Qual è la probabilità che un gruppo di 10 pazienti contenga non più di 5 individui che mostrano un disturbo collegato al lavoro?
+
+```{r}
+pbinom(5, 10, 0.72)
+```
+
+## Esercizio 13
+
+Qual è la probabilità che in un gruppo di 10 pazienti ci siano almeno 5 individui che mostrano un disturbo collegato al lavoro?
+
+```{r}
+1 - pbinom(5, 10, 0.72)
+```
+
+
+## Esercizio 14
+
+Una moneta viene piegata in modo che la probabilità che esca testa sia 2/3.
+La moneta viene lanciata dieci volte. Trova la probabilità che esca testa al massimo cinque volte.
+
+```{r}
+pbinom(5, 10, 2/3)
+```
+
+## Esercizio 15
+
+Si trovi la probabilità che testa  esca più volte che croce.
+
+```{r}
+1 - pbinom(5, 10, 2/3)
+```
+
+## Esercizio 16
+
+Un turista visita un paese in cui il 30% della popolazione parla inglese. Ha bisogno di chiedere indicazioni a qualcuno. Si trovi la probabilità che la prima persona che incontra sarà in grado di parlare in inglese.
+
+```{r}
+0.3
+```
+
+## Esercizio 16
+
+Il turista incontra quattro persone. Si trovi la probabilità che almeno uno di loro sia in grado di parlare inglese.
+
+```{r}
+1 - dbinom(0, 4, 0.3)
+```
+
+## Esercizio 17
+
+Uno psicologo vende 20 pazienti ogni settimana. Il dieci per cento dei pazienti si lamenta di problemi relativi alla famiglia. Qual è la probabilità che, in una settimana, lo psicologo non incontri neppure un paziente che  si lamenta di problemi relativi alla famiglia.
+
+```{r}
+dbinom(0, 20, 0.1)
+```
+
+## Esercizio 18
+
+Si trovi la probabilità che lo psicologo incontri 2, 3 o 4 pazienti che  si lamenta di problemi relativi alla famiglia.
+
+```{r}
+dbinom(2, 20, 0.1) + dbinom(3, 20, 0.1) + dbinom(4, 20, 0.1)
+```
+
+## Esercizio 19
+
+Si trovi la probabilità che lo psicologo incontri almeno 5 pazienti che  si lamenta di problemi relativi alla famiglia.
+
+```{r}
+1 - pbinom(4, 20, 0.1)
+```
+
+## Esercizio 20
+
+Circa il 2% degli _alumni_ dà denaro dopo aver ricevuto una sollecitazione da
+il college o l'università da cui si sono laureati. Si trovi il numero medio di donazioni monetarie che un college può aspettarsi per ogni 2000 sollecitazioni che invia.
+
+```{r}
+2000 * 0.02
+```
+
+## Esercizio 21
+
+Tradizionalmente, circa il 70% degli studenti in un particolare insegnamento superano l'esame al primo appello. Supponiamo che 20 studenti vengano scelti a caso
+da tutti gli studenti che hanno già tentato l'esame. Qual è la probabilità che
+più di 15 di loro abbiano superato l'esame?
+
+```{r}
+1 - pbinom(15, 20, 0.7)
+```
+
+## Esercizio 22
+
+Supponiamo che uno studente completi un test a scelta multipla. Il test è composto da 40 domande, ciascuna con 5 opzioni. Se lo studente si limita a tirare ad indovinare in tutte le 40 domande, quali sono la media e la deviazione standard del numero di risposte corrette?
+
+```{r}
+n <- 40
+p <- 1/5
+
+n * p
+sqrt(n * p * (1 - p))
+```
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
+

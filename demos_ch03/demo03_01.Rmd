@@ -5,6 +5,7 @@ date: "`r format(Sys.Date())`"
 output:
   html_document:
     theme: readable
+    highlight: pygments
     code_download: true
 ---
 
