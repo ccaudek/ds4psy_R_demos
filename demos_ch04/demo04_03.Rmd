@@ -1,0 +1,86 @@
+---
+title: 'Tutorial 01_03: Esercizi sui dati di Zetsche et al. (2019)'
+author: "Corrado Caudek"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# please do not alter this code chunk
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, error = TRUE)
+```
+
+```{r}
+library("tidyverse")
+library("here")
+library("rio")
+library("visdat")
+```
+
+# Leggere i dati
+
+```{r}
+d <- rio::import(
+  here::here(
+    "data", "data_mood.csv"
+  )
+)
+```
+
+# Dati mancanti
+
+Usiamo le funzioni del pacchetto `visdat` per rappresentare graficamente il DataFrame in modo da evidenziare la presenza di dati mancanti.
+
+```{r}
+d %>% 
+  vis_dat(palette = "cb_safe")
+```
+
+```{r}
+d %>% 
+  vis_miss()
+```
+
+```{r}
+glimpse(d)
+```
+
+Il codice del paziente è `vpn_nr`. Quanti pazienti ci sono nel campione? Controllare il risultato con quello riportato nell'articolo.
+
+```{r}
+d$vpn_nr %>% 
+  unique() %>% 
+  length()
+```
+
+```{r}
+34 + 41 - 8
+```
+
+30 MDD + 37 controlli
+
+```{r}
+temp <- d %>% 
+  group_by(group, vpn_nr) %>% 
+  summarise(
+    bdi = mean(bdi)
+  )
+temp %>% 
+  head()
+```
+
+Quanti soggetti hanno valori mancati su BDI?
+
+
+```{r}
+summary(temp)
+```
+
+# Rimuovere i dati mancanti
+
+Ci sono tanti modi per affrontare il problema dei dati mancanti. Il più semplice (e, in generale, non raccomandato) è quello di rimuovere tutte le osservazioni (righe) che contengono dati mancanti.
+
+```{r}
+bysubj <- temp %>% 
+  na.omit()
+```
+

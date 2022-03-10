@@ -1,0 +1,69 @@
+---
+title: "Data science per psicologi - demo 08.03"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("tidyverse")
+  library("prob")
+  library("bayesplot")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Il teorema della probabilità assoluta 
+
+Consideriamo un'urna che contiene 5 palline rosse e 2 palline verdi. Due
+palline vengono estratte, una dopo l'altra. Vogliamo sapere la
+probabilità dell'evento "la seconda pallina estratta è rossa".
+
+Lo spazio campionario è $\Omega = \{RR, RV, VR, VV\}$. Chiamiamo $R_1$
+l'evento "la prima pallina estratta è rossa", $V_1$ l'evento "la prima
+pallina estratta è verde", $R_2$ l'evento "la seconda pallina estratta è
+rossa" e $V_2$ l'evento "la seconda pallina estratta è verde". Dobbiamo
+trovare $P(R_2)$ e possiamo risolvere il problema usando il teorema
+della probabilità assoluta:
+
+$$
+\begin{split}
+P(R_2) &= P(R_2 \mid R_1) P(R_1) + P(R_2 \mid V_1)P(V_1)\\
+&= \frac{4}{6} \cdot \frac{5}{7} + \frac{5}{6} \cdot \frac{2}{7} \\
+&= \frac{30}{42} = \frac{5}{7}.
+\end{split}
+$$
+
+Se la prima estrazione è quella di una pallina rossa, nell'urna restano
+4 palline rosse e due verdi, dunque, la probabilità che la seconda
+estrazione produca una pallina rossa è uguale a 4/6. La probabilità di
+una pallina rossa nella prima estrazione è 5/7. Se la prima estrazione è
+quella di una pallina verde, nell'urna restano 5 palline rosse e una
+pallina verde, dunque, la probabilità che la seconda estrazione produca
+una pallina rossa è uguale a 5/6. La probabilità di una pallina verde
+nella prima estrazione è 2/7.
+
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

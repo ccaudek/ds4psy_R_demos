@@ -277,6 +277,38 @@ sqrt(n * p * (1 - p))
 ```
 
 
+## Esercizio 23
+
+Sia $X$ una v.c. binomiale di parametri $n = 5$ e $p = 0.3$. Usando la simulazione di Monte Carlo, si calcolino la media e la deviazione standard di $X$.
+
+Il valore atteso di $X$ è $n \cdot p = 5 \cdot 0.3 = 1.5$.
+
+Generiamo un grande numero di realizzazioni della v.c.:
+
+```{r}
+set.seed(34534)
+x <- rbinom(1e5, size = 5, prob = 0.3)
+```
+
+Una stima del valore atteso di $X$ è
+
+```{r}
+mean(x)
+```
+
+La deviazione standard di $X$ è $\sqrt{n\cdot p \cdot (1-p)}$ ovvero 
+
+```{r}
+sqrt(5 * 0.3 * 0.7)
+```
+
+Usando la simulazione di Monte Carlo otteniamo
+
+```{r}
+sd(x)
+```
+
+
 ## Informazioni sulla sessione di lavoro
 
 ```{r}

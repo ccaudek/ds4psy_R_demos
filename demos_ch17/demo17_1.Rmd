@@ -1,0 +1,188 @@
+---
+title: "Data science per psicologi - demo 17.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("scales")
+  library("bayesplot")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Simulazione di Monte Carlo
+
+## Esercizio 1 
+
+[_Riproduco qui un esercizio presentato da Alicia Johnson (ajohns24 at macalester dot edu)._]
+
+Una famiglia ha due figli. Defininiamo i seguenti eventi:
+
+- A = entrambi i bambini sono maschi;
+
+- B = almeno un bambino è un maschio;
+
+- C = almeno un bambino è un maschio che è nato di giorno;
+
+- D = il primogenito è un maschio che è nato di giorno;
+
+Per gli eventi definiti sopra è vero che 
+
+$$P(A) < P(A \mid B) < P(A \mid C) < P(A \mid D).$$ 
+
+Si usi la simulazione di Monte Carlo per verificare la disuguaglianza precedente.
+
+
+### Soluzione
+
+Simuliamo 10,000 coppie di bambini.
+
+```{r}
+library("tidyverse")  # for data wrangling and  visualization
+library("janitor")   # for data wrangling
+
+set.seed(354)
+
+gender_id <- tibble(id = c("b","g"))
+
+# Simulate the gender_id of child 1
+gender_id_1 <- sample_n(gender_id, size = 10000, replace = TRUE)
+head(gender_id_1)
+
+# Simulate the gender_id of child 2
+gender_id_2 <- sample_n(gender_id, size = 10000, replace = TRUE)
+head(gender_id_2)
+
+# Store the simulated pairs in a data frame
+children <- tibble(
+  gender_id_1 = gender_id_1$id, 
+  gender_id_2 = gender_id_2$id
+)
+
+# Check out the first 3 pairs    
+head(children)
+```
+
+
+Aggiungiamo il tempo del giorno (giorno, notte):
+
+```{r}
+set.seed(27)
+
+time_of_day <- tibble(time = c("d", "n"))
+# Simulate the birth time of child 1
+time_of_day_1 <- sample_n(time_of_day, size = 10000, replace = TRUE)
+# Simulate the birth time of child 2
+time_of_day_2 <- sample_n(time_of_day, size = 10000, replace = TRUE)
+
+# Incorporate time into data frame using mutate()    
+children <- children %>% 
+    mutate(
+      time_of_day_1 = time_of_day_1$time, 
+      time_of_day_2 = time_of_day_2$time
+    )
+
+# Check out the first 6 pairs    
+head(children)
+```
+
+#### Calcoliamo $P(A)$
+
+```{r}
+children %>% 
+  tabyl(gender_id_1, gender_id_2) %>% 
+  adorn_totals(c("row","col"))
+```
+
+
+```{r}
+2470 / 10000
+```
+
+#### Calcoliamo $P(A \mid B)$
+
+```{r}
+# Keep only the cases that match information B
+info_B <- children %>% 
+  dplyr::filter(gender_id_1 == "b" | gender_id_2 == "b")
+head(info_B)
+```
+
+```{r}
+info_B %>% 
+  tabyl(gender_id_1, gender_id_2) %>% 
+  adorn_totals(c("row","col"))
+```
+
+
+```{r}
+2470 / 7523
+```
+
+#### Calcoliamo $P(A \mid C$
+
+```{r}
+# Keep only the cases that match information C
+info_C <- children %>% 
+  dplyr::filter(
+    (gender_id_1 == "b" & time_of_day_1 == "d") | 
+      (gender_id_2 == "b" & time_of_day_2 == "d")
+  )
+
+info_C %>% 
+  tabyl(gender_id_1, gender_id_2) %>% 
+  adorn_totals(c("row","col"))
+```
+
+
+```{r}
+1862 / 4420
+```
+
+
+#### Calcoliamo  $P(A \mid D$
+
+```{r}
+# Keep only the cases that match information D
+info_D <- children %>% 
+  dplyr::filter(
+    gender_id_1 == "b" & time_of_day_1 == "d"
+  )
+
+info_D %>% 
+  tabyl(gender_id_1, gender_id_2) %>% 
+  adorn_totals(c("row","col"))
+```
+
+
+```{r}
+1201 / 2462
+```
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

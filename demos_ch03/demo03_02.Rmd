@@ -1,0 +1,55 @@
+---
+title: "Data science per psicologi - demo 03.02"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+# Swirl
+
+Per imparare ad usare le funzionalità di `tidyverse`, una delle tante possibilità è quella di usare `swirl`. Le istruzioni per l'installazione sono le seguenti:
+
+```{r, eval=FALSE}
+install.packages("swirl")
+library(swirl)
+install_course_github("sysilviakim", "swirl-tidy")
+```
+
+Per iniziare i tutorial, digitare
+
+```{r, eval=FALSE}
+swirl()
+```
+
+Sono coperti i seguenti argomenti:
+
+```{r, eval=FALSE}
+01. Overview
+02. Introduction_to_tibbles
+03. Introduction_to_pipes
+04. Import_with_readr
+05. Import_with_haven
+06. Import_with_readxl
+07. Transform_with_dplyr_I
+08. Transform_with_dplyr_II
+09. Transform_with_dplyr_III
+10. Transform_with_dplyr_IV
+11. Visualize_with_ggplot2_I
+12. Visualize_with_ggplot2_II
+13. Visualize_with_ggplot2_III
+14. Epilogue
+```
+
+Io trovo che questo modo di procedere sia troppo lento, ma forse per qualcuno potrà essere utile.
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

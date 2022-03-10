@@ -1,0 +1,405 @@
+---
+title: 'Tutorial 01_02: Introduzione a dplyr'
+author: "Corrado Caudek"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# please do not alter this code chunk
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, error = TRUE)
+```
+
+```{r}
+library("tidyverse")
+library("here")
+library("rio")
+```
+# Scopo
+
+Lo scopo di questo tutorial è illustrare la manipolazione dei dati mediante le funzionalità di `dplyr`. Come vi renderete conto svolgendo l'analisi dei dati del progetto di gruppo, calcolare le statistiche descrittive (media, varianza, quantili, ...) è molto facile *se i dati sono nel formato appropriato*. Ma questo, nella pratica concreta, non succede quasi mai. Per cui dobbiamo eseguire delle manipolazioni preliminari sui dati, che li trasformino nel formato opportuno, prima di poterli analizzare. Questa operazione, detta di *data wrangling*, è molto onerosa dal punto di vista temporale -- e non semplice. Dunque, per risolvere questo problema vogliamo usare un software che offra soluzioni che siano "le meno dolorose possibili". Tra i vari software, R consente di svolgere le operazioni di *data wrangling* nella maniera più semplice possibile -- e questa è una delle ragioni per cui è così popolare. Questo non vuol dire che le operazioni di *data wrangling* siano semplici. Vuol solo dire che, con altri software, queste operazioni sono molto più complicate. 
+
+# Tidy data
+
+Dato un problema da risolvere (studiare per un esame, scrivere la tesi di laurea, analizzare i dati in R, ...), la prima cosa da fare è avere ben chiaro quale risultato si vuole ottenere. Altrimenti perdiamo solo tempo.
+
+Quello che vogliamo ottenere, per potere analizzare i dati con R, è un formato dei dati che si chiama *tidy*. Il seguente [link](https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html), fornisce questa definizione del formato `tidy`:
+
+- Every column is a variable.
+- Every row is an observation.
+- Every cell is a single value.
+
+Se questo non si verifica, non si possono analizzare i dati con R. Detto in altre parole: *state il più lontani possibile da Excel!* Questo è il mio consiglio.
+
+
+# I nomi delle variabili/cartelle/modalità
+
+Una considerazione preliminare **IMPORTANTE**.
+
+Non usate **MAI** caratteri "speciali", ovvero `~!@#$%^&*(){}_+:"<>?,./;'[]-=`, **incluso lo spazio**
+
+- nel nome delle variabili,
+- nel nome delle cartelle,
+- nelle modalità delle variabili.
+
+Se lo fate, si creeranno problemi impossibili da prevedere e otterrete messaggi d'errore incomprensibili. In altri termini: non funzionerà più nulla!
+
+Per i nomi delle varibili, per i nomi delle cartelle, per i nomi delle modalità delle varibili (se alfa-numeriche), usate solo
+
+- lettere, 
+- numeri, 
+- trattino basso. 
+
+Nient'altro. 
+
+In maniera più precisa, possiamo dire che R usa le seguenti regole per i nomi delle variabili:
+
+- Il nome di una variabile deve iniziare con una lettera e può essere una combinazione di lettere, numeri, punto(.) e trattino basso (_).
+- Se inizia con il punto (.), il punto non può essere seguito da un numero.
+- Il nome di una variabile non può iniziare con un numero o un trattino basso (_).
+- I nomi delle variabili fanno distinzione tra maiuscole e minuscole (AGE, Age ed age sono tre variabili diverse).
+- Le parole riservate non possono essere utilizzate come nomi di variabili (TRUE, FALSE, NULL, if...).
+
+Tuttavia, vi consiglio fortemente di seguire l'euristica che ho descritto sopra -- non c'è alcuna necessità di fare altro.  Ricordate: è necessario che i vincoli qui descritti siano soddisfatti **prima** di leggere i dati in R.
+
+# Project-oriented workflow
+
+Avendo capito cosa vogliamo ottenere, vediamo ora come leggere i dati in R da un file esterno (un link ad un video-tutorial su questo tema è fornito nel demo05).
+
+Il problema della lettura dei dati in R è illustrato da un famoso post di [Jenny Bryan](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/). Il post descrive tutti i problemi che nascono dall'idea di specificare l'indirizzo di un file di dati in termini *assoluti*. Molto più efficiente è specificare l'indirizzo in termini *relativi*, ovvero in riferimento ad un progetto *self-contained*. Questo vuol dire che tutti i materiali (script, dati) di un progetto devono essere contenuti all'interno di una singola cartella (la cartella del progetto). Vediamo ora come ottenere due risultati:
+
+1. far coincidere la *working directory* con la cartella del progetto,
+2. specificare l'indirizzo dei file dei dati in termini relativi, in riferimento alla cartella del progetto.
+
+# Creare un "progetto"
+
+È possibile usare `RStudio->Project` per creare un "progetto", ovvero per fare in modo tale che la `working directory` corrisponda alla cartella che contiene tutti i materiali del progetto. 
+
+Ad esempio, il presente script Rmd è contenuto nella cartella `ds4psy_R_demos` che ha questa struttura:
+
+```{r, eval=FALSE}
+├── README.md
+├── data
+│   ├── MehrSongSpelke_exp_1.csv
+│   ├── data_mood.csv
+│   └── msleep.csv
+├── demos_ch03
+│   ├── demo03_01.Rmd
+│   ├── demo03_01.html
+│   ├── demo03_02.Rmd
+│   └── demo03_02.html
+├── demos_ch04
+│   ├── demo04_01.Rmd
+│   ├── demo04_01.html
+│   ├── demo04_02.Rmd
+│   └── demo04_03.Rmd
+├── demos_ch05
+│   ├── demo05_01.Rmd
+│   ├── demo05_01.html
+│   ├── demo05_02.Rmd
+│   ├── demo05_02.html
+│   ├── demo05_03.Rmd
+│   └── demo05_03.html
+├── demos_ch07
+│   ├── demo07_01.Rmd
+│   ├── demo07_01.html
+│   ├── demo07_02.Rmd
+│   └── demo07_02.html
+├── demos_ch08
+│   ├── demo08_01.Rmd
+│   ├── demo08_01.html
+│   ├── demo08_02.Rmd
+│   ├── demo08_02.html
+│   ├── demo08_03.Rmd
+│   ├── demo08_03.html
+│   ├── demo08_04.Rmd
+│   └── demo08_04.html
+├── demos_ch09
+│   ├── demo09_01.Rmd
+│   ├── demo09_01.html
+│   ├── demo09_02.Rmd
+│   └── demo09_02.html
+├── demos_ch11
+│   ├── demo11_01.Rmd
+│   ├── demo11_01.html
+│   ├── demo11_02.Rmd
+│   ├── demo11_02.html
+│   ├── demo11_03.Rmd
+│   └── demo11_03.html
+├── demos_ch12
+│   ├── demo12_01.Rmd
+│   ├── demo12_01.html
+│   ├── demo12_02.Rmd
+│   └── demo12_02.html
+├── demos_ch13
+│   ├── beta_distr.R
+│   ├── demo13_01.Rmd
+│   ├── demo13_01.html
+│   ├── demo13_02.Rmd
+│   └── demo13_02.html
+├── demos_ch14
+│   ├── demo14_01.Rmd
+│   ├── demo14_01.html
+│   ├── demo14_02.Rmd
+│   └── demo14_02.html
+├── demos_ch17
+│   ├── demo17_04.Rmd
+│   ├── demo17_04.html
+│   ├── demo17_1.Rmd
+│   ├── demo17_1.html
+│   ├── demo17_2.Rmd
+│   ├── demo17_2.html
+│   ├── demo17_3.Rmd
+│   └── demo17_3.html
+├── demos_ch18
+│   ├── code
+│   │   ├── hello_world
+│   │   └── hello_world.stan
+│   ├── demo18_01.Rmd
+│   └── demo18_01.html
+├── ds4psy_R_demos.Rproj
+└── project
+    ├── MehrSongSpelke_exp_1.csv
+    ├── code
+    │   ├── normalmodel
+    │   ├── normalmodel.stan
+    │   ├── normalmodel2
+    │   └── normalmodel2.stan
+    ├── esempio_report.Rproj
+    ├── melodies_infants.pdf
+    ├── melody.Rmd
+    └── melody.html
+```
+
+Si noti il file `ds4psy_R_demos.Rproj` che è stato creato da RStudio con `File -> New Project...`.
+
+Se apro RStudio cliccando su `ds4psy_R_demos.Rproj`, questo avrà l'effetto di fare in modo che la *working directory* corrisponda alla cartella che contiene il progetto.
+
+Di conseguenza, potrò descrivere l'indirizzo del file dei dati che voglio leggere in R *in termini relativi*, ovvero solo facendo riferimento alla cartella che corrisponde alla *working directory*. 
+
+# Dove sono i dati?
+
+Iniziamo a chiederci quale sia l'indirizzo della *working directory*.
+
+```{r}
+here::here()
+```
+
+Questo è l'indirizzo *assoluto* della *working directory*. Ma su un'altra macchina sarà diverso. Di questo si prenderà cura la funzione `here::here()`, per cui, della componente *assoluta* dell'indirizzo del file dei dati *non mi devo preoccupare*. L'unica cosa che devo specificare è l'indirizzo *relativo*, ovvero dove si trova il file di dati che voglio leggere in R *rispetto alla working directory* . 
+
+Il file che voglio leggere in questo tutorial si chiama `msleep.csv` e si trova nella cartella `data`, che è contenuta nella *working directory*, come indicato nella struttura ad albero descritta sopra. 
+
+Utilizzando `here::here()`, posso definire nel modo seguente *l'indirizzo relativo* del file `msleep.csv`, ovvero in riferimento alla cartella di lavoro:
+
+```{r}
+here::here("data", "msleep.csv")
+```
+
+Si noti che la funzione `here()`, usando soltanto gli argomenti `data`, `msleep.csv`, è stata in grado di trovare l'indirizzo assoluto. Il problema di trovare l'indirizzo assoluto è un problema che viene risolto da `here()`: l'unica cosa di cui dobbiamo preoccuparci è specificare l'indirizzo *relativo* alla cartella di lavoro, ovvero `data/msleep.csv`. Per fare questo, usiamo `here()` come indicato sopra.
+
+
+# Leggere i dati in R
+
+Avendo capito come specificare l'indirizzo dei dati, possiamo ora passare tale indirizzo dalla funzione `rio::import()`:
+
+```{r}
+msleep <- rio::import(
+  here::here("data", "msleep.csv")
+)
+```
+
+Se non ottengo messaggi d'errore, vuol dire che l'operazione è andata a buon fine. Infatti, nel pannello `Environment` di RStudio compare un oggetto chiamato `msleep`.
+
+
+# Contenuto di `msleep`
+
+Esamino il contenuto di `msleep` con `dplyr::glimpse()`:
+
+```{r}
+glimpse(msleep)
+```
+
+Questo è il significato delle variabili:
+
+| column name |	Description |
+|-------------|-------------|
+|vore	        | carnivore, omnivore or herbivore? |
+|order	      | taxonomic rank |
+|conservation	| the conservation status of the mammal |
+|sleep_total	| total amount of sleep, in hours |
+|sleep_rem	  | rem sleep, in hours |
+|sleep_cycle	| length of sleep cycle, in hours |
+|awake	      | amount of time spent awake, in hours |
+|brainwt	    | brain weight in kilograms |
+|bodywt	      | body weight in kilograms |
+
+
+
+## Verbi dplyr da ricordare
+
+Usiamo ora le funzioni di `dplyr` per le operazioni di *data wrangling*.
+
+| dplyr verbs	| Description |
+|-------------|-------------|
+| select()	  | select columns |
+| filter()	  | filter rows |
+| arrange()	  | re-order or arrange rows |
+| mutate()	  | create new columns |
+| summarise()	| summarise values |
+| group_by()	| allows for group operations in the “split-apply-combine” concept |
+
+## Operatore pipe: `%>%`
+
+Per semplificare il codice, useremo l'operatore "pipe". L'operatore `%>%` consente di utilizzare l'output di una funzione quale input della funzione successiva.
+
+```{r}
+mean(msleep$sleep_total)
+```
+
+```{r}
+msleep %>% 
+  pull(sleep_total) %>% 
+  mean()
+```
+
+
+## Selezionare colonne con `select()`
+
+Un DataFrame in formato `tidy` può contere molto colonne (ovvero, variabili).  Per convenienza, ne possiamo selezionare solo alcune:
+
+```{r}
+sleep_data <- msleep %>% 
+  dplyr::select(name, sleep_total)
+head(sleep_data)
+```
+
+Per selezionare tutte le colonne eccetto alcune usare la sintassi seguente:
+
+```{r}
+msleep %>% 
+  dplyr::select(-c(name, genus, vore, order, conservation)) %>% 
+  head()
+```
+
+Per selezionare un insieme di colonne, da ... a ...
+
+```{r}
+names(msleep)
+```
+
+
+```{r}
+msleep %>% 
+  dplyr::select(order:sleep_cycle) %>% 
+  head()
+```
+
+Per selezionare tutte le colonne che iniziano con la stringa `sl`, usare la funzione `starts_with()`:
+
+```{r}
+msleep %>% 
+  dplyr::select(starts_with("sl")) %>% 
+  head()
+```
+
+Altre utili funzioni sono:
+
+- `ends_with()` = Select columns that end with a character string
+- `contains()` = Select columns that contain a character string
+- `matches()` = Select columns that match a regular expression
+- `one_of()` = Select columns names that are from a group of names
+
+## Selezionare righe con `filter()`
+
+Selezioniamo tutti i mammiferi che dormono almeno 16 ore:
+
+```{r}
+sleep_16 <- msleep %>% 
+  dplyr::filter(sleep_total >= 16) 
+```
+
+```{r}
+dim(sleep_16)
+dim(msleep)
+```
+
+Selezioniamo tutti i mammiferi che dormono almeno 16 ore e hanno un peso di almeno 1 kg:
+
+```{r}
+sleep_16_1kg <- msleep %>% 
+  dplyr::filter(sleep_total >= 16 & bodywt >= 1) 
+```
+
+```{r}
+dim(sleep_16_1kg)
+```
+
+Selezioniamo le righe nelle quali `order` assume le modalità `Perissodactyla` e `Primates`:
+
+```{r}
+msleep %>% 
+  dplyr::filter(
+    order %in% c("Perissodactyla", "Primates")
+  )
+```
+È possibile utilizzare tutti gli operatori logici per selezionare sottoinsiemi di righe: `>, <, >=, <=, !=, %in% `.
+
+## Ordinare le osservazioni
+
+```{r}
+msleep %>% 
+  select(name, order) %>% 
+  arrange(order) 
+```
+
+```{r}
+msleep %>% 
+  dplyr::select(name, order, sleep_total) %>%
+  arrange(order, desc(sleep_total)) %>% 
+  dplyr::filter(sleep_total >= 16)
+
+```
+
+## Creare nuove variabili con `mutate()`
+
+```{r}
+msleep <- msleep %>% 
+    mutate(
+      rem_proportion = sleep_rem / sleep_total,
+      bodywt_grams = bodywt * 1000
+    ) 
+msleep %>% 
+  glimpse()
+```
+
+## Funzione `summarise()`
+
+```{r}
+msleep %>%
+  summarise(
+    avg_sleep = mean(sleep_total),
+    min_sleep = min(sleep_total),
+    max_sleep = max(sleep_total),
+    total = n()
+  )
+```
+
+## Ragruppare le operazioni con `group_by()`
+
+```{r}
+msleep %>%
+  group_by(vore) %>%
+  summarise(
+    avg_sleep = mean(sleep_total),
+    min_sleep = min(sleep_total),
+    max_sleep = max(sleep_total),
+    total = n()
+  )
+```
+
+
+
+
+
+
+
+

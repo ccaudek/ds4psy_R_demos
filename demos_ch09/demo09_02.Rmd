@@ -1,0 +1,60 @@
+---
+title: "Data science per psicologi - demo 09.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("tidyverse")
+  library("prob")
+})
+
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Esercizi sulle distribuzione congiunta 
+
+## Esercizio 1
+
+Due pazienti, $A$ e $B$, completano insieme un compito standardizzato costituito da un gran numero di prove. I pazienti discutono insieme, ma poi ciascuno di essi fornisce una risposta separata in ciascuna prova. Le risposte possono essere corrette oppure errate. Qui sotto è riportata la distribuzione di probabilità congiunta (derivata dalle frequenze relative) della prestazione dei due pazienti. La distribuzione descrive la probabilità di commettere un errore.
+
+|        |  $B$     |   $B^C$  |  Totale  |
+| :---:  | :----:   |  :---:   | :------: |
+| $A$    | 0.05     | 0.25     |  0.30    |
+| $A^C$  | 0.10     | 0.60     |  0.70    |
+| Totale | 0.15     | 0.85     |  1.00    |
+
+1. Qual è la probabilità che almeno uno dei due pazienti commetta un errore? 
+
+2. Qual è la probabilità che almeno un paziente fornisca la risposta giusta? 
+
+3. La probabilità che $A$ commetta un errore è indipendente dalla probabilità che $B$ commetta un errore?
+
+### Soluzioni
+
+1. $p(A \cap B) = 0.3 + 0.15 - 0.05 = 0.40$.
+
+2. $p(A^C \cap B^C) = 1 - p((A \cap B)^C)$ = 0.95.
+
+3. I due eventi non sono indipendenti: le probabilità congiunte non sono uguali al prodotto delle marginali.
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
