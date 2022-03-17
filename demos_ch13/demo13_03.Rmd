@@ -1,0 +1,281 @@
+---
+title: "Data science per psicologi - demo 13.03"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("bayesplot")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Funzione beta
+
+La funzione beta di Eulero è una funzione matematica, non è una distribuzione di densità.
+
+Nella dispensa abbiamo visto che dipende da due parametri, $\alpha$ e $\beta$. 
+
+Ad esempio, fissiamo i parametri ai valori seguenti:
+
+```{r}
+alpha <- 2
+beta <- 4
+```
+
+Così facendo otteniamo il seguente risultato:
+
+```{r}
+beta(alpha, beta)
+```
+
+Questo risultato si ottiene nel modo seguente:
+
+```{r}
+gamma(alpha) * gamma(beta) / gamma(alpha + beta)
+```
+
+ovvero
+
+```{r}
+(factorial(alpha - 1) * factorial(beta - 1)) / 
+  (factorial(alpha + beta - 1))
+```
+
+Ciò significa che la funzione gamma è uguale a:
+
+```{r, eval=FALSE}
+factorial(x - 1)
+```
+
+Possiamo denotare la funzione beta con $\mbox{B}(\alpha, \beta)$.
+
+
+## Distribuzione beta
+
+La distribuzione beta è definita come
+
+$$
+\mbox{Beta}(\alpha, \beta) = \frac{1}{\mbox{B}(\alpha, \beta)} \pi^{\alpha-1}\pi^{\beta-1}.
+$$
+
+La distribuzione beta è dunque una distribuzione continua con supporto $[0, 1]$.
+
+Per esempio, la funzione beta di parametri 
+
+```{r}
+x <- seq(0, 1, length.out = 1e3)
+y <- dbeta(x, 2, 4)
+tibble(x, y) %>% 
+  ggplot(aes(x, y)) +
+  geom_line()
+```
+
+ovvero
+
+```{r}
+beta_fnc <- function(alpha, beta) {
+    (factorial(alpha - 1) * factorial(beta - 1)) / 
+  (factorial(alpha + beta - 1))
+  }
+
+beta_dens <- function(alpha, beta, pi) {
+  (1 / beta_fnc(alpha, beta)) * (pi^(alpha-1) * (1 - pi)^(beta -1))
+}
+
+y <- beta_dens(2, 4, x)
+tibble(x, y) %>% 
+  ggplot(aes(x, y)) +
+  geom_line()
+```
+
+Possiamo anche usare
+
+```{r}
+bayesrules::plot_beta(alpha, beta)
+```
+
+L'area sottesa alla funzione di densità è
+
+```{r}
+integrand <- function(p) {
+ 1 / beta_fnc(alpha, beta) * p^{alpha - 1}*(1 - p)^{beta - 1}
+}
+
+integrate(integrand, lower = 0, upper = 1)
+```
+
+
+Dato che il kernel della distribuzione beta, ovvero $\pi^{\alpha-1}\pi^{\beta-1}$ è moltiplicato per $1/\mbox{B}(\alpha, \beta)$, questo significa che la funzione beta viene utilizzata per normalizzare la densità del kernel della funzione beta. In altre parole, il valore della funzione beta
+
+```{r}
+beta(alpha, beta)
+```
+
+è uguale all'area del kernel della distribuzione beta:
+
+```{r}
+integrand <- function(p) {
+ p^{alpha - 1}*(1 - p)^{beta - 1}
+}
+
+integrate(integrand, lower = 0, upper = 1)
+```
+
+La funzione beta fornisce dunque una costante di normalizzazione per il kernel della distribuzione beta.
+
+### Valore atteso
+
+Calcoliamo il valore atteso:
+
+$$
+\mathbb{E}(\pi) = \frac{\alpha}{\alpha + \beta}
+$$
+
+```{r}
+ex <- alpha / (alpha + beta)
+ex
+```
+
+ovvero
+
+$$
+\mathbb{E}(\pi) = \int x f(x) dx
+$$
+
+```{r}
+a <- alpha
+b <- beta
+integrand <- function(p) {
+ p * 1 / beta_fnc(a, b) * p^{a - 1}*(1 - p)^{b - 1}
+  }
+
+integrate(integrand, lower = 0, upper = 1)
+```
+
+
+### Varianza
+
+La varianza è 
+
+$$
+\mbox{Var}(\pi) = \frac{\alpha \beta}{(\alpha + \beta)^2 (\alpha + \beta + 1)}
+$$
+
+```{r}
+var_beta_distr <- function(a, b) {
+  (a * b) / ((a + b)^2 * (a + b + 1))
+}
+var_beta_distr(alpha, beta)
+```
+
+ovvero
+
+```{r}
+a <- alpha
+b <- beta
+integrand <- function(p) {
+ (p - ex)^2 * 1 / beta_fnc(a, b) * p^{a - 1}*(1 - p)^{b - 1}
+}
+
+integrate(integrand, lower = 0, upper = 1)
+```
+
+In maniera equivalente
+
+```{r}
+integrand <- function(p) {
+ (p - ex)^2 * dbeta(p, alpha, beta)
+}
+integrate(integrand, lower = 0, upper = 1)
+```
+
+Gli stessi risultati si ottengono con `summarize_beta()`:
+
+```{r}
+ bayesrules::summarize_beta(alpha, beta)
+```
+
+## Interpretazione
+
+Iniziamo a calcolare la *mediana* della distribuzione Beta. 
+
+Un valore **approssimativo** della mediana è dato da:
+
+$$
+\mbox{Md} \approx \frac{\alpha - \frac{1}{3}}{\alpha + \beta - \frac{2}{3}}
+$$
+Implementiamo questa funzione in $\mathsf{R}$:
+
+```{r}
+median_beta <- function(a, b) {
+  (a - 1/3) / (a + b - 2/3)
+}
+```
+
+Per i parametri dell'esempio, otteniamo:
+
+```{r}
+med <- median_beta(alpha, beta)
+med
+```
+
+Che interpretazione può essere assegnata alla mediana nel caso di una funzione di densità?
+
+Nel caso delle variabili casuali continue, abbiamo visto che la media coincide con il centro di massa della distribuzione. Questa idea può essere estesa al caso delle funzioni di densità. In questo secondo caso, però, è la mediana, $x_m$, che divide l'area sottesa alla funzione di densità in due porzioni uguali:
+
+$$
+\int_{-\infty}^{x_m} p(x) dx = \int_{x_m}^{-\infty} p(x) dx = \frac{1}{2}.
+$$
+
+Verifichiamo questa affermazione nel caso della distribuzione Beta in esame:
+
+```{r}
+a <- alpha
+b <- beta
+integrand <- function(p) {
+  1 / beta_fnc(a, b) * p^{a - 1}*(1 - p)^{b - 1}
+  }
+
+integrate(integrand, lower = 0, upper = median_beta(a, b))
+```
+
+Al valore atteso e alla varianza possiamo invece assegnare l'interpretazione usuale:
+
+```{r}
+x <- rbeta(1e6, alpha, beta)
+```
+
+```{r}
+mean(x)
+```
+
+```{r}
+var(x)
+```
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
