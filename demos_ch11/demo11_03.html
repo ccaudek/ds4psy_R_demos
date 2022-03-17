@@ -11,7 +11,7 @@
 
 <meta name="author" content="Corrado Caudek" />
 
-<meta name="date" content="2022-02-06" />
+<meta name="date" content="2022-03-17" />
 
 <title>Data science per psicologi - demo 11.02</title>
 
@@ -257,7 +257,9 @@ window.initializeCodeFolding = function(show) {
     showCodeButton.append(showCodeText);
     showCodeButton
         .attr('data-toggle', 'collapse')
+        .attr('data-bs-toggle', 'collapse') // BS5
         .attr('data-target', '#' + id)
+        .attr('data-bs-target', '#' + id)   // BS5
         .attr('aria-expanded', showThis)
         .attr('aria-controls', id);
 
@@ -316,6 +318,7 @@ window.initializeSourceEmbed = function(filename) {
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 <style type="text/css">
@@ -446,6 +449,9 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+details > summary > p:only-child {
+  display: inline;
+}
 pre code {
   padding: 0;
 }
@@ -530,7 +536,7 @@ pre code {
 <div id="header">
 
 <div class="btn-group pull-right float-right">
-<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
 <ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
 <li><a id="rmd-download-source" href="#">Download Rmd</a></li>
 </ul>
@@ -541,7 +547,7 @@ pre code {
 <h1 class="title toc-ignore">Data science per psicologi - demo
 11.02</h1>
 <h4 class="author">Corrado Caudek</h4>
-<h4 class="date">2022-02-06</h4>
+<h4 class="date">2022-03-17</h4>
 
 </div>
 
@@ -770,54 +776,161 @@ correlazione:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>s_uv <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">var</span>(U) <span class="sc">*</span> <span class="fu">var</span>(V))</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.621059</span></span></code></pre></div>
 </div>
+<div id="covarianza-2" class="section level2">
+<h2>Covarianza (2)</h2>
+<p>Calcoliamo nuovamente la covarianza in maniera più diretta, ovvero
+applicando la formula seguente mediante due cicli
+<code>for()</code>:</p>
+<p><span class="math display">\[
+\sigma_{xy} = \sum_i \big(x_i - \mathbb{E}(x)\big)\big(y_i -
+\mathbb{E}(y)\big) \cdot p_i(x,y)
+\]</span> Iniziamo creando un oggetto chiamato <code>puv</code> che
+contiene la distribuzione di probabilità congiunta delle variabili <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>puv <span class="ot">&lt;-</span> <span class="fu">xtabs</span>(<span class="fu">round</span>(probs, <span class="dv">3</span>) <span class="sc">~</span> U <span class="sc">+</span> V, <span class="at">data =</span> UV)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>puv</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     V</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="do">## U        0     1</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   2  0.000 0.028</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="do">##   3  0.000 0.056</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="do">##   4  0.000 0.083</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   5  0.028 0.083</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   6  0.056 0.083</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="do">##   7  0.083 0.083</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="do">##   8  0.083 0.056</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="do">##   9  0.083 0.028</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="do">##   10 0.083 0.000</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="do">##   11 0.056 0.000</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="do">##   12 0.028 0.000</span></span></code></pre></div>
+<p>La somma degli elementi di <code>puv</code> deve essere uguale a 1 (è
+sempre una buona idea controllare):</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(puv)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 1</span></span></code></pre></div>
+<p>La variabile casuale <code>u</code> assume i valori:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">12</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>u</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1]  2  3  4  5  6  7  8  9 10 11 12</span></span></code></pre></div>
+<p>La variabile casuale <code>v</code> assume i valori:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">1</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>v</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0 1</span></span></code></pre></div>
+<p>Abbiamo già calcolato in precedenza i valori attesi delle due
+variabili casuali, che sono chiamati <code>mu_u</code> e
+<code>mu_v</code>:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>mu_u</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 7</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>mu_v</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
+<p>Per semplicità, creo una matrice vuota delle stesse dimensioni
+dell’oggetto <code>puv</code>:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>suv <span class="ot">&lt;-</span> <span class="fu">matrix</span>(, <span class="at">nrow =</span> <span class="dv">11</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="co"># empty matrix</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>suv</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="do">##       [,1] [,2]</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1,]   NA   NA</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="do">##  [2,]   NA   NA</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="do">##  [3,]   NA   NA</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="do">##  [4,]   NA   NA</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="do">##  [5,]   NA   NA</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="do">##  [6,]   NA   NA</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="do">##  [7,]   NA   NA</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="do">##  [8,]   NA   NA</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="do">##  [9,]   NA   NA</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="do">## [10,]   NA   NA</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="do">## [11,]   NA   NA</span></span></code></pre></div>
+<p>Utilizzo due cicli <code>for()</code> nidificati (<em>nested</em>)
+per calcolare il valore di ciascun prodotto</p>
+<p><span class="math display">\[
+\big(u_i - \mathbb{E}(u)\big)\big(v_j - \mathbb{E}(v)\big) \cdot
+p_{i,j}(u,v)
+\]</span></p>
+<p>con <span class="math inline">\(i \in \{1, \dots, 11\}\)</span> e
+<span class="math inline">\(j \in \{1, 2\}\)</span>, che verrà salvato
+nel corrispondente elemento della matrice <code>suv</code>:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">11</span>) {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>) {</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    suv[i, j] <span class="ot">&lt;-</span> (u[i] <span class="sc">-</span> mu_u) <span class="sc">*</span> (v[j] <span class="sc">-</span> mu_v) <span class="sc">*</span> puv[i, j]</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Nel caso presente, si inizia con <code>i = 1</code>. Viene quindi
+svolto il ciclo interno e quindi, in due esecuzioni, <code>j = 1</code>
+e <code>j = 2</code>. Una volta completato il ciclo interno, il valore
+dell’indice del ciclo esterno varrà <code>i = 2</code>. Si ripetono le
+esecuzioni del ciclo interno, <code>j = 1</code> e <code>j = 2</code>.
+Così via fino a <code>i = 11</code>.</p>
+<p>Esaminiamo la prima esecuzione del ciclo interno per
+<code>i = 1</code>. Ciò corrisponde a:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(u[<span class="dv">1</span>] <span class="sc">-</span> mu_u) <span class="sc">*</span> (v[<span class="dv">1</span>] <span class="sc">-</span> mu_v) <span class="sc">*</span> puv[<span class="dv">1</span>, <span class="dv">1</span>]</span></code></pre></div>
+<p>ovvero</p>
+<p><span class="math display">\[
+\big(u_1 - \mathbb{E}(u)\big)\big(v_1 - \mathbb{E}(v)\big) \cdot
+p_{1,1}(u,v)
+\]</span> Nel secondo step avremo</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(u[<span class="dv">1</span>] <span class="sc">-</span> mu_u) <span class="sc">*</span> (v[<span class="dv">2</span>] <span class="sc">-</span> mu_v) <span class="sc">*</span> puv[<span class="dv">1</span>, <span class="dv">2</span>]</span></code></pre></div>
+<p>ovvero</p>
+<p><span class="math display">\[
+\big(u_1 - \mathbb{E}(u)\big)\big(v_2 - \mathbb{E}(v)\big) \cdot
+p_{1,2}(u,v)
+\]</span> E così via per tutti gli <span class="math inline">\(11\times2\)</span> elementi della matrice che
+contiene la distribuzione di probabilità congiunta.</p>
+<p>È irrilevante quale sia il ciclo esterno e quale quello interno,
+questo cambia soltanto l’ordine con il quale ventono svolte le
+operazioni.</p>
+<p>Una volta svolti i calcoli precedenti, non resta che sommare tutti
+gli addendi, ovvero gli <span class="math inline">\(11\times2\)</span>
+elementi della matrice <code>suv</code>. Così facendo troviamo la
+covarianza tra <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span>:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(suv)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.75</span></span></code></pre></div>
+<p>Il risultato riproduce quello trovato in precedenza.</p>
+</div>
 <div id="informazioni-sulla-sessione-di-lavoro" class="section level2">
 <h2>Informazioni sulla sessione di lavoro</h2>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>utils<span class="sc">::</span><span class="fu">sessionInfo</span>()</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="do">## R version 4.1.2 (2021-11-01)</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Platform: x86_64-apple-darwin17.0 (64-bit)</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Running under: macOS Big Sur 10.16</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Matrix products: default</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="do">## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="do">## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="do">## locale:</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="do">## attached base packages:</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="do">## other attached packages:</span></span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] distrEx_2.8.0         distr_2.8.0           sfsmisc_1.1-12       </span></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="do">##  [4] startupmsg_0.9.6      prob_1.0-1            fAsianOptions_3042.82</span></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="do">##  [7] fOptions_3042.86      fBasics_3042.89.1     timeSeries_3062.100  </span></span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="do">## [10] timeDate_3043.102     combinat_0.0-8        bayesplot_1.8.1      </span></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="do">## [13] scales_1.1.1          forcats_0.5.1         stringr_1.4.0        </span></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="do">## [16] dplyr_1.0.7           purrr_0.3.4           readr_2.1.2          </span></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="do">## [19] tidyr_1.2.0           tibble_3.1.6          ggplot2_3.3.5        </span></span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="do">## [22] tidyverse_1.3.1       here_1.0.1           </span></span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="do">## loaded via a namespace (and not attached):</span></span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] httr_1.4.2        sass_0.4.0        jsonlite_1.7.3    R.utils_2.11.0   </span></span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="do">##  [5] modelr_0.1.8      bslib_0.3.1       assertthat_0.2.1  cellranger_1.1.0 </span></span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="do">##  [9] yaml_2.2.2        pillar_1.7.0      backports_1.4.1   glue_1.6.1       </span></span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="do">## [13] digest_0.6.29     rvest_1.0.2       colorspace_2.0-2  R.oo_1.24.0      </span></span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="do">## [17] htmltools_0.5.2   plyr_1.8.6        pkgconfig_2.0.3   broom_0.7.12     </span></span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="do">## [21] haven_2.4.3       tzdb_0.2.0        styler_1.6.2      generics_0.1.2   </span></span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="do">## [25] spatial_7.3-15    ellipsis_0.3.2    withr_2.4.3       cli_3.1.1        </span></span>
-<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="do">## [29] magrittr_2.0.2    crayon_1.4.2      readxl_1.3.1      evaluate_0.14    </span></span>
-<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a><span class="do">## [33] R.methodsS3_1.8.1 fs_1.5.2          fansi_1.0.2       R.cache_0.15.0   </span></span>
-<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a><span class="do">## [37] MASS_7.3-55       xml2_1.3.3        tools_4.1.2       hms_1.1.1        </span></span>
-<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a><span class="do">## [41] lifecycle_1.0.1   munsell_0.5.0     reprex_2.0.1      compiler_4.1.2   </span></span>
-<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a><span class="do">## [45] jquerylib_0.1.4   rlang_1.0.1       grid_4.1.2        ggridges_0.5.3   </span></span>
-<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a><span class="do">## [49] rstudioapi_0.13   rmarkdown_2.11    gtable_0.3.0      DBI_1.1.2        </span></span>
-<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a><span class="do">## [53] R6_2.5.1          lubridate_1.8.0   knitr_1.37        fastmap_1.1.0    </span></span>
-<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a><span class="do">## [57] utf8_1.2.2        rprojroot_2.0.2   stringi_1.7.6     Rcpp_1.0.8       </span></span>
-<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a><span class="do">## [61] vctrs_0.3.8       dbplyr_2.1.1      tidyselect_1.1.1  xfun_0.29</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>utils<span class="sc">::</span><span class="fu">sessionInfo</span>()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="do">## R version 4.1.3 (2022-03-10)</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Platform: x86_64-apple-darwin17.0 (64-bit)</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Running under: macOS Big Sur/Monterey 10.16</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Matrix products: default</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="do">## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="do">## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="do">## locale:</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="do">## attached base packages:</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="do">## other attached packages:</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] distrEx_2.8.0         distr_2.8.0           sfsmisc_1.1-12       </span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="do">##  [4] startupmsg_0.9.6      prob_1.0-1            fAsianOptions_3042.82</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="do">##  [7] fOptions_3042.86      fBasics_3042.89.1     timeSeries_3062.100  </span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="do">## [10] timeDate_3043.102     combinat_0.0-8        bayesplot_1.9.0      </span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="do">## [13] scales_1.1.1          forcats_0.5.1         stringr_1.4.0        </span></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="do">## [16] dplyr_1.0.8           purrr_0.3.4           readr_2.1.2          </span></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="do">## [19] tidyr_1.2.0           tibble_3.1.6          ggplot2_3.3.5        </span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="do">## [22] tidyverse_1.3.1       here_1.0.1           </span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a><span class="do">## loaded via a namespace (and not attached):</span></span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] httr_1.4.2        sass_0.4.0.9000   jsonlite_1.8.0    R.utils_2.11.0   </span></span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a><span class="do">##  [5] modelr_0.1.8      bslib_0.3.1       assertthat_0.2.1  cellranger_1.1.0 </span></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a><span class="do">##  [9] yaml_2.3.5        pillar_1.7.0      backports_1.4.1   glue_1.6.2       </span></span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a><span class="do">## [13] digest_0.6.29     rvest_1.0.2       colorspace_2.0-3  R.oo_1.24.0      </span></span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a><span class="do">## [17] htmltools_0.5.2   plyr_1.8.6        pkgconfig_2.0.3   broom_0.7.12     </span></span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a><span class="do">## [21] haven_2.4.3       tzdb_0.2.0        styler_1.7.0      generics_0.1.2   </span></span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a><span class="do">## [25] spatial_7.3-15    ellipsis_0.3.2    withr_2.5.0       cli_3.2.0        </span></span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a><span class="do">## [29] magrittr_2.0.2    crayon_1.5.0      readxl_1.3.1      evaluate_0.15    </span></span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a><span class="do">## [33] R.methodsS3_1.8.1 fs_1.5.2          fansi_1.0.2       R.cache_0.15.0   </span></span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a><span class="do">## [37] MASS_7.3-55       xml2_1.3.3        tools_4.1.3       hms_1.1.1        </span></span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a><span class="do">## [41] lifecycle_1.0.1   munsell_0.5.0     reprex_2.0.1      compiler_4.1.3   </span></span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a><span class="do">## [45] jquerylib_0.1.4   rlang_1.0.2       grid_4.1.3        ggridges_0.5.3   </span></span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a><span class="do">## [49] rstudioapi_0.13   rmarkdown_2.13    gtable_0.3.0      DBI_1.1.2        </span></span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a><span class="do">## [53] rematch2_2.1.2    R6_2.5.1          lubridate_1.8.0   knitr_1.37       </span></span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a><span class="do">## [57] fastmap_1.1.0     utf8_1.2.2        rprojroot_2.0.2   stringi_1.7.6    </span></span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a><span class="do">## [61] Rcpp_1.0.8.2      vctrs_0.3.8       dbplyr_2.1.1      tidyselect_1.1.2 </span></span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a><span class="do">## [65] xfun_0.30</span></span></code></pre></div>
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDExLjAyIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBoaWdobGlnaHQ6IHB5Z21lbnRzCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgiaGVyZSIpCiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJzY2FsZXMiKQogIGxpYnJhcnkoImJheWVzcGxvdCIpCiAgbGlicmFyeSgicHJvYiIpCiAgbGlicmFyeSgiZGlzdHJFeCIpCn0pCgp0aGVtZV9zZXQoYmF5ZXNwbG90Ojp0aGVtZV9kZWZhdWx0KGJhc2Vfc2l6ZSA9IDEyKSkKYmF5ZXNwbG90Ojpjb2xvcl9zY2hlbWVfc2V0KCJncmF5IikKc2V0LnNlZWQoODQ3MzUpCgprbml0cjo6b3B0c19jaHVuayRzZXQoCiAgY29sbGFwc2UgPSBUUlVFLAogIHRpZHkgPSAnc3R5bGVyJywKICBmaWcud2lkdGggPSA2LAogIGZpZy5hc3AgPSAwLjYxOCAjIDEgLyBwaGkKKQpgYGAKCiMgTGEgY292YXJpYW56YSBkaSBkdWUgdmFyaWFiaWxpIGFsZWF0b3JpZSBkaXNjcmV0ZQoKUG9uaWFtb2NpIGlsIHByb2JsZW1hIGRpIGNhbGNvbGFyZSBsYSBjb3ZhcmlhbnphIGUgbGEgY29ycmVsYXppb25lIGRpIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGRpc2NyZXRlIHV0aWxpenphbmRvIGwnaW5mb3JtYXppb25lIGZvcm5pdGEgZGFsbGEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AgY29uZ2l1bnRhLiAgCgpDb25zaWRlcmlhbW8gbCdlc3BlcmltZW50byBjYXN1YWxlIGNoZSBjb3JyaXNwb25kZSBhbCBsYW5jaW8gZGkgZHVlIGRhZGkgYmlsYW5jaWF0aS4gQ3JlaWFtbyBsbyBzcGF6aW8gY2FtcGlvbmFyaW8gZGkgcXVlc3RvIGVzcGVyaW1lbnRvIGNhc3VhbGUgZSBkZWZpbmlhbW8gc3UgZGkgZXNzbyBsZSBzZWd1ZW50aSB2YXJpYWJpbGkgYWxlYXRvcmllOgoKLSBVOiBzb21tYSBkZWkgcHVudGkgZGVpIGR1ZSBkYWRpLAotIFY6IDEgc2UgaSBwdW50aSBkZWwgbGFuY2lvIGRlbCBwcmltbyBkYWRvIHNvbm8gbWlub3JpIGRpIDQsIDAgYWx0cmltZW50aS4KClBvc3NpYW1vIG90dGVuZXJlIHVuIGVsZW5jbyBkaSB0dXR0aSBnbGkgZXZlbnRpIGVsZW1lbnRhcmkgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIHVzYW5kbyBsZSBpc3RydXppb25pIHNlZ3VlbnRpOgoKYGBge3J9ClMgPC0gcm9sbGRpZSgyLCBuc2lkZXMgPSA2LCBtYWtlc3BhY2UgPSBUUlVFKQpTIDwtIGFkZHJ2KFMsIFUgPSBYMStYMiwgViA9IGlmZWxzZShYMSA8IDQsIDEsIDApKQpTCmBgYAoKTGUgaXN0cnV6aW9uaSBwcmVjZWRlbnRpIHNwZWNpZmljYW5vLCBpbiBjb3JyaXNwb25kZW56YSBkaSBvZ25pIHB1bnRvIGRlbGxvIHNwYXppbyBjYW1waW9uYXJpbyAob3Z2ZXJvLCBpbiBjaWFzY3VuYSByaWdhIGRlbCBkYXRhLmZyYW1lIGNoZSB2aWVuZSBnZW5lcmF0byksIGlsIHZhbG9yZSBhc3N1bnRvIGRhbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGNoZSBzb25vIHN0YXRlIGRlZmluaXRlLgoKTGEgZGVzY3JpemlvbmUgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIGZvcm5pdGEgZGEgYFJgIMOoIGNvcnJldHRhOiBxdWVzdG8gZXNwZXJpbWVudG8gY2FzdWFsZSBwcm9kdWNlIGluZmF0dGkgNiAkXHRpbWVzJCA2IGVzaXRpIChldmVudGkgZWxlbWVudGFyaSkgcG9zc2liaWxpLiBNYSBzaSBub3RpIGNoZSBhbGN1bmUgcmlnaGUgZGVsIGRhdGEuZnJhbWUgc2kgcmlwZXRvbm8gcGnDuSB2b2x0ZS4gUG9zc2lhbW8gZHVucXVlIHNlbXBsaWZpY2FyZSB0YWxlIGRlc2NyaXppb25lIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9ClVWIDwtIG1hcmdpbmFsKFMsIHZhcnMgPSBjKCJVIiwgIlYiKSkgClVWCmBgYAoKTCdlbGVuY28gZGVpIHZhbG9yaSBjaGUgbGUgZHVlIHZhcmlhYmlsaSBhbGVhdG9yaWUgJFUkIGUgJFYkIHBvc3Nvbm8gYXNzdW1lcmUsIGluc2llbWUgYWxsYSBwcm9iYWJpbGl0w6AgZGVsIGxvcm8gdmVyaWZpY2Fyc2ksIGNvc3RpdHVpc2NlIGxhIF9kaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGFfIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllLiDDiCBhbmNoZSBwb3NzaWJpbGUgcHJlc2VudGFyZSBsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGEgaW4gZm9ybWEgdGFidWxhcmUuIEEgdGFsZSBmaW5lIHBvc3NpYW1vIHV0aWxpenphcmUgbGEgZnVuemlvbmUgYHh0YWJzKClgOgoKYGBge3J9Cnh0YWJzKHJvdW5kKHByb2JzLCAzKSB+IFUgKyBWLCBkYXRhID0gVVYpCmBgYAoKUmlwZXRpYW1vIG9yYSBpbCBwcm9jZXNzbyBwcmVjZWRlbnRlIGNoaWVkZW5kbyBhbGxhIGZ1bnppb25lIGBtYXJnaW5hbCgpYCBkaSBjYWxjb2xhcmUgbGUgZHVlIGRpc3RyaWJ1emlvbmkgbWFyZ2luYWxpIHVuaXZhcmlhdGU6CgpgYGB7cn0KcHUgPC0gbWFyZ2luYWwoUywgdmFycyA9ICJVIikKcHUKYGBgCgplCgpgYGB7cn0KcHYgPC0gbWFyZ2luYWwoUywgdmFycyA9ICJWIikKcHYKYGBgCgpJbiBtYW5pZXJhIGVxdWl2YWxlbnRlLCBsbyBzdGVzc28gcmlzdWx0YXRvIHNpIHRyb3ZhIGFwcGxpY2FuZG8gbGUgZnVuemlvbmkgYHJvd1N1bXMoKWAgZSBgY29sU3VtcygpYCBhbGwnb2dnZXR0byBjcmVhdG8gZGEgYHh0YWJzKClgOgoKYGBge3J9CnRlbXAgPC0geHRhYnMocHJvYnMgfiBVICsgViwgZGF0YSA9IFVWKQpyb3dTdW1zKHRlbXApCmBgYAoKZQoKYGBge3J9CmNvbFN1bXModGVtcCkKYGBgCgojIyBWYWxvcmUgYXR0ZXNvCgpDYWxjb2xpYW1vIG9yYSBpbCB2YWxvcmUgYXR0ZXNvIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllLiBVdGlsaXp6aWFtbyBsYSBmdW56aW9uZSBgRGlzY3JldGVEaXN0cmlidXRpb24oKWAuIElsIHByaW1vIGFyZ29tZW50byByaWNoaWVkZSB1biB2ZXR0b3JlIGNoZSBzcGVjaWZpY2EgaWwgc3VwcG9ydG8gZGVsbGEgdmFyaWFiaWxlIGNhc3VhbGUgZGlzY3JldGEuIElsIHNlY29uZG8gYXJnb21lbnRvIMOoIHVuIHZldHRvcmUgY2hlLCBwZXIgY2lhc3VuIHZhbG9yZSBkZWxsYSB2YXJpYWJpbGUgY2FzdWFsZSBkaXNjcmV0YSwgc3BlY2lmaWNhIGlsIGNvcnJpc3BvbmRlbnRlIHZhbG9yZSBkZWxsYSBmdW56aW9uZSBkaSBtYXNzYSBkaSBwcm9iYWJpbGl0w6AuIE1lZGlhbnRlIGxhIGZ1bnppb25lIGBEaXNjcmV0ZURpc3RyaWJ1dGlvbigpYCBvdHRlbmlhbW8gaWwgdmFsb3JlIGF0dGVzbyBkaSBgVWA6CgpgYGB7cn0KVSA8LSBEaXNjcmV0ZURpc3RyaWJ1dGlvbihzdXBwID0gcHUkVSwgcHJvYiA9IHB1JHByb2JzKQptdV91IDwtIEUoVSkKbXVfdQpgYGAKCklub2x0cmUsIGlsIHZhbG9yZSBhdHRlc28gZGkgYFZgIMOoOgoKYGBge3J9ClYgPC0gRGlzY3JldGVEaXN0cmlidXRpb24oc3VwcCA9IHB2JFYsIHByb2IgPSBwdiRwcm9icykKbXVfdiA8LSBFKFYpCm11X3YKYGBgCgoKIyMgQ292YXJpYW56YQoKVXRpbGl6emFuZG8gbGUgaW5mb3JtYXppb25pIHByZWNlZGVudGkgcG9zc2lhbW8gY2FsY29sYXJlIGxhIGNvdmFyaWFuemEgdHJhICRVJCBlICRWJC4gTGEgZm9ybXVsYSBkZWxsYSBjb3ZhcmlhbnphCgokJApcc2lnbWFfe3h5fSA9IFxzdW1faSBcYmlnKHhfaSAtIFxtYXRoYmJ7RX0oeClcYmlnKVxiaWcoeV9pIC0gXG1hdGhiYntFfSh5KVxiaWcpIFxjZG90IHBfaSh4LHkpCiQkCgpwdcOyIGVzc2VyZSBpbXBsZW1lbnRhdGEgaW4gYFJgIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9CnNfdXYgPC0gc3VtKChVViRVIC0gbXVfdSkgKiAoVVYkViAtIG11X3YpICogVVYkcHJvYnMpCnNfdXYKYGBgCgpMbyBzdGVzc28gcmlzdWx0YXRvIHNpIG90dGllbmUgdXNhbmRvIGxhIGZvcm11bGEgYWx0ZXJuYXRpdmEgcGVyIGlsIGNhbGNvbG8gZGVsbGEgY292YXJpYW56YToKCiQkClxzaWdtYV97eHl9ID0gXG1hdGhiYntFfSh4eSkgLVxtYXRoYmJ7RX0oeClcbWF0aGJie0V9KHkpCiQkCm92dmVybyAKCmBgYHtyfQpzdW0oKFVWJFUgKiBVViRWKSAqIFVWJHByb2JzKSAtIG11X3UgKiBtdV92CmBgYAoKCiMjIENvcnJlbGF6aW9uZQoKQ29ub3NjZW5kbyBsYSBjb3ZhcmlhbnphIMOoIHBvc3NpYmlsZSBjYWxjb2xhcmUgbGEgY29ycmVsYXppb25lLiBMYSBjb3JyZWxhemlvbmUgaW5mYXR0aSDDqCB1bmEgY292YXJpYW56YSBzdGFuZGFyZGl6emF0YToKCiQkClxyaG9fe3h5fSA9IFxmcmFje1xzaWdtYV97eHl9fXtcc2lnbWFfeFxzaWdtYV95fQokJAoKUGVyIHN0YW5kYXJkaXp6YXJlIGRvYmJpYW1vIGRpdmlkZXJlIHBlciBsZSBkdWUgZGV2aWF6aW9uaSBzdGFuZGFyZC4gSW5pemlhbW8gZHVucXVlIGEgY2FsY29sYXJlIGxlIHZhcmlhbnplIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllICRVJCBlICRWJDoKCmBgYHtyfQp2X3UgPC0gc3VtKChwdSRVIC0gbXVfdSleMiAqIHB1JHByb2JzKQp2X3UKdl92IDwtIHN1bSgocHYkViAtIG11X3YpXjIgKiBwdiRwcm9icykKdl92CmBgYAoKb3BwdXJlLCBpbiBtYW5pZXJhIGVxdWl2YWxlbnRlCgpgYGB7cn0KdmFyKFUpCnZhcihWKQpgYGAKCkFiYmlhbW8gb3JhIHR1dHRlIGxlIGluZm9ybWF6aW9uaSBuZWNlc3NhcmllIHBlciBpbCBjYWxjb2xvIGRlbGxhIGNvcnJlbGF6aW9uZToKCmBgYHtyfQpzX3V2IC8gc3FydCh2YXIoVSkgKiB2YXIoVikpCmBgYAoKIyMgSW5mb3JtYXppb25pIHN1bGxhIHNlc3Npb25lIGRpIGxhdm9ybwoKYGBge3J9CnV0aWxzOjpzZXNzaW9uSW5mbygpCmBgYAoKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDExLjAyIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBoaWdobGlnaHQ6IHB5Z21lbnRzCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgiaGVyZSIpCiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJzY2FsZXMiKQogIGxpYnJhcnkoImJheWVzcGxvdCIpCiAgbGlicmFyeSgicHJvYiIpCiAgbGlicmFyeSgiZGlzdHJFeCIpCn0pCgp0aGVtZV9zZXQoYmF5ZXNwbG90Ojp0aGVtZV9kZWZhdWx0KGJhc2Vfc2l6ZSA9IDEyKSkKYmF5ZXNwbG90Ojpjb2xvcl9zY2hlbWVfc2V0KCJncmF5IikKc2V0LnNlZWQoODQ3MzUpCgprbml0cjo6b3B0c19jaHVuayRzZXQoCiAgY29sbGFwc2UgPSBUUlVFLAogIHRpZHkgPSAnc3R5bGVyJywKICBmaWcud2lkdGggPSA2LAogIGZpZy5hc3AgPSAwLjYxOCAjIDEgLyBwaGkKKQpgYGAKCiMgTGEgY292YXJpYW56YSBkaSBkdWUgdmFyaWFiaWxpIGFsZWF0b3JpZSBkaXNjcmV0ZQoKUG9uaWFtb2NpIGlsIHByb2JsZW1hIGRpIGNhbGNvbGFyZSBsYSBjb3ZhcmlhbnphIGUgbGEgY29ycmVsYXppb25lIGRpIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGRpc2NyZXRlIHV0aWxpenphbmRvIGwnaW5mb3JtYXppb25lIGZvcm5pdGEgZGFsbGEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AgY29uZ2l1bnRhLiAgCgpDb25zaWRlcmlhbW8gbCdlc3BlcmltZW50byBjYXN1YWxlIGNoZSBjb3JyaXNwb25kZSBhbCBsYW5jaW8gZGkgZHVlIGRhZGkgYmlsYW5jaWF0aS4gQ3JlaWFtbyBsbyBzcGF6aW8gY2FtcGlvbmFyaW8gZGkgcXVlc3RvIGVzcGVyaW1lbnRvIGNhc3VhbGUgZSBkZWZpbmlhbW8gc3UgZGkgZXNzbyBsZSBzZWd1ZW50aSB2YXJpYWJpbGkgYWxlYXRvcmllOgoKLSBVOiBzb21tYSBkZWkgcHVudGkgZGVpIGR1ZSBkYWRpLAotIFY6IDEgc2UgaSBwdW50aSBkZWwgbGFuY2lvIGRlbCBwcmltbyBkYWRvIHNvbm8gbWlub3JpIGRpIDQsIDAgYWx0cmltZW50aS4KClBvc3NpYW1vIG90dGVuZXJlIHVuIGVsZW5jbyBkaSB0dXR0aSBnbGkgZXZlbnRpIGVsZW1lbnRhcmkgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIHVzYW5kbyBsZSBpc3RydXppb25pIHNlZ3VlbnRpOgoKYGBge3J9ClMgPC0gcm9sbGRpZSgyLCBuc2lkZXMgPSA2LCBtYWtlc3BhY2UgPSBUUlVFKQpTIDwtIGFkZHJ2KFMsIFUgPSBYMStYMiwgViA9IGlmZWxzZShYMSA8IDQsIDEsIDApKQpTCmBgYAoKTGUgaXN0cnV6aW9uaSBwcmVjZWRlbnRpIHNwZWNpZmljYW5vLCBpbiBjb3JyaXNwb25kZW56YSBkaSBvZ25pIHB1bnRvIGRlbGxvIHNwYXppbyBjYW1waW9uYXJpbyAob3Z2ZXJvLCBpbiBjaWFzY3VuYSByaWdhIGRlbCBkYXRhLmZyYW1lIGNoZSB2aWVuZSBnZW5lcmF0byksIGlsIHZhbG9yZSBhc3N1bnRvIGRhbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGNoZSBzb25vIHN0YXRlIGRlZmluaXRlLgoKTGEgZGVzY3JpemlvbmUgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIGZvcm5pdGEgZGEgYFJgIMOoIGNvcnJldHRhOiBxdWVzdG8gZXNwZXJpbWVudG8gY2FzdWFsZSBwcm9kdWNlIGluZmF0dGkgNiAkXHRpbWVzJCA2IGVzaXRpIChldmVudGkgZWxlbWVudGFyaSkgcG9zc2liaWxpLiBNYSBzaSBub3RpIGNoZSBhbGN1bmUgcmlnaGUgZGVsIGRhdGEuZnJhbWUgc2kgcmlwZXRvbm8gcGnDuSB2b2x0ZS4gUG9zc2lhbW8gZHVucXVlIHNlbXBsaWZpY2FyZSB0YWxlIGRlc2NyaXppb25lIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9ClVWIDwtIG1hcmdpbmFsKFMsIHZhcnMgPSBjKCJVIiwgIlYiKSkgClVWCmBgYAoKTCdlbGVuY28gZGVpIHZhbG9yaSBjaGUgbGUgZHVlIHZhcmlhYmlsaSBhbGVhdG9yaWUgJFUkIGUgJFYkIHBvc3Nvbm8gYXNzdW1lcmUsIGluc2llbWUgYWxsYSBwcm9iYWJpbGl0w6AgZGVsIGxvcm8gdmVyaWZpY2Fyc2ksIGNvc3RpdHVpc2NlIGxhIF9kaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGFfIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllLiDDiCBhbmNoZSBwb3NzaWJpbGUgcHJlc2VudGFyZSBsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGEgaW4gZm9ybWEgdGFidWxhcmUuIEEgdGFsZSBmaW5lIHBvc3NpYW1vIHV0aWxpenphcmUgbGEgZnVuemlvbmUgYHh0YWJzKClgOgoKYGBge3J9Cnh0YWJzKHJvdW5kKHByb2JzLCAzKSB+IFUgKyBWLCBkYXRhID0gVVYpCmBgYAoKUmlwZXRpYW1vIG9yYSBpbCBwcm9jZXNzbyBwcmVjZWRlbnRlIGNoaWVkZW5kbyBhbGxhIGZ1bnppb25lIGBtYXJnaW5hbCgpYCBkaSBjYWxjb2xhcmUgbGUgZHVlIGRpc3RyaWJ1emlvbmkgbWFyZ2luYWxpIHVuaXZhcmlhdGU6CgpgYGB7cn0KcHUgPC0gbWFyZ2luYWwoUywgdmFycyA9ICJVIikKcHUKYGBgCgplCgpgYGB7cn0KcHYgPC0gbWFyZ2luYWwoUywgdmFycyA9ICJWIikKcHYKYGBgCgpJbiBtYW5pZXJhIGVxdWl2YWxlbnRlLCBsbyBzdGVzc28gcmlzdWx0YXRvIHNpIHRyb3ZhIGFwcGxpY2FuZG8gbGUgZnVuemlvbmkgYHJvd1N1bXMoKWAgZSBgY29sU3VtcygpYCBhbGwnb2dnZXR0byBjcmVhdG8gZGEgYHh0YWJzKClgOgoKYGBge3J9CnRlbXAgPC0geHRhYnMocHJvYnMgfiBVICsgViwgZGF0YSA9IFVWKQpyb3dTdW1zKHRlbXApCmBgYAoKZQoKYGBge3J9CmNvbFN1bXModGVtcCkKYGBgCgojIyBWYWxvcmUgYXR0ZXNvCgpDYWxjb2xpYW1vIG9yYSBpbCB2YWxvcmUgYXR0ZXNvIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllLiBVdGlsaXp6aWFtbyBsYSBmdW56aW9uZSBgRGlzY3JldGVEaXN0cmlidXRpb24oKWAuIElsIHByaW1vIGFyZ29tZW50byByaWNoaWVkZSB1biB2ZXR0b3JlIGNoZSBzcGVjaWZpY2EgaWwgc3VwcG9ydG8gZGVsbGEgdmFyaWFiaWxlIGNhc3VhbGUgZGlzY3JldGEuIElsIHNlY29uZG8gYXJnb21lbnRvIMOoIHVuIHZldHRvcmUgY2hlLCBwZXIgY2lhc3VuIHZhbG9yZSBkZWxsYSB2YXJpYWJpbGUgY2FzdWFsZSBkaXNjcmV0YSwgc3BlY2lmaWNhIGlsIGNvcnJpc3BvbmRlbnRlIHZhbG9yZSBkZWxsYSBmdW56aW9uZSBkaSBtYXNzYSBkaSBwcm9iYWJpbGl0w6AuIE1lZGlhbnRlIGxhIGZ1bnppb25lIGBEaXNjcmV0ZURpc3RyaWJ1dGlvbigpYCBvdHRlbmlhbW8gaWwgdmFsb3JlIGF0dGVzbyBkaSBgVWA6CgpgYGB7cn0KVSA8LSBEaXNjcmV0ZURpc3RyaWJ1dGlvbihzdXBwID0gcHUkVSwgcHJvYiA9IHB1JHByb2JzKQptdV91IDwtIEUoVSkKbXVfdQpgYGAKCklub2x0cmUsIGlsIHZhbG9yZSBhdHRlc28gZGkgYFZgIMOoOgoKYGBge3J9ClYgPC0gRGlzY3JldGVEaXN0cmlidXRpb24oc3VwcCA9IHB2JFYsIHByb2IgPSBwdiRwcm9icykKbXVfdiA8LSBFKFYpCm11X3YKYGBgCgoKIyMgQ292YXJpYW56YQoKVXRpbGl6emFuZG8gbGUgaW5mb3JtYXppb25pIHByZWNlZGVudGkgcG9zc2lhbW8gY2FsY29sYXJlIGxhIGNvdmFyaWFuemEgdHJhICRVJCBlICRWJC4gTGEgZm9ybXVsYSBkZWxsYSBjb3ZhcmlhbnphCgokJApcc2lnbWFfe3h5fSA9IFxzdW1faSBcYmlnKHhfaSAtIFxtYXRoYmJ7RX0oeClcYmlnKVxiaWcoeV9pIC0gXG1hdGhiYntFfSh5KVxiaWcpIFxjZG90IHBfaSh4LHkpCiQkCgpwdcOyIGVzc2VyZSBpbXBsZW1lbnRhdGEgaW4gYFJgIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9CnNfdXYgPC0gc3VtKChVViRVIC0gbXVfdSkgKiAoVVYkViAtIG11X3YpICogVVYkcHJvYnMpCnNfdXYKYGBgCgpMbyBzdGVzc28gcmlzdWx0YXRvIHNpIG90dGllbmUgdXNhbmRvIGxhIGZvcm11bGEgYWx0ZXJuYXRpdmEgcGVyIGlsIGNhbGNvbG8gZGVsbGEgY292YXJpYW56YToKCiQkClxzaWdtYV97eHl9ID0gXG1hdGhiYntFfSh4eSkgLVxtYXRoYmJ7RX0oeClcbWF0aGJie0V9KHkpCiQkCm92dmVybyAKCmBgYHtyfQpzdW0oKFVWJFUgKiBVViRWKSAqIFVWJHByb2JzKSAtIG11X3UgKiBtdV92CmBgYAoKCiMjIENvcnJlbGF6aW9uZQoKQ29ub3NjZW5kbyBsYSBjb3ZhcmlhbnphIMOoIHBvc3NpYmlsZSBjYWxjb2xhcmUgbGEgY29ycmVsYXppb25lLiBMYSBjb3JyZWxhemlvbmUgaW5mYXR0aSDDqCB1bmEgY292YXJpYW56YSBzdGFuZGFyZGl6emF0YToKCiQkClxyaG9fe3h5fSA9IFxmcmFje1xzaWdtYV97eHl9fXtcc2lnbWFfeFxzaWdtYV95fQokJAoKUGVyIHN0YW5kYXJkaXp6YXJlIGRvYmJpYW1vIGRpdmlkZXJlIHBlciBsZSBkdWUgZGV2aWF6aW9uaSBzdGFuZGFyZC4gSW5pemlhbW8gZHVucXVlIGEgY2FsY29sYXJlIGxlIHZhcmlhbnplIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllICRVJCBlICRWJDoKCmBgYHtyfQp2X3UgPC0gc3VtKChwdSRVIC0gbXVfdSleMiAqIHB1JHByb2JzKQp2X3UKdl92IDwtIHN1bSgocHYkViAtIG11X3YpXjIgKiBwdiRwcm9icykKdl92CmBgYAoKb3BwdXJlLCBpbiBtYW5pZXJhIGVxdWl2YWxlbnRlCgpgYGB7cn0KdmFyKFUpCnZhcihWKQpgYGAKCkFiYmlhbW8gb3JhIHR1dHRlIGxlIGluZm9ybWF6aW9uaSBuZWNlc3NhcmllIHBlciBpbCBjYWxjb2xvIGRlbGxhIGNvcnJlbGF6aW9uZToKCmBgYHtyfQpzX3V2IC8gc3FydCh2YXIoVSkgKiB2YXIoVikpCmBgYAoKIyMgQ292YXJpYW56YSAoMikKCkNhbGNvbGlhbW8gbnVvdmFtZW50ZSBsYSBjb3ZhcmlhbnphIGluIG1hbmllcmEgcGnDuSBkaXJldHRhLCBvdnZlcm8gYXBwbGljYW5kbyBsYSBmb3JtdWxhIHNlZ3VlbnRlIG1lZGlhbnRlIGR1ZSBjaWNsaSBgZm9yKClgOgoKJCQKXHNpZ21hX3t4eX0gPSBcc3VtX2kgXGJpZyh4X2kgLSBcbWF0aGJie0V9KHgpXGJpZylcYmlnKHlfaSAtIFxtYXRoYmJ7RX0oeSlcYmlnKSBcY2RvdCBwX2koeCx5KQokJApJbml6aWFtbyBjcmVhbmRvIHVuIG9nZ2V0dG8gY2hpYW1hdG8gYHB1dmAgY2hlIGNvbnRpZW5lIGxhIGRpc3RyaWJ1emlvbmUgZGkgcHJvYmFiaWxpdMOgIGNvbmdpdW50YSBkZWxsZSB2YXJpYWJpbGkgJFUkIGUgJFYkOgoKYGBge3J9CnB1diA8LSB4dGFicyhyb3VuZChwcm9icywgMykgfiBVICsgViwgZGF0YSA9IFVWKQpwdXYKYGBgCgpMYSBzb21tYSBkZWdsaSBlbGVtZW50aSBkaSBgcHV2YCBkZXZlIGVzc2VyZSB1Z3VhbGUgYSAxICjDqCBzZW1wcmUgdW5hIGJ1b25hIGlkZWEgY29udHJvbGxhcmUpOgoKYGBge3J9CnN1bShwdXYpCmBgYAoKTGEgdmFyaWFiaWxlIGNhc3VhbGUgYHVgIGFzc3VtZSBpIHZhbG9yaToKCmBgYHtyfQp1IDwtIDI6MTIKdQpgYGAKCkxhIHZhcmlhYmlsZSBjYXN1YWxlIGB2YCBhc3N1bWUgaSB2YWxvcmk6CgpgYGB7cn0KdiA8LSAwOjEKdgpgYGAKCkFiYmlhbW8gZ2nDoCBjYWxjb2xhdG8gaW4gcHJlY2VkZW56YSBpIHZhbG9yaSBhdHRlc2kgZGVsbGUgZHVlIHZhcmlhYmlsaSBjYXN1YWxpLCBjaGUgc29ubyBjaGlhbWF0aSBgbXVfdWAgZSBgbXVfdmA6CgpgYGB7cn0KbXVfdQptdV92CmBgYAoKUGVyIHNlbXBsaWNpdMOgLCBjcmVvIHVuYSBtYXRyaWNlIHZ1b3RhIGRlbGxlIHN0ZXNzZSBkaW1lbnNpb25pIGRlbGwnb2dnZXR0byBgcHV2YDoKCmBgYHtyfQpzdXYgPSBtYXRyaXgoLCBucm93ID0gMTEsIG5jb2wgPSAyKSAjIGVtcHR5IG1hdHJpeApzdXYKYGBgCgpVdGlsaXp6byBkdWUgY2ljbGkgYGZvcigpYCBuaWRpZmljYXRpIChfbmVzdGVkXykgcGVyIGNhbGNvbGFyZSBpbCB2YWxvcmUgZGkgY2lhc2N1biBwcm9kb3R0byAKCiQkClxiaWcodV9pIC0gXG1hdGhiYntFfSh1KVxiaWcpXGJpZyh2X2ogLSBcbWF0aGJie0V9KHYpXGJpZykgXGNkb3QgcF97aSxqfSh1LHYpCiQkIAoKY29uICRpIFxpbiBcezEsIFxkb3RzLCAxMVx9JCBlICRqIFxpbiBcezEsIDJcfSQsIGNoZSB2ZXJyw6Agc2FsdmF0byBuZWwgY29ycmlzcG9uZGVudGUgZWxlbWVudG8gZGVsbGEgbWF0cmljZSBgc3V2YDoKCmBgYHtyfQpmb3IgKGkgaW4gMToxMSkgCiAgZm9yIChqIGluIDE6MikgewogICAgc3V2W2ksIGpdIDwtICh1W2ldIC0gbXVfdSkgKiAodltqXSAtIG11X3YpICogcHV2W2ksIGpdCiAgfQpgYGAKCk5lbCBjYXNvIHByZXNlbnRlLCBzaSBpbml6aWEgY29uIGBpID0gMWAuIFZpZW5lIHF1aW5kaSBzdm9sdG8gaWwgY2ljbG8gaW50ZXJubyBlIHF1aW5kaSwgaW4gZHVlIGVzZWN1emlvbmksIGBqID0gMWAgZSBgaiA9IDJgLiBVbmEgdm9sdGEgY29tcGxldGF0byBpbCBjaWNsbyBpbnRlcm5vLCBpbCB2YWxvcmUgZGVsbCdpbmRpY2UgZGVsIGNpY2xvIGVzdGVybm8gdmFycsOgIGBpID0gMmAuIFNpIHJpcGV0b25vIGxlIGVzZWN1emlvbmkgZGVsIGNpY2xvIGludGVybm8sIGBqID0gMWAgZSBgaiA9IDJgLiBDb3PDrCB2aWEgZmlubyBhIGBpID0gMTFgLiAKCkVzYW1pbmlhbW8gbGEgcHJpbWEgZXNlY3V6aW9uZSBkZWwgY2ljbG8gaW50ZXJubyBwZXIgYGkgPSAxYC4gQ2nDsiBjb3JyaXNwb25kZSBhOgoKYGBge3IsIGV2YWw9RkFMU0V9Cih1WzFdIC0gbXVfdSkgKiAodlsxXSAtIG11X3YpICogcHV2WzEsIDFdCmBgYAoKb3Z2ZXJvCgokJApcYmlnKHVfMSAtIFxtYXRoYmJ7RX0odSlcYmlnKVxiaWcodl8xIC0gXG1hdGhiYntFfSh2KVxiaWcpIFxjZG90IHBfezEsMX0odSx2KQokJApOZWwgc2Vjb25kbyBzdGVwIGF2cmVtbyAKCmBgYHtyLCBldmFsPUZBTFNFfQoodVsxXSAtIG11X3UpICogKHZbMl0gLSBtdV92KSAqIHB1dlsxLCAyXQpgYGAKCm92dmVybwoKJCQKXGJpZyh1XzEgLSBcbWF0aGJie0V9KHUpXGJpZylcYmlnKHZfMiAtIFxtYXRoYmJ7RX0odilcYmlnKSBcY2RvdCBwX3sxLDJ9KHUsdikKJCQKRSBjb3PDrCB2aWEgcGVyIHR1dHRpIGdsaSAkMTFcdGltZXMyJCBlbGVtZW50aSBkZWxsYSBtYXRyaWNlIGNoZSBjb250aWVuZSBsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGEuIAoKw4ggaXJyaWxldmFudGUgcXVhbGUgc2lhIGlsIGNpY2xvIGVzdGVybm8gZSBxdWFsZSBxdWVsbG8gaW50ZXJubywgcXVlc3RvIGNhbWJpYSBzb2x0YW50byBsJ29yZGluZSBjb24gaWwgcXVhbGUgdmVudG9ubyBzdm9sdGUgbGUgb3BlcmF6aW9uaS4KClVuYSB2b2x0YSBzdm9sdGkgaSBjYWxjb2xpIHByZWNlZGVudGksIG5vbiByZXN0YSBjaGUgc29tbWFyZSB0dXR0aSBnbGkgYWRkZW5kaSwgb3Z2ZXJvIGdsaSAkMTFcdGltZXMyJCBlbGVtZW50aSBkZWxsYSBtYXRyaWNlIGBzdXZgLiBDb3PDrCBmYWNlbmRvIHRyb3ZpYW1vIGxhIGNvdmFyaWFuemEgdHJhICRVJCBlICRWJDoKCmBgYHtyfQpzdW0oc3V2KQpgYGAKCklsIHJpc3VsdGF0byByaXByb2R1Y2UgcXVlbGxvIHRyb3ZhdG8gaW4gcHJlY2VkZW56YS4KCgojIyBJbmZvcm1hemlvbmkgc3VsbGEgc2Vzc2lvbmUgZGkgbGF2b3JvCgpgYGB7cn0KdXRpbHM6OnNlc3Npb25JbmZvKCkKYGBgCgoK</div>
 
 
 

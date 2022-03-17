@@ -166,6 +166,106 @@ Abbiamo ora tutte le informazioni necessarie per il calcolo della correlazione:
 s_uv / sqrt(var(U) * var(V))
 ```
 
+## Covarianza (2)
+
+Calcoliamo nuovamente la covarianza in maniera più diretta, ovvero applicando la formula seguente mediante due cicli `for()`:
+
+$$
+\sigma_{xy} = \sum_i \big(x_i - \mathbb{E}(x)\big)\big(y_i - \mathbb{E}(y)\big) \cdot p_i(x,y)
+$$
+Iniziamo creando un oggetto chiamato `puv` che contiene la distribuzione di probabilità congiunta delle variabili $U$ e $V$:
+
+```{r}
+puv <- xtabs(round(probs, 3) ~ U + V, data = UV)
+puv
+```
+
+La somma degli elementi di `puv` deve essere uguale a 1 (è sempre una buona idea controllare):
+
+```{r}
+sum(puv)
+```
+
+La variabile casuale `u` assume i valori:
+
+```{r}
+u <- 2:12
+u
+```
+
+La variabile casuale `v` assume i valori:
+
+```{r}
+v <- 0:1
+v
+```
+
+Abbiamo già calcolato in precedenza i valori attesi delle due variabili casuali, che sono chiamati `mu_u` e `mu_v`:
+
+```{r}
+mu_u
+mu_v
+```
+
+Per semplicità, creo una matrice vuota delle stesse dimensioni dell'oggetto `puv`:
+
+```{r}
+suv = matrix(, nrow = 11, ncol = 2) # empty matrix
+suv
+```
+
+Utilizzo due cicli `for()` nidificati (_nested_) per calcolare il valore di ciascun prodotto 
+
+$$
+\big(u_i - \mathbb{E}(u)\big)\big(v_j - \mathbb{E}(v)\big) \cdot p_{i,j}(u,v)
+$$ 
+
+con $i \in \{1, \dots, 11\}$ e $j \in \{1, 2\}$, che verrà salvato nel corrispondente elemento della matrice `suv`:
+
+```{r}
+for (i in 1:11) 
+  for (j in 1:2) {
+    suv[i, j] <- (u[i] - mu_u) * (v[j] - mu_v) * puv[i, j]
+  }
+```
+
+Nel caso presente, si inizia con `i = 1`. Viene quindi svolto il ciclo interno e quindi, in due esecuzioni, `j = 1` e `j = 2`. Una volta completato il ciclo interno, il valore dell'indice del ciclo esterno varrà `i = 2`. Si ripetono le esecuzioni del ciclo interno, `j = 1` e `j = 2`. Così via fino a `i = 11`. 
+
+Esaminiamo la prima esecuzione del ciclo interno per `i = 1`. Ciò corrisponde a:
+
+```{r, eval=FALSE}
+(u[1] - mu_u) * (v[1] - mu_v) * puv[1, 1]
+```
+
+ovvero
+
+$$
+\big(u_1 - \mathbb{E}(u)\big)\big(v_1 - \mathbb{E}(v)\big) \cdot p_{1,1}(u,v)
+$$
+Nel secondo step avremo 
+
+```{r, eval=FALSE}
+(u[1] - mu_u) * (v[2] - mu_v) * puv[1, 2]
+```
+
+ovvero
+
+$$
+\big(u_1 - \mathbb{E}(u)\big)\big(v_2 - \mathbb{E}(v)\big) \cdot p_{1,2}(u,v)
+$$
+E così via per tutti gli $11\times2$ elementi della matrice che contiene la distribuzione di probabilità congiunta. 
+
+È irrilevante quale sia il ciclo esterno e quale quello interno, questo cambia soltanto l'ordine con il quale ventono svolte le operazioni.
+
+Una volta svolti i calcoli precedenti, non resta che sommare tutti gli addendi, ovvero gli $11\times2$ elementi della matrice `suv`. Così facendo troviamo la covarianza tra $U$ e $V$:
+
+```{r}
+sum(suv)
+```
+
+Il risultato riproduce quello trovato in precedenza.
+
+
 ## Informazioni sulla sessione di lavoro
 
 ```{r}
