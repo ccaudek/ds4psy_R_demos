@@ -65,11 +65,11 @@ E(X)
 var(X)
 ```
 
-Possiamo anche replicare il risultato dell'esercizio 1 nel modo seguente:
+<!-- Possiamo anche replicare il risultato dell'esercizio 1 nel modo seguente: -->
 
-```{r}
-p(X)(0.71) - p(X)(0.14)
-```
+<!-- ```{r} -->
+<!-- p(X)(0.71) - p(X)(0.14) -->
+<!-- ``` -->
 
 
 ## Informazioni sulla sessione di lavoro

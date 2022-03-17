@@ -45,15 +45,28 @@ Laddove i valori indicano la frequenza con la quale tale sintomo, riduzione di e
 
 ## Rappresentazione grafica della distribuzione di massa di probabilità
 
+Consideriamo dunque i valori $Y$
+
 ```{r}
-# valori della variabile aleatoria
 y <- 1:4
+```
 
-# probabilità
+con probabilità
+
+```{r}
 py <- c(0.1, 0.5, 0.3, 0.1)
+```
 
-d <- data.frame(y, py)
+Credo un DataFrame con queste informazioni
 
+```{r}
+d <- tibble(y, py)
+d
+```
+
+Rappresento in maniera grafica la distribuzione di massa di probabilità della $Y$:
+
+```{r}
 d %>% 
   ggplot(aes(y, py)) +
   geom_point(size = 4) +
@@ -66,17 +79,17 @@ d %>%
   )
 ```
 
-Per i punteggi di astenia di questo ipotetico test, poniamoci ora il problema di trovare il *valore atteso* e la *varianza*, e di assegnare un'interpretazione inuitiva a questi concetti.
+Per i punteggi di astenia di questo ipotetico test, poniamoci ora il problema di trovare il *valore atteso* e la *varianza*. In seguito, ci porreo il problema di assegnare un'interpretazione inuitiva a questi concetti.
 
 ## Valore atteso
 
 La definizione di valore atteso della variabile aleatoria $y$ è
 
 $$
-\mathbb{E}(y) = \sum_{i=1}^n y_i \cdot p_i
+\mathbb{E}(Y) = \sum_{\forall y_i \in Y} y_i \cdot P(Y = y_i)
 $$
 
-il che, per i dati del problema, significa
+Per i dati del problema, abbiamo
 
 $$
 1 \cdot 0.1 + 2 \cdot 0.5 + 3 \cdot 0.3 + 4 \cdot 0.1 = 2.4
@@ -85,6 +98,7 @@ $$
 ```{r}
 1 * 0.1 + 2 * 0.5 + 3 * 0.3 + 4 * 0.1
 ```
+
 ovvero
 
 ```{r}
@@ -129,10 +143,10 @@ Il risultato della simulazione mostra che la media di un capione molto grande es
 La definizione di varianza di una variabile aleatoria è la seguente:
 
 $$
-Var(y) = \sum_{i=1}^n (y_i - \mu)^2 \cdot p_i
+\mbox{Var}(y) = \sum_{\forall y_i \in Y} (y_i - \mu)^2 \cdot P(Y = y_i)
 $$
 
-Implementiamo la formula in R per i dati del problema:
+Per i dati del problema questo diventa:
 
 $$
 (1 - 4.4)^2 \cdot 0.1 + (2 - 4.4)^2 \cdot 0.5 +(3 - 4.4)^2 \cdot 0.3 +(4 - 4.4)^2 \cdot 0.1 = 0.64
@@ -161,7 +175,6 @@ sum(y^2 * py) - ev_y^2
 ## Interpretazione
 
 Di nuovo, ci chiediamo: che cosa è, in pratica, la varianza di una variabile aleatoria? Possiamo rispondere a questa domanda ripetendo il ragionamento fatto sopra. 
-
 Avendo extratto 100,000 valori dalla popolazione di riferimento, calcoliamo la varianza di tali valori, usando la formula della statistica descrittiva:
 
 ```{r}

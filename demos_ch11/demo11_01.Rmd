@@ -33,7 +33,7 @@ knitr::opts_chunk$set(
 Lanciamo 3 monete.  Sia $Y$ il numero di volte in cui si ossserva Testa.  Si trovi il valore atteso di $Y$, la sua varianza e la sua deviazione standard.
 
 
-Lo spazio campionario è
+Lo spazio campione è
 
 ```{r}
 S <- tosscoin(3, makespace = TRUE)
@@ -88,7 +88,13 @@ sigma2 <- sum((y - mu)^2 * p)
 sigma2
 ```
 
-e la deviazione standard
+Verifico il risultato con la formula alternativa della varianza:
+
+```{r}
+sum(y^2 * p) - (sum(y * p))^2 
+```
+
+La deviazione standard è 
 
 ```{r}
 sigma <- sqrt(sigma2)
@@ -107,8 +113,10 @@ F
 Uso le funzioni di `distrEx` per eseguire in maniera più semplice gli stessi calcoli descritti sopra:
 
 ```{r}
-Y <- DiscreteDistribution(supp = 0:3, prob = c(1, 3, 3, 1) / 8)
-Y
+Y <- DiscreteDistribution(
+  supp = 0:3, 
+  prob = c(1, 3, 3, 1) / 8
+  )
 ```
 
 ```{r}
@@ -116,9 +124,15 @@ plot(Y)
 ```
 
 ```{r}
-E(Y)
-var(Y)
-sd(Y)
+distrEx::E(Y)
+```
+
+```{r}
+distrEx::var(Y)
+```
+
+```{r}
+distrEx::sd(Y)
 ```
 
 
