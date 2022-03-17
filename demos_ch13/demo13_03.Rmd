@@ -246,6 +246,13 @@ $$
 \int_{-\infty}^{x_m} p(x) dx = \int_{x_m}^{-\infty} p(x) dx = \frac{1}{2}.
 $$
 
+Segue da tale definizione che la mediana è il valore $x$ per il quale la distribuzione cumulativa soddisfa
+
+$$
+F(x_m) = \frac{1}{2}.
+$$
+
+
 Verifichiamo questa affermazione nel caso della distribuzione Beta in esame:
 
 ```{r}
