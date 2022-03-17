@@ -1,0 +1,155 @@
+---
+title: "Data science per psicologi - demo 11.04"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("scales")
+  library("bayesplot")
+  library("prob")
+  library("distrEx")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Proprietà della covarianza 
+
+Consideriamo le proprietà della covarianza delle variabili aleatorie esaminando, per analogia, le stesse proprietà quando vengono osservate in un campione di osservazioni. Ricordiamo che le variabili casuali sono ignote prima dell'esecuzione dell'esperimento casuale. Una volta svolto l'esperimento casuale, le varibili casuali sono semplicemente un campione di osservazioni. Ovviamente, la nozione di variabile casuale fa riferimento a tutti i possibili campioni che si possono osservare.  Ma per semplicità, qui ne consideramo uno soltanto.
+
+Generiamo dei dati a caso di due variabili che chiamiamo $X$ e $Y$.
+
+```{r}
+set.seed(123)
+n <- 20
+x <- rnorm(n, 20, 3)
+y <- x + rnorm(n, 0, 2)
+cor(x, y)
+```
+
+```{r}
+tibble(x, y) %>% 
+  ggplot(aes(x, y)) +
+  geom_point()
+```
+
+Esaminiamo ora le proprietà della covarianza discusse nel capitolo 11 della dispensa.
+
+## Variana: covarianza di una variabile con se stessa
+
+Il modo più semplice per ricordare che cos'è la covarianza è di pensare alla varianza come alla covarianza di una variabile con se stessa:
+
+$$
+\sigma_{xx} = \sum_i \big(x_i - \mathbb{E}(x)\big)\big(x_i - \mathbb{E}(x)\big) \cdot p_i(x)
+$$
+ovvero
+
+```{r}
+var(x)
+cov(x, x)
+```
+
+
+## La covarianza tra una variabile aleatoria 𝑋 e una costante 𝑐 è nulla
+
+```{r}
+cov(rep(3, n), x)
+```
+
+## La covarianza è simmetrica
+
+```{r}
+cov(x, y) == cov(y, x)
+```
+
+## La correlazione non dipende dall’unità di misura
+
+```{r}
+cor(x, y)
+cor(x*100, y*3)
+```
+
+## Covarianza tra 𝑋 e 𝑌, ciascuna moltiplicata per una costante
+
+Moltiplichiamo $X$ per 3 e $Y$ per 2 e calcoliamo la nuova covarianza:
+
+```{r}
+cov(x, y)
+cov(3*x, 2*y)
+6 * cov(x, y)
+```
+
+## La varianza di una somma
+
+Sommiamo $X$ e $Y$ e calcoliamo la varianza:
+
+```{r}
+z <- x + y
+z
+```
+
+```{r}
+var(z)
+```
+
+ovvero
+
+```{r}
+var(x) + var(y) + 2*cov(x,y)
+```
+
+Consideriamo 3 variabili:
+
+```{r}
+w <- y + rnorm(n, 0, 4)
+```
+
+Esaminiamo la matrice di correlazioni:
+
+```{r}
+cor(cbind(x, y, w))
+```
+
+Sommiamo 
+
+```{r}
+t <- x + y + w
+t
+```
+
+```{r}
+var(t)
+```
+
+ovvero
+
+```{r}
+var(x) + var(y) + var(w) + 2*cov(x, y) + 2*cov(x, w) + 2*cov(w, y) 
+```
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
