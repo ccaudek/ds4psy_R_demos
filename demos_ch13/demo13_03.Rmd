@@ -279,6 +279,47 @@ mean(x)
 var(x)
 ```
 
+## Esercizio 1
+
+Supponiamo di avere a disposizione i voti $X$ degli studenti in un insegnamento universitario. Tali voti sono espressi come proporzioni, ovvero, sono valori compresi nell'intervallo $[0, 1]$. Supponiamo che la distribuzione dei voti sia bene descritta da una distribuzione Beta: $X ∼ \mbox{Beta}(\alpha = 8.28, \beta = 3.16)$. Ci chiediamo: qual è la probabilità che uno studente sia al di sotto della media (cioè delle aspettative)?
+
+Per rispondere a questa domanda dobbiamo fare due cose:
+
+- calcolare la media della distribuzione,
+- calcolare la probabilità che la variabile casuale (voto dello studente) assuma un valore inferiore al valore atteso.
+
+Il valore atteso della variabile casuale $X$ è
+
+```{r}
+alpha <- 8.28
+beta <- 3.16
+
+ev <- alpha / (alpha + beta)
+ev
+```
+
+Ora dobbiamo calcolare $P(X < \mathbb{E}(X))$. Per fare questo possiamo usare la funzione `pbeta()`, la quale restituisce il valore della funzione di ripartizione in corrispondenza del quantile indicato -- ovvero, l'area sottesa alla funzione di densità nella coda di sinistra da $-\infty$ fino al punto indicato:
+
+```{r}
+pbeta(ev, alpha, beta)
+```
+
+## Esercizio 2
+
+Per i dati dell'esempio precedente, si crei una rappresentazione grafica della distribuzione Beta in esame.
+
+```{r}
+bayesrules::plot_beta(alpha, beta)
+```
+
+## Esercizio 3
+
+Per i dati dell'esempio precedente, si trovi il voto $X$ tale per cui solo il 10% degli studenti ha ottenuto un risultato migliore.
+
+```{r}
+qbeta(0.9, alpha, beta)
+```
+
 ## Informazioni sulla sessione di lavoro
 
 ```{r}
