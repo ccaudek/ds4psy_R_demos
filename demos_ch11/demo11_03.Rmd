@@ -33,44 +33,56 @@ knitr::opts_chunk$set(
 
 # La covarianza di due variabili aleatorie discrete
 
-Poniamoci il problema di calcolare la covarianza e la correlazione di due variabili aleatorie discrete utilizzando l'informazione fornita dalla distribuzione di probabilità congiunta.  
+Poniamoci il problema di calcolare la covarianza e la correlazione di due variabili aleatorie discrete utilizzando l'informazione fornita dalla *distribuzione di probabilità congiunta*.  
 
 Consideriamo l'esperimento casuale che corrisponde al lancio di due dadi bilanciati. Creiamo lo spazio campionario di questo esperimento casuale e definiamo su di esso le seguenti variabili aleatorie:
 
 - U: somma dei punti dei due dadi,
 - V: 1 se i punti del lancio del primo dado sono minori di 4, 0 altrimenti.
 
-Possiamo ottenere un elenco di tutti gli eventi elementari dello spazio campionario usando le istruzioni seguenti:
+Creiamo lo spazio campione nel modo seguente:
 
 ```{r}
 S <- rolldie(2, nsides = 6, makespace = TRUE)
+S
+```
+Su tale spazio campione definisco le due variabili casuali descritte in precedenza:
+
+```{r}
 S <- addrv(S, U = X1+X2, V = ifelse(X1 < 4, 1, 0))
 S
 ```
 
-Le istruzioni precedenti specificano, in corrispondenza di ogni punto dello spazio campionario (ovvero, in ciascuna riga del data.frame che viene generato), il valore assunto dalle due variabili aleatorie che sono state definite.
+Le istruzioni precedenti specificano, in corrispondenza di ogni evento elementare dello spazio campione -- ovvero, in corrispondenza di ciascuna riga del DataFrame -- il valore assunto dalle due variabili casuali. 
 
-La descrizione dello spazio campionario fornita da `R` è corretta: questo esperimento casuale produce infatti 6 $\times$ 6 esiti (eventi elementari) possibili. Ma si noti che alcune righe del data.frame si ripetono più volte. Possiamo dunque semplificare tale descrizione nel modo seguente:
+Possiamo semplificare tale descrizione usando `prob::marginal()`. Si noti la funzione `c()` che consente di specificare un vettore che contiene il nome delle due variabili:
 
 ```{r}
 UV <- marginal(S, vars = c("U", "V")) 
 UV
 ```
 
-L'elenco dei valori che le due variabili aleatorie $U$ e $V$ possono assumere, insieme alla probabilità del loro verificarsi, costituisce la _distribuzione di probabilità congiunta_ delle due variabili aleatorie. È anche possibile presentare la distribuzione di probabilità congiunta in forma tabulare. A tale fine possiamo utilizzare la funzione `xtabs()`:
+L'elenco dei valori che le due variabili casuali $U$ e $V$ possono assumere, insieme alla probabilità del loro verificarsi, costituisce la *distribuzione di probabilità congiunta*. Verifico che questa sia veramente una distribuzione di probabilità congiunta:
 
 ```{r}
-xtabs(round(probs, 3) ~ U + V, data = UV)
+sum(UV$probs)
 ```
 
-Ripetiamo ora il processo precedente chiedendo alla funzione `marginal()` di calcolare le due distribuzioni marginali univariate:
+È anche possibile presentare la distribuzione di probabilità congiunta in forma tabulare. A tale fine possiamo utilizzare la funzione `xtabs()`:
+
+```{r}
+xtabs(probs ~ U + V, data = UV) %>% 
+  round(3)
+```
+
+Calcoliamo ora le due distribuzioni marginali. Per la variabile `U` otteniamo:
 
 ```{r}
 pu <- marginal(S, vars = "U")
 pu
 ```
 
-e
+e per la variabile `V` otteniamo:
 
 ```{r}
 pv <- marginal(S, vars = "V")
@@ -92,7 +104,7 @@ colSums(temp)
 
 ## Valore atteso
 
-Calcoliamo ora il valore atteso delle due variabili aleatorie. Utilizziamo la funzione `DiscreteDistribution()`. Il primo argomento richiede un vettore che specifica il supporto della variabile casuale discreta. Il secondo argomento è un vettore che, per ciasun valore della variabile casuale discreta, specifica il corrispondente valore della funzione di massa di probabilità. Mediante la funzione `DiscreteDistribution()` otteniamo il valore atteso di `U`:
+Calcoliamo il valore atteso delle due variabili casuali. Utilizziamo la funzione `DiscreteDistribution()`. Il primo argomento richiede un vettore che specifica il supporto della variabile casuale discreta; il secondo argomento è un vettore che specifica la funzione di massa di probabilità. Il valore atteso di `U` è:
 
 ```{r}
 U <- DiscreteDistribution(supp = pu$U, prob = pu$probs)
@@ -111,13 +123,13 @@ mu_v
 
 ## Covarianza
 
-Utilizzando le informazioni precedenti possiamo calcolare la covarianza tra $U$ e $V$. La formula della covarianza
+Possiamo ora calcolare la covarianza tra $U$ e $V$. La formula della covarianza
 
 $$
-\sigma_{xy} = \sum_i \big(x_i - \mathbb{E}(x)\big)\big(y_i - \mathbb{E}(y)\big) \cdot p_i(x,y)
+\sigma_{xy} = \sum_i \big[x_i - \mathbb{E}(x)\big]\big[y_i - \mathbb{E}(y)\big] \cdot p_i(x,y)
 $$
 
-può essere implementata in `R` nel modo seguente:
+può essere implementata in $\mathsf{R}$ nel modo seguente:
 
 ```{r}
 s_uv <- sum((UV$U - mu_u) * (UV$V - mu_v) * UV$probs)
@@ -144,7 +156,7 @@ $$
 \rho_{xy} = \frac{\sigma_{xy}}{\sigma_x\sigma_y}
 $$
 
-Per standardizzare dobbiamo dividere per le due deviazioni standard. Iniziamo dunque a calcolare le varianze delle due variabili aleatorie $U$ e $V$:
+Per standardizzare dobbiamo dividere per le due deviazioni standard. Iniziamo dunque a calcolare le varianze delle due variabili casuali $U$ e $V$:
 
 ```{r}
 v_u <- sum((pu$U - mu_u)^2 * pu$probs)
@@ -176,7 +188,7 @@ $$
 Iniziamo creando un oggetto chiamato `puv` che contiene la distribuzione di probabilità congiunta delle variabili $U$ e $V$:
 
 ```{r}
-puv <- xtabs(round(probs, 3) ~ U + V, data = UV)
+puv <- xtabs(probs ~ U + V, data = UV)
 puv
 ```
 

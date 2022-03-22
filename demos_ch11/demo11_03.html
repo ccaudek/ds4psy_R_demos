@@ -11,7 +11,7 @@
 
 <meta name="author" content="Corrado Caudek" />
 
-<meta name="date" content="2022-03-17" />
+<meta name="date" content="2022-03-22" />
 
 <title>Data science per psicologi - demo 11.02</title>
 
@@ -547,7 +547,7 @@ pre code {
 <h1 class="title toc-ignore">Data science per psicologi - demo
 11.02</h1>
 <h4 class="author">Corrado Caudek</h4>
-<h4 class="date">2022-03-17</h4>
+<h4 class="date">2022-03-22</h4>
 
 </div>
 
@@ -575,7 +575,7 @@ pre code {
 <h1>La covarianza di due variabili aleatorie discrete</h1>
 <p>Poniamoci il problema di calcolare la covarianza e la correlazione di
 due variabili aleatorie discrete utilizzando l’informazione fornita
-dalla distribuzione di probabilità congiunta.</p>
+dalla <em>distribuzione di probabilità congiunta</em>.</p>
 <p>Consideriamo l’esperimento casuale che corrisponde al lancio di due
 dadi bilanciati. Creiamo lo spazio campionario di questo esperimento
 casuale e definiamo su di esso le seguenti variabili aleatorie:</p>
@@ -584,171 +584,208 @@ casuale e definiamo su di esso le seguenti variabili aleatorie:</p>
 <li>V: 1 se i punti del lancio del primo dado sono minori di 4, 0
 altrimenti.</li>
 </ul>
-<p>Possiamo ottenere un elenco di tutti gli eventi elementari dello
-spazio campionario usando le istruzioni seguenti:</p>
+<p>Creiamo lo spazio campione nel modo seguente:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="fu">rolldie</span>(<span class="dv">2</span>, <span class="at">nsides =</span> <span class="dv">6</span>, <span class="at">makespace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="fu">addrv</span>(S, <span class="at">U =</span> X1 <span class="sc">+</span> X2, <span class="at">V =</span> <span class="fu">ifelse</span>(X1 <span class="sc">&lt;</span> <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>S</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="do">##    X1 X2  U V      probs</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 1   1  1  2 1 0.02777778</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 2   2  1  3 1 0.02777778</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 3   3  1  4 1 0.02777778</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 4   4  1  5 0 0.02777778</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 5   5  1  6 0 0.02777778</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 6   6  1  7 0 0.02777778</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 7   1  2  3 1 0.02777778</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 8   2  2  4 1 0.02777778</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 9   3  2  5 1 0.02777778</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 10  4  2  6 0 0.02777778</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="do">## 11  5  2  7 0 0.02777778</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="do">## 12  6  2  8 0 0.02777778</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="do">## 13  1  3  4 1 0.02777778</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="do">## 14  2  3  5 1 0.02777778</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="do">## 15  3  3  6 1 0.02777778</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="do">## 16  4  3  7 0 0.02777778</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="do">## 17  5  3  8 0 0.02777778</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="do">## 18  6  3  9 0 0.02777778</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="do">## 19  1  4  5 1 0.02777778</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="do">## 20  2  4  6 1 0.02777778</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="do">## 21  3  4  7 1 0.02777778</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="do">## 22  4  4  8 0 0.02777778</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="do">## 23  5  4  9 0 0.02777778</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="do">## 24  6  4 10 0 0.02777778</span></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="do">## 25  1  5  6 1 0.02777778</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="do">## 26  2  5  7 1 0.02777778</span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="do">## 27  3  5  8 1 0.02777778</span></span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="do">## 28  4  5  9 0 0.02777778</span></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="do">## 29  5  5 10 0 0.02777778</span></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="do">## 30  6  5 11 0 0.02777778</span></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="do">## 31  1  6  7 1 0.02777778</span></span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="do">## 32  2  6  8 1 0.02777778</span></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="do">## 33  3  6  9 1 0.02777778</span></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="do">## 34  4  6 10 0 0.02777778</span></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="do">## 35  5  6 11 0 0.02777778</span></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="do">## 36  6  6 12 0 0.02777778</span></span></code></pre></div>
-<p>Le istruzioni precedenti specificano, in corrispondenza di ogni punto
-dello spazio campionario (ovvero, in ciascuna riga del data.frame che
-viene generato), il valore assunto dalle due variabili aleatorie che
-sono state definite.</p>
-<p>La descrizione dello spazio campionario fornita da <code>R</code> è
-corretta: questo esperimento casuale produce infatti 6 <span class="math inline">\(\times\)</span> 6 esiti (eventi elementari)
-possibili. Ma si noti che alcune righe del data.frame si ripetono più
-volte. Possiamo dunque semplificare tale descrizione nel modo
-seguente:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>UV <span class="ot">&lt;-</span> <span class="fu">marginal</span>(S, <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;U&quot;</span>, <span class="st">&quot;V&quot;</span>))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>UV</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     U V      probs</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 1   5 0 0.02777778</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 2   6 0 0.05555556</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 3   7 0 0.08333333</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 4   8 0 0.08333333</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 5   9 0 0.08333333</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 6  10 0 0.08333333</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 7  11 0 0.05555556</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 8  12 0 0.02777778</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 9   2 1 0.02777778</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 10  3 1 0.05555556</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 11  4 1 0.08333333</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="do">## 12  5 1 0.08333333</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="do">## 13  6 1 0.08333333</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="do">## 14  7 1 0.08333333</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="do">## 15  8 1 0.05555556</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="do">## 16  9 1 0.02777778</span></span></code></pre></div>
-<p>L’elenco dei valori che le due variabili aleatorie <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span> possono assumere, insieme alla
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>S</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="do">##    X1 X2      probs</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 1   1  1 0.02777778</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 2   2  1 0.02777778</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 3   3  1 0.02777778</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 4   4  1 0.02777778</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 5   5  1 0.02777778</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 6   6  1 0.02777778</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 7   1  2 0.02777778</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 8   2  2 0.02777778</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 9   3  2 0.02777778</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 10  4  2 0.02777778</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 11  5  2 0.02777778</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="do">## 12  6  2 0.02777778</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="do">## 13  1  3 0.02777778</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="do">## 14  2  3 0.02777778</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="do">## 15  3  3 0.02777778</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="do">## 16  4  3 0.02777778</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="do">## 17  5  3 0.02777778</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="do">## 18  6  3 0.02777778</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="do">## 19  1  4 0.02777778</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="do">## 20  2  4 0.02777778</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="do">## 21  3  4 0.02777778</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="do">## 22  4  4 0.02777778</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="do">## 23  5  4 0.02777778</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="do">## 24  6  4 0.02777778</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="do">## 25  1  5 0.02777778</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="do">## 26  2  5 0.02777778</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="do">## 27  3  5 0.02777778</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="do">## 28  4  5 0.02777778</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="do">## 29  5  5 0.02777778</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="do">## 30  6  5 0.02777778</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="do">## 31  1  6 0.02777778</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="do">## 32  2  6 0.02777778</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="do">## 33  3  6 0.02777778</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="do">## 34  4  6 0.02777778</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="do">## 35  5  6 0.02777778</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="do">## 36  6  6 0.02777778</span></span></code></pre></div>
+<p>Su tale spazio campione definisco le due variabili casuali descritte
+in precedenza:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="fu">addrv</span>(S, <span class="at">U =</span> X1 <span class="sc">+</span> X2, <span class="at">V =</span> <span class="fu">ifelse</span>(X1 <span class="sc">&lt;</span> <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>S</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">##    X1 X2  U V      probs</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 1   1  1  2 1 0.02777778</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 2   2  1  3 1 0.02777778</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 3   3  1  4 1 0.02777778</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 4   4  1  5 0 0.02777778</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 5   5  1  6 0 0.02777778</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 6   6  1  7 0 0.02777778</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 7   1  2  3 1 0.02777778</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 8   2  2  4 1 0.02777778</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 9   3  2  5 1 0.02777778</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 10  4  2  6 0 0.02777778</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 11  5  2  7 0 0.02777778</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="do">## 12  6  2  8 0 0.02777778</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="do">## 13  1  3  4 1 0.02777778</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="do">## 14  2  3  5 1 0.02777778</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="do">## 15  3  3  6 1 0.02777778</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="do">## 16  4  3  7 0 0.02777778</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="do">## 17  5  3  8 0 0.02777778</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="do">## 18  6  3  9 0 0.02777778</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="do">## 19  1  4  5 1 0.02777778</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="do">## 20  2  4  6 1 0.02777778</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="do">## 21  3  4  7 1 0.02777778</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="do">## 22  4  4  8 0 0.02777778</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="do">## 23  5  4  9 0 0.02777778</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="do">## 24  6  4 10 0 0.02777778</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="do">## 25  1  5  6 1 0.02777778</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="do">## 26  2  5  7 1 0.02777778</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="do">## 27  3  5  8 1 0.02777778</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="do">## 28  4  5  9 0 0.02777778</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="do">## 29  5  5 10 0 0.02777778</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="do">## 30  6  5 11 0 0.02777778</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="do">## 31  1  6  7 1 0.02777778</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="do">## 32  2  6  8 1 0.02777778</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="do">## 33  3  6  9 1 0.02777778</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="do">## 34  4  6 10 0 0.02777778</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="do">## 35  5  6 11 0 0.02777778</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="do">## 36  6  6 12 0 0.02777778</span></span></code></pre></div>
+<p>Le istruzioni precedenti specificano, in corrispondenza di ogni
+evento elementare dello spazio campione – ovvero, in corrispondenza di
+ciascuna riga del DataFrame – il valore assunto dalle due variabili
+casuali.</p>
+<p>Possiamo semplificare tale descrizione usando
+<code>prob::marginal()</code>. Si noti la funzione <code>c()</code> che
+consente di specificare un vettore che contiene il nome delle due
+variabili:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>UV <span class="ot">&lt;-</span> <span class="fu">marginal</span>(S, <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;U&quot;</span>, <span class="st">&quot;V&quot;</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>UV</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     U V      probs</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 1   5 0 0.02777778</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 2   6 0 0.05555556</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 3   7 0 0.08333333</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 4   8 0 0.08333333</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 5   9 0 0.08333333</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 6  10 0 0.08333333</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 7  11 0 0.05555556</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 8  12 0 0.02777778</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 9   2 1 0.02777778</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 10  3 1 0.05555556</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 11  4 1 0.08333333</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="do">## 12  5 1 0.08333333</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="do">## 13  6 1 0.08333333</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="do">## 14  7 1 0.08333333</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="do">## 15  8 1 0.05555556</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="do">## 16  9 1 0.02777778</span></span></code></pre></div>
+<p>L’elenco dei valori che le due variabili casuali <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span> possono assumere, insieme alla
 probabilità del loro verificarsi, costituisce la <em>distribuzione di
-probabilità congiunta</em> delle due variabili aleatorie. È anche
-possibile presentare la distribuzione di probabilità congiunta in forma
-tabulare. A tale fine possiamo utilizzare la funzione
+probabilità congiunta</em>. Verifico che questa sia veramente una
+distribuzione di probabilità congiunta:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(UV<span class="sc">$</span>probs)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 1</span></span></code></pre></div>
+<p>È anche possibile presentare la distribuzione di probabilità
+congiunta in forma tabulare. A tale fine possiamo utilizzare la funzione
 <code>xtabs()</code>:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">xtabs</span>(<span class="fu">round</span>(probs, <span class="dv">3</span>) <span class="sc">~</span> U <span class="sc">+</span> V, <span class="at">data =</span> UV)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="do">##     V</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">## U        0     1</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="do">##   2  0.000 0.028</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   3  0.000 0.056</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="do">##   4  0.000 0.083</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="do">##   5  0.028 0.083</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   6  0.056 0.083</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   7  0.083 0.083</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="do">##   8  0.083 0.056</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="do">##   9  0.083 0.028</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="do">##   10 0.083 0.000</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="do">##   11 0.056 0.000</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="do">##   12 0.028 0.000</span></span></code></pre></div>
-<p>Ripetiamo ora il processo precedente chiedendo alla funzione
-<code>marginal()</code> di calcolare le due distribuzioni marginali
-univariate:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pu <span class="ot">&lt;-</span> <span class="fu">marginal</span>(S, <span class="at">vars =</span> <span class="st">&quot;U&quot;</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>pu</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     U      probs</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 1   2 0.02777778</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 2   3 0.05555556</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 3   4 0.08333333</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 4   5 0.11111111</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 5   6 0.13888889</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 6   7 0.16666667</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 7   8 0.13888889</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 8   9 0.11111111</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 9  10 0.08333333</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 10 11 0.05555556</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 11 12 0.02777778</span></span></code></pre></div>
-<p>e</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pv <span class="ot">&lt;-</span> <span class="fu">marginal</span>(S, <span class="at">vars =</span> <span class="st">&quot;V&quot;</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>pv</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="do">##   V probs</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 0   0.5</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 1   0.5</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">xtabs</span>(probs <span class="sc">~</span> U <span class="sc">+</span> V, <span class="at">data =</span> UV) <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(<span class="dv">3</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     V</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## U        0     1</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   2  0.000 0.028</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="do">##   3  0.000 0.056</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="do">##   4  0.000 0.083</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   5  0.028 0.083</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   6  0.056 0.083</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="do">##   7  0.083 0.083</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="do">##   8  0.083 0.056</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="do">##   9  0.083 0.028</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="do">##   10 0.083 0.000</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="do">##   11 0.056 0.000</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="do">##   12 0.028 0.000</span></span></code></pre></div>
+<p>Calcoliamo ora le due distribuzioni marginali. Per la variabile
+<code>U</code> otteniamo:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pu <span class="ot">&lt;-</span> <span class="fu">marginal</span>(S, <span class="at">vars =</span> <span class="st">&quot;U&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>pu</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     U      probs</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 1   2 0.02777778</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 2   3 0.05555556</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 3   4 0.08333333</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 4   5 0.11111111</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 5   6 0.13888889</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 6   7 0.16666667</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 7   8 0.13888889</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 8   9 0.11111111</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 9  10 0.08333333</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 10 11 0.05555556</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 11 12 0.02777778</span></span></code></pre></div>
+<p>e per la variabile <code>V</code> otteniamo:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pv <span class="ot">&lt;-</span> <span class="fu">marginal</span>(S, <span class="at">vars =</span> <span class="st">&quot;V&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>pv</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="do">##   V probs</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 0   0.5</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 1   0.5</span></span></code></pre></div>
 <p>In maniera equivalente, lo stesso risultato si trova applicando le
 funzioni <code>rowSums()</code> e <code>colSums()</code> all’oggetto
 creato da <code>xtabs()</code>:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">xtabs</span>(probs <span class="sc">~</span> U <span class="sc">+</span> V, <span class="at">data =</span> UV)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rowSums</span>(temp)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="do">##          2          3          4          5          6          7          8 </span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 0.02777778 0.05555556 0.08333333 0.11111111 0.13888889 0.16666667 0.13888889 </span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="do">##          9         10         11         12 </span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 0.11111111 0.08333333 0.05555556 0.02777778</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">xtabs</span>(probs <span class="sc">~</span> U <span class="sc">+</span> V, <span class="at">data =</span> UV)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rowSums</span>(temp)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="do">##          2          3          4          5          6          7          8 </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 0.02777778 0.05555556 0.08333333 0.11111111 0.13888889 0.16666667 0.13888889 </span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="do">##          9         10         11         12 </span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 0.11111111 0.08333333 0.05555556 0.02777778</span></span></code></pre></div>
 <p>e</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(temp)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="do">##   0   1 </span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="do">## 0.5 0.5</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(temp)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="do">##   0   1 </span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="do">## 0.5 0.5</span></span></code></pre></div>
 <div id="valore-atteso" class="section level2">
 <h2>Valore atteso</h2>
-<p>Calcoliamo ora il valore atteso delle due variabili aleatorie.
-Utilizziamo la funzione <code>DiscreteDistribution()</code>. Il primo
-argomento richiede un vettore che specifica il supporto della variabile
-casuale discreta. Il secondo argomento è un vettore che, per ciasun
-valore della variabile casuale discreta, specifica il corrispondente
-valore della funzione di massa di probabilità. Mediante la funzione
-<code>DiscreteDistribution()</code> otteniamo il valore atteso di
-<code>U</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>U <span class="ot">&lt;-</span> <span class="fu">DiscreteDistribution</span>(<span class="at">supp =</span> pu<span class="sc">$</span>U, <span class="at">prob =</span> pu<span class="sc">$</span>probs)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>mu_u <span class="ot">&lt;-</span> <span class="fu">E</span>(U)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>mu_u</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 7</span></span></code></pre></div>
+<p>Calcoliamo il valore atteso delle due variabili casuali. Utilizziamo
+la funzione <code>DiscreteDistribution()</code>. Il primo argomento
+richiede un vettore che specifica il supporto della variabile casuale
+discreta; il secondo argomento è un vettore che specifica la funzione di
+massa di probabilità. Il valore atteso di <code>U</code> è:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>U <span class="ot">&lt;-</span> <span class="fu">DiscreteDistribution</span>(<span class="at">supp =</span> pu<span class="sc">$</span>U, <span class="at">prob =</span> pu<span class="sc">$</span>probs)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>mu_u <span class="ot">&lt;-</span> <span class="fu">E</span>(U)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>mu_u</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 7</span></span></code></pre></div>
 <p>Inoltre, il valore atteso di <code>V</code> è:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>V <span class="ot">&lt;-</span> <span class="fu">DiscreteDistribution</span>(<span class="at">supp =</span> pv<span class="sc">$</span>V, <span class="at">prob =</span> pv<span class="sc">$</span>probs)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>mu_v <span class="ot">&lt;-</span> <span class="fu">E</span>(V)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>mu_v</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>V <span class="ot">&lt;-</span> <span class="fu">DiscreteDistribution</span>(<span class="at">supp =</span> pv<span class="sc">$</span>V, <span class="at">prob =</span> pv<span class="sc">$</span>probs)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>mu_v <span class="ot">&lt;-</span> <span class="fu">E</span>(V)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>mu_v</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
 </div>
 <div id="covarianza" class="section level2">
 <h2>Covarianza</h2>
-<p>Utilizzando le informazioni precedenti possiamo calcolare la
-covarianza tra <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span>. La formula della covarianza</p>
+<p>Possiamo ora calcolare la covarianza tra <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span>. La formula della covarianza</p>
 <p><span class="math display">\[
-\sigma_{xy} = \sum_i \big(x_i - \mathbb{E}(x)\big)\big(y_i -
-\mathbb{E}(y)\big) \cdot p_i(x,y)
+\sigma_{xy} = \sum_i \big[x_i - \mathbb{E}(x)\big]\big[y_i -
+\mathbb{E}(y)\big] \cdot p_i(x,y)
 \]</span></p>
-<p>può essere implementata in <code>R</code> nel modo seguente:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>s_uv <span class="ot">&lt;-</span> <span class="fu">sum</span>((UV<span class="sc">$</span>U <span class="sc">-</span> mu_u) <span class="sc">*</span> (UV<span class="sc">$</span>V <span class="sc">-</span> mu_v) <span class="sc">*</span> UV<span class="sc">$</span>probs)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>s_uv</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.75</span></span></code></pre></div>
+<p>può essere implementata in <span class="math inline">\(\mathsf{R}\)</span> nel modo seguente:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>s_uv <span class="ot">&lt;-</span> <span class="fu">sum</span>((UV<span class="sc">$</span>U <span class="sc">-</span> mu_u) <span class="sc">*</span> (UV<span class="sc">$</span>V <span class="sc">-</span> mu_v) <span class="sc">*</span> UV<span class="sc">$</span>probs)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>s_uv</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.75</span></span></code></pre></div>
 <p>Lo stesso risultato si ottiene usando la formula alternativa per il
 calcolo della covarianza:</p>
 <p><span class="math display">\[
 \sigma_{xy} = \mathbb{E}(xy) -\mathbb{E}(x)\mathbb{E}(y)
 \]</span> ovvero</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>((UV<span class="sc">$</span>U <span class="sc">*</span> UV<span class="sc">$</span>V) <span class="sc">*</span> UV<span class="sc">$</span>probs) <span class="sc">-</span> mu_u <span class="sc">*</span> mu_v</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.75</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>((UV<span class="sc">$</span>U <span class="sc">*</span> UV<span class="sc">$</span>V) <span class="sc">*</span> UV<span class="sc">$</span>probs) <span class="sc">-</span> mu_u <span class="sc">*</span> mu_v</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.75</span></span></code></pre></div>
 </div>
 <div id="correlazione" class="section level2">
 <h2>Correlazione</h2>
@@ -758,23 +795,23 @@ correlazione infatti è una covarianza standardizzata:</p>
 \rho_{xy} = \frac{\sigma_{xy}}{\sigma_x\sigma_y}
 \]</span></p>
 <p>Per standardizzare dobbiamo dividere per le due deviazioni standard.
-Iniziamo dunque a calcolare le varianze delle due variabili aleatorie
+Iniziamo dunque a calcolare le varianze delle due variabili casuali
 <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span>:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>v_u <span class="ot">&lt;-</span> <span class="fu">sum</span>((pu<span class="sc">$</span>U <span class="sc">-</span> mu_u)<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> pu<span class="sc">$</span>probs)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>v_u</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 5.833333</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>v_v <span class="ot">&lt;-</span> <span class="fu">sum</span>((pv<span class="sc">$</span>V <span class="sc">-</span> mu_v)<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> pv<span class="sc">$</span>probs)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>v_v</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.25</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>v_u <span class="ot">&lt;-</span> <span class="fu">sum</span>((pu<span class="sc">$</span>U <span class="sc">-</span> mu_u)<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> pu<span class="sc">$</span>probs)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>v_u</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 5.833333</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>v_v <span class="ot">&lt;-</span> <span class="fu">sum</span>((pv<span class="sc">$</span>V <span class="sc">-</span> mu_v)<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> pv<span class="sc">$</span>probs)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>v_v</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.25</span></span></code></pre></div>
 <p>oppure, in maniera equivalente</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(U)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 5.833333</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(V)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.25</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(U)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 5.833333</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(V)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.25</span></span></code></pre></div>
 <p>Abbiamo ora tutte le informazioni necessarie per il calcolo della
 correlazione:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>s_uv <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">var</span>(U) <span class="sc">*</span> <span class="fu">var</span>(V))</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.621059</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>s_uv <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">var</span>(U) <span class="sc">*</span> <span class="fu">var</span>(V))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.621059</span></span></code></pre></div>
 </div>
 <div id="covarianza-2" class="section level2">
 <h2>Covarianza (2)</h2>
@@ -786,56 +823,56 @@ applicando la formula seguente mediante due cicli
 \mathbb{E}(y)\big) \cdot p_i(x,y)
 \]</span> Iniziamo creando un oggetto chiamato <code>puv</code> che
 contiene la distribuzione di probabilità congiunta delle variabili <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span>:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>puv <span class="ot">&lt;-</span> <span class="fu">xtabs</span>(<span class="fu">round</span>(probs, <span class="dv">3</span>) <span class="sc">~</span> U <span class="sc">+</span> V, <span class="at">data =</span> UV)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>puv</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     V</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="do">## U        0     1</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   2  0.000 0.028</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="do">##   3  0.000 0.056</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="do">##   4  0.000 0.083</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   5  0.028 0.083</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   6  0.056 0.083</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="do">##   7  0.083 0.083</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="do">##   8  0.083 0.056</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="do">##   9  0.083 0.028</span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="do">##   10 0.083 0.000</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="do">##   11 0.056 0.000</span></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="do">##   12 0.028 0.000</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>puv <span class="ot">&lt;-</span> <span class="fu">xtabs</span>(probs <span class="sc">~</span> U <span class="sc">+</span> V, <span class="at">data =</span> UV)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>puv</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     V</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="do">## U             0          1</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   2  0.00000000 0.02777778</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="do">##   3  0.00000000 0.05555556</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="do">##   4  0.00000000 0.08333333</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   5  0.02777778 0.08333333</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   6  0.05555556 0.08333333</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="do">##   7  0.08333333 0.08333333</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="do">##   8  0.08333333 0.05555556</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="do">##   9  0.08333333 0.02777778</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="do">##   10 0.08333333 0.00000000</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="do">##   11 0.05555556 0.00000000</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="do">##   12 0.02777778 0.00000000</span></span></code></pre></div>
 <p>La somma degli elementi di <code>puv</code> deve essere uguale a 1 (è
 sempre una buona idea controllare):</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(puv)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 1</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(puv)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 1</span></span></code></pre></div>
 <p>La variabile casuale <code>u</code> assume i valori:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">12</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>u</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1]  2  3  4  5  6  7  8  9 10 11 12</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">12</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>u</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1]  2  3  4  5  6  7  8  9 10 11 12</span></span></code></pre></div>
 <p>La variabile casuale <code>v</code> assume i valori:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">1</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>v</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0 1</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">1</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>v</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0 1</span></span></code></pre></div>
 <p>Abbiamo già calcolato in precedenza i valori attesi delle due
 variabili casuali, che sono chiamati <code>mu_u</code> e
 <code>mu_v</code>:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>mu_u</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 7</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>mu_v</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>mu_u</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 7</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>mu_v</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
 <p>Per semplicità, creo una matrice vuota delle stesse dimensioni
 dell’oggetto <code>puv</code>:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>suv <span class="ot">&lt;-</span> <span class="fu">matrix</span>(, <span class="at">nrow =</span> <span class="dv">11</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="co"># empty matrix</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>suv</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="do">##       [,1] [,2]</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1,]   NA   NA</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="do">##  [2,]   NA   NA</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="do">##  [3,]   NA   NA</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="do">##  [4,]   NA   NA</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="do">##  [5,]   NA   NA</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="do">##  [6,]   NA   NA</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="do">##  [7,]   NA   NA</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="do">##  [8,]   NA   NA</span></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="do">##  [9,]   NA   NA</span></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="do">## [10,]   NA   NA</span></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="do">## [11,]   NA   NA</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>suv <span class="ot">&lt;-</span> <span class="fu">matrix</span>(, <span class="at">nrow =</span> <span class="dv">11</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="co"># empty matrix</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>suv</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="do">##       [,1] [,2]</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1,]   NA   NA</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="do">##  [2,]   NA   NA</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="do">##  [3,]   NA   NA</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="do">##  [4,]   NA   NA</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="do">##  [5,]   NA   NA</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="do">##  [6,]   NA   NA</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="do">##  [7,]   NA   NA</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="do">##  [8,]   NA   NA</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="do">##  [9,]   NA   NA</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="do">## [10,]   NA   NA</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="do">## [11,]   NA   NA</span></span></code></pre></div>
 <p>Utilizzo due cicli <code>for()</code> nidificati (<em>nested</em>)
 per calcolare il valore di ciascun prodotto</p>
 <p><span class="math display">\[
@@ -845,11 +882,11 @@ p_{i,j}(u,v)
 <p>con <span class="math inline">\(i \in \{1, \dots, 11\}\)</span> e
 <span class="math inline">\(j \in \{1, 2\}\)</span>, che verrà salvato
 nel corrispondente elemento della matrice <code>suv</code>:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">11</span>) {</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>) {</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    suv[i, j] <span class="ot">&lt;-</span> (u[i] <span class="sc">-</span> mu_u) <span class="sc">*</span> (v[j] <span class="sc">-</span> mu_v) <span class="sc">*</span> puv[i, j]</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">11</span>) {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>) {</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    suv[i, j] <span class="ot">&lt;-</span> (u[i] <span class="sc">-</span> mu_u) <span class="sc">*</span> (v[j] <span class="sc">-</span> mu_v) <span class="sc">*</span> puv[i, j]</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Nel caso presente, si inizia con <code>i = 1</code>. Viene quindi
 svolto il ciclo interno e quindi, in due esecuzioni, <code>j = 1</code>
 e <code>j = 2</code>. Una volta completato il ciclo interno, il valore
@@ -858,13 +895,13 @@ esecuzioni del ciclo interno, <code>j = 1</code> e <code>j = 2</code>.
 Così via fino a <code>i = 11</code>.</p>
 <p>Esaminiamo la prima esecuzione del ciclo interno per
 <code>i = 1</code>. Ciò corrisponde a:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(u[<span class="dv">1</span>] <span class="sc">-</span> mu_u) <span class="sc">*</span> (v[<span class="dv">1</span>] <span class="sc">-</span> mu_v) <span class="sc">*</span> puv[<span class="dv">1</span>, <span class="dv">1</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(u[<span class="dv">1</span>] <span class="sc">-</span> mu_u) <span class="sc">*</span> (v[<span class="dv">1</span>] <span class="sc">-</span> mu_v) <span class="sc">*</span> puv[<span class="dv">1</span>, <span class="dv">1</span>]</span></code></pre></div>
 <p>ovvero</p>
 <p><span class="math display">\[
 \big(u_1 - \mathbb{E}(u)\big)\big(v_1 - \mathbb{E}(v)\big) \cdot
 p_{1,1}(u,v)
 \]</span> Nel secondo step avremo</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(u[<span class="dv">1</span>] <span class="sc">-</span> mu_u) <span class="sc">*</span> (v[<span class="dv">2</span>] <span class="sc">-</span> mu_v) <span class="sc">*</span> puv[<span class="dv">1</span>, <span class="dv">2</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(u[<span class="dv">1</span>] <span class="sc">-</span> mu_u) <span class="sc">*</span> (v[<span class="dv">2</span>] <span class="sc">-</span> mu_v) <span class="sc">*</span> puv[<span class="dv">1</span>, <span class="dv">2</span>]</span></code></pre></div>
 <p>ovvero</p>
 <p><span class="math display">\[
 \big(u_1 - \mathbb{E}(u)\big)\big(v_2 - \mathbb{E}(v)\big) \cdot
@@ -878,59 +915,59 @@ operazioni.</p>
 gli addendi, ovvero gli <span class="math inline">\(11\times2\)</span>
 elementi della matrice <code>suv</code>. Così facendo troviamo la
 covarianza tra <span class="math inline">\(U\)</span> e <span class="math inline">\(V\)</span>:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(suv)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.75</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(suv)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.75</span></span></code></pre></div>
 <p>Il risultato riproduce quello trovato in precedenza.</p>
 </div>
 <div id="informazioni-sulla-sessione-di-lavoro" class="section level2">
 <h2>Informazioni sulla sessione di lavoro</h2>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>utils<span class="sc">::</span><span class="fu">sessionInfo</span>()</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="do">## R version 4.1.3 (2022-03-10)</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Platform: x86_64-apple-darwin17.0 (64-bit)</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Running under: macOS Big Sur/Monterey 10.16</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Matrix products: default</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="do">## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="do">## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="do">## locale:</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8</span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="do">## attached base packages:</span></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="do">## other attached packages:</span></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] distrEx_2.8.0         distr_2.8.0           sfsmisc_1.1-12       </span></span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="do">##  [4] startupmsg_0.9.6      prob_1.0-1            fAsianOptions_3042.82</span></span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="do">##  [7] fOptions_3042.86      fBasics_3042.89.1     timeSeries_3062.100  </span></span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="do">## [10] timeDate_3043.102     combinat_0.0-8        bayesplot_1.9.0      </span></span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="do">## [13] scales_1.1.1          forcats_0.5.1         stringr_1.4.0        </span></span>
-<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="do">## [16] dplyr_1.0.8           purrr_0.3.4           readr_2.1.2          </span></span>
-<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="do">## [19] tidyr_1.2.0           tibble_3.1.6          ggplot2_3.3.5        </span></span>
-<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="do">## [22] tidyverse_1.3.1       here_1.0.1           </span></span>
-<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a><span class="do">## loaded via a namespace (and not attached):</span></span>
-<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] httr_1.4.2        sass_0.4.0.9000   jsonlite_1.8.0    R.utils_2.11.0   </span></span>
-<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a><span class="do">##  [5] modelr_0.1.8      bslib_0.3.1       assertthat_0.2.1  cellranger_1.1.0 </span></span>
-<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a><span class="do">##  [9] yaml_2.3.5        pillar_1.7.0      backports_1.4.1   glue_1.6.2       </span></span>
-<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a><span class="do">## [13] digest_0.6.29     rvest_1.0.2       colorspace_2.0-3  R.oo_1.24.0      </span></span>
-<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a><span class="do">## [17] htmltools_0.5.2   plyr_1.8.6        pkgconfig_2.0.3   broom_0.7.12     </span></span>
-<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a><span class="do">## [21] haven_2.4.3       tzdb_0.2.0        styler_1.7.0      generics_0.1.2   </span></span>
-<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a><span class="do">## [25] spatial_7.3-15    ellipsis_0.3.2    withr_2.5.0       cli_3.2.0        </span></span>
-<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a><span class="do">## [29] magrittr_2.0.2    crayon_1.5.0      readxl_1.3.1      evaluate_0.15    </span></span>
-<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a><span class="do">## [33] R.methodsS3_1.8.1 fs_1.5.2          fansi_1.0.2       R.cache_0.15.0   </span></span>
-<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a><span class="do">## [37] MASS_7.3-55       xml2_1.3.3        tools_4.1.3       hms_1.1.1        </span></span>
-<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a><span class="do">## [41] lifecycle_1.0.1   munsell_0.5.0     reprex_2.0.1      compiler_4.1.3   </span></span>
-<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a><span class="do">## [45] jquerylib_0.1.4   rlang_1.0.2       grid_4.1.3        ggridges_0.5.3   </span></span>
-<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a><span class="do">## [49] rstudioapi_0.13   rmarkdown_2.13    gtable_0.3.0      DBI_1.1.2        </span></span>
-<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a><span class="do">## [53] rematch2_2.1.2    R6_2.5.1          lubridate_1.8.0   knitr_1.37       </span></span>
-<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a><span class="do">## [57] fastmap_1.1.0     utf8_1.2.2        rprojroot_2.0.2   stringi_1.7.6    </span></span>
-<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a><span class="do">## [61] Rcpp_1.0.8.2      vctrs_0.3.8       dbplyr_2.1.1      tidyselect_1.1.2 </span></span>
-<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a><span class="do">## [65] xfun_0.30</span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>utils<span class="sc">::</span><span class="fu">sessionInfo</span>()</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="do">## R version 4.1.3 (2022-03-10)</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Platform: x86_64-apple-darwin17.0 (64-bit)</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Running under: macOS Big Sur/Monterey 10.16</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Matrix products: default</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="do">## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="do">## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="do">## locale:</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="do">## attached base packages:</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a><span class="do">## other attached packages:</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] distrEx_2.8.0         distr_2.8.0           sfsmisc_1.1-12       </span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a><span class="do">##  [4] startupmsg_0.9.6      prob_1.0-1            fAsianOptions_3042.82</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="do">##  [7] fOptions_3042.86      fBasics_3042.89.1     timeSeries_3062.100  </span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a><span class="do">## [10] timeDate_3043.102     combinat_0.0-8        bayesplot_1.9.0      </span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a><span class="do">## [13] scales_1.1.1          forcats_0.5.1         stringr_1.4.0        </span></span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a><span class="do">## [16] dplyr_1.0.8           purrr_0.3.4           readr_2.1.2          </span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a><span class="do">## [19] tidyr_1.2.0           tibble_3.1.6          ggplot2_3.3.5        </span></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a><span class="do">## [22] tidyverse_1.3.1       here_1.0.1           </span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a><span class="do">## loaded via a namespace (and not attached):</span></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] httr_1.4.2        sass_0.4.0.9000   jsonlite_1.8.0    R.utils_2.11.0   </span></span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a><span class="do">##  [5] modelr_0.1.8      bslib_0.3.1       assertthat_0.2.1  cellranger_1.1.0 </span></span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a><span class="do">##  [9] yaml_2.3.5        pillar_1.7.0      backports_1.4.1   glue_1.6.2       </span></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a><span class="do">## [13] digest_0.6.29     rvest_1.0.2       colorspace_2.0-3  R.oo_1.24.0      </span></span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a><span class="do">## [17] htmltools_0.5.2   plyr_1.8.6        pkgconfig_2.0.3   broom_0.7.12     </span></span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a><span class="do">## [21] haven_2.4.3       tzdb_0.2.0        styler_1.7.0      generics_0.1.2   </span></span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a><span class="do">## [25] spatial_7.3-15    ellipsis_0.3.2    withr_2.5.0       cli_3.2.0        </span></span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a><span class="do">## [29] magrittr_2.0.2    crayon_1.5.0      readxl_1.3.1      evaluate_0.15    </span></span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a><span class="do">## [33] R.methodsS3_1.8.1 fs_1.5.2          fansi_1.0.2       R.cache_0.15.0   </span></span>
+<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a><span class="do">## [37] MASS_7.3-55       xml2_1.3.3        tools_4.1.3       hms_1.1.1        </span></span>
+<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a><span class="do">## [41] lifecycle_1.0.1   munsell_0.5.0     reprex_2.0.1      compiler_4.1.3   </span></span>
+<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a><span class="do">## [45] jquerylib_0.1.4   rlang_1.0.2       grid_4.1.3        ggridges_0.5.3   </span></span>
+<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a><span class="do">## [49] rstudioapi_0.13   rmarkdown_2.13    gtable_0.3.0      DBI_1.1.2        </span></span>
+<span id="cb28-40"><a href="#cb28-40" aria-hidden="true" tabindex="-1"></a><span class="do">## [53] rematch2_2.1.2    R6_2.5.1          lubridate_1.8.0   knitr_1.37       </span></span>
+<span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a><span class="do">## [57] fastmap_1.1.0     utf8_1.2.2        rprojroot_2.0.2   stringi_1.7.6    </span></span>
+<span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a><span class="do">## [61] Rcpp_1.0.8.3      vctrs_0.3.8       dbplyr_2.1.1      tidyselect_1.1.2 </span></span>
+<span id="cb28-43"><a href="#cb28-43" aria-hidden="true" tabindex="-1"></a><span class="do">## [65] xfun_0.30</span></span></code></pre></div>
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDExLjAyIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBoaWdobGlnaHQ6IHB5Z21lbnRzCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgiaGVyZSIpCiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJzY2FsZXMiKQogIGxpYnJhcnkoImJheWVzcGxvdCIpCiAgbGlicmFyeSgicHJvYiIpCiAgbGlicmFyeSgiZGlzdHJFeCIpCn0pCgp0aGVtZV9zZXQoYmF5ZXNwbG90Ojp0aGVtZV9kZWZhdWx0KGJhc2Vfc2l6ZSA9IDEyKSkKYmF5ZXNwbG90Ojpjb2xvcl9zY2hlbWVfc2V0KCJncmF5IikKc2V0LnNlZWQoODQ3MzUpCgprbml0cjo6b3B0c19jaHVuayRzZXQoCiAgY29sbGFwc2UgPSBUUlVFLAogIHRpZHkgPSAnc3R5bGVyJywKICBmaWcud2lkdGggPSA2LAogIGZpZy5hc3AgPSAwLjYxOCAjIDEgLyBwaGkKKQpgYGAKCiMgTGEgY292YXJpYW56YSBkaSBkdWUgdmFyaWFiaWxpIGFsZWF0b3JpZSBkaXNjcmV0ZQoKUG9uaWFtb2NpIGlsIHByb2JsZW1hIGRpIGNhbGNvbGFyZSBsYSBjb3ZhcmlhbnphIGUgbGEgY29ycmVsYXppb25lIGRpIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGRpc2NyZXRlIHV0aWxpenphbmRvIGwnaW5mb3JtYXppb25lIGZvcm5pdGEgZGFsbGEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AgY29uZ2l1bnRhLiAgCgpDb25zaWRlcmlhbW8gbCdlc3BlcmltZW50byBjYXN1YWxlIGNoZSBjb3JyaXNwb25kZSBhbCBsYW5jaW8gZGkgZHVlIGRhZGkgYmlsYW5jaWF0aS4gQ3JlaWFtbyBsbyBzcGF6aW8gY2FtcGlvbmFyaW8gZGkgcXVlc3RvIGVzcGVyaW1lbnRvIGNhc3VhbGUgZSBkZWZpbmlhbW8gc3UgZGkgZXNzbyBsZSBzZWd1ZW50aSB2YXJpYWJpbGkgYWxlYXRvcmllOgoKLSBVOiBzb21tYSBkZWkgcHVudGkgZGVpIGR1ZSBkYWRpLAotIFY6IDEgc2UgaSBwdW50aSBkZWwgbGFuY2lvIGRlbCBwcmltbyBkYWRvIHNvbm8gbWlub3JpIGRpIDQsIDAgYWx0cmltZW50aS4KClBvc3NpYW1vIG90dGVuZXJlIHVuIGVsZW5jbyBkaSB0dXR0aSBnbGkgZXZlbnRpIGVsZW1lbnRhcmkgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIHVzYW5kbyBsZSBpc3RydXppb25pIHNlZ3VlbnRpOgoKYGBge3J9ClMgPC0gcm9sbGRpZSgyLCBuc2lkZXMgPSA2LCBtYWtlc3BhY2UgPSBUUlVFKQpTIDwtIGFkZHJ2KFMsIFUgPSBYMStYMiwgViA9IGlmZWxzZShYMSA8IDQsIDEsIDApKQpTCmBgYAoKTGUgaXN0cnV6aW9uaSBwcmVjZWRlbnRpIHNwZWNpZmljYW5vLCBpbiBjb3JyaXNwb25kZW56YSBkaSBvZ25pIHB1bnRvIGRlbGxvIHNwYXppbyBjYW1waW9uYXJpbyAob3Z2ZXJvLCBpbiBjaWFzY3VuYSByaWdhIGRlbCBkYXRhLmZyYW1lIGNoZSB2aWVuZSBnZW5lcmF0byksIGlsIHZhbG9yZSBhc3N1bnRvIGRhbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGNoZSBzb25vIHN0YXRlIGRlZmluaXRlLgoKTGEgZGVzY3JpemlvbmUgZGVsbG8gc3BhemlvIGNhbXBpb25hcmlvIGZvcm5pdGEgZGEgYFJgIMOoIGNvcnJldHRhOiBxdWVzdG8gZXNwZXJpbWVudG8gY2FzdWFsZSBwcm9kdWNlIGluZmF0dGkgNiAkXHRpbWVzJCA2IGVzaXRpIChldmVudGkgZWxlbWVudGFyaSkgcG9zc2liaWxpLiBNYSBzaSBub3RpIGNoZSBhbGN1bmUgcmlnaGUgZGVsIGRhdGEuZnJhbWUgc2kgcmlwZXRvbm8gcGnDuSB2b2x0ZS4gUG9zc2lhbW8gZHVucXVlIHNlbXBsaWZpY2FyZSB0YWxlIGRlc2NyaXppb25lIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9ClVWIDwtIG1hcmdpbmFsKFMsIHZhcnMgPSBjKCJVIiwgIlYiKSkgClVWCmBgYAoKTCdlbGVuY28gZGVpIHZhbG9yaSBjaGUgbGUgZHVlIHZhcmlhYmlsaSBhbGVhdG9yaWUgJFUkIGUgJFYkIHBvc3Nvbm8gYXNzdW1lcmUsIGluc2llbWUgYWxsYSBwcm9iYWJpbGl0w6AgZGVsIGxvcm8gdmVyaWZpY2Fyc2ksIGNvc3RpdHVpc2NlIGxhIF9kaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGFfIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllLiDDiCBhbmNoZSBwb3NzaWJpbGUgcHJlc2VudGFyZSBsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGEgaW4gZm9ybWEgdGFidWxhcmUuIEEgdGFsZSBmaW5lIHBvc3NpYW1vIHV0aWxpenphcmUgbGEgZnVuemlvbmUgYHh0YWJzKClgOgoKYGBge3J9Cnh0YWJzKHJvdW5kKHByb2JzLCAzKSB+IFUgKyBWLCBkYXRhID0gVVYpCmBgYAoKUmlwZXRpYW1vIG9yYSBpbCBwcm9jZXNzbyBwcmVjZWRlbnRlIGNoaWVkZW5kbyBhbGxhIGZ1bnppb25lIGBtYXJnaW5hbCgpYCBkaSBjYWxjb2xhcmUgbGUgZHVlIGRpc3RyaWJ1emlvbmkgbWFyZ2luYWxpIHVuaXZhcmlhdGU6CgpgYGB7cn0KcHUgPC0gbWFyZ2luYWwoUywgdmFycyA9ICJVIikKcHUKYGBgCgplCgpgYGB7cn0KcHYgPC0gbWFyZ2luYWwoUywgdmFycyA9ICJWIikKcHYKYGBgCgpJbiBtYW5pZXJhIGVxdWl2YWxlbnRlLCBsbyBzdGVzc28gcmlzdWx0YXRvIHNpIHRyb3ZhIGFwcGxpY2FuZG8gbGUgZnVuemlvbmkgYHJvd1N1bXMoKWAgZSBgY29sU3VtcygpYCBhbGwnb2dnZXR0byBjcmVhdG8gZGEgYHh0YWJzKClgOgoKYGBge3J9CnRlbXAgPC0geHRhYnMocHJvYnMgfiBVICsgViwgZGF0YSA9IFVWKQpyb3dTdW1zKHRlbXApCmBgYAoKZQoKYGBge3J9CmNvbFN1bXModGVtcCkKYGBgCgojIyBWYWxvcmUgYXR0ZXNvCgpDYWxjb2xpYW1vIG9yYSBpbCB2YWxvcmUgYXR0ZXNvIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllLiBVdGlsaXp6aWFtbyBsYSBmdW56aW9uZSBgRGlzY3JldGVEaXN0cmlidXRpb24oKWAuIElsIHByaW1vIGFyZ29tZW50byByaWNoaWVkZSB1biB2ZXR0b3JlIGNoZSBzcGVjaWZpY2EgaWwgc3VwcG9ydG8gZGVsbGEgdmFyaWFiaWxlIGNhc3VhbGUgZGlzY3JldGEuIElsIHNlY29uZG8gYXJnb21lbnRvIMOoIHVuIHZldHRvcmUgY2hlLCBwZXIgY2lhc3VuIHZhbG9yZSBkZWxsYSB2YXJpYWJpbGUgY2FzdWFsZSBkaXNjcmV0YSwgc3BlY2lmaWNhIGlsIGNvcnJpc3BvbmRlbnRlIHZhbG9yZSBkZWxsYSBmdW56aW9uZSBkaSBtYXNzYSBkaSBwcm9iYWJpbGl0w6AuIE1lZGlhbnRlIGxhIGZ1bnppb25lIGBEaXNjcmV0ZURpc3RyaWJ1dGlvbigpYCBvdHRlbmlhbW8gaWwgdmFsb3JlIGF0dGVzbyBkaSBgVWA6CgpgYGB7cn0KVSA8LSBEaXNjcmV0ZURpc3RyaWJ1dGlvbihzdXBwID0gcHUkVSwgcHJvYiA9IHB1JHByb2JzKQptdV91IDwtIEUoVSkKbXVfdQpgYGAKCklub2x0cmUsIGlsIHZhbG9yZSBhdHRlc28gZGkgYFZgIMOoOgoKYGBge3J9ClYgPC0gRGlzY3JldGVEaXN0cmlidXRpb24oc3VwcCA9IHB2JFYsIHByb2IgPSBwdiRwcm9icykKbXVfdiA8LSBFKFYpCm11X3YKYGBgCgoKIyMgQ292YXJpYW56YQoKVXRpbGl6emFuZG8gbGUgaW5mb3JtYXppb25pIHByZWNlZGVudGkgcG9zc2lhbW8gY2FsY29sYXJlIGxhIGNvdmFyaWFuemEgdHJhICRVJCBlICRWJC4gTGEgZm9ybXVsYSBkZWxsYSBjb3ZhcmlhbnphCgokJApcc2lnbWFfe3h5fSA9IFxzdW1faSBcYmlnKHhfaSAtIFxtYXRoYmJ7RX0oeClcYmlnKVxiaWcoeV9pIC0gXG1hdGhiYntFfSh5KVxiaWcpIFxjZG90IHBfaSh4LHkpCiQkCgpwdcOyIGVzc2VyZSBpbXBsZW1lbnRhdGEgaW4gYFJgIG5lbCBtb2RvIHNlZ3VlbnRlOgoKYGBge3J9CnNfdXYgPC0gc3VtKChVViRVIC0gbXVfdSkgKiAoVVYkViAtIG11X3YpICogVVYkcHJvYnMpCnNfdXYKYGBgCgpMbyBzdGVzc28gcmlzdWx0YXRvIHNpIG90dGllbmUgdXNhbmRvIGxhIGZvcm11bGEgYWx0ZXJuYXRpdmEgcGVyIGlsIGNhbGNvbG8gZGVsbGEgY292YXJpYW56YToKCiQkClxzaWdtYV97eHl9ID0gXG1hdGhiYntFfSh4eSkgLVxtYXRoYmJ7RX0oeClcbWF0aGJie0V9KHkpCiQkCm92dmVybyAKCmBgYHtyfQpzdW0oKFVWJFUgKiBVViRWKSAqIFVWJHByb2JzKSAtIG11X3UgKiBtdV92CmBgYAoKCiMjIENvcnJlbGF6aW9uZQoKQ29ub3NjZW5kbyBsYSBjb3ZhcmlhbnphIMOoIHBvc3NpYmlsZSBjYWxjb2xhcmUgbGEgY29ycmVsYXppb25lLiBMYSBjb3JyZWxhemlvbmUgaW5mYXR0aSDDqCB1bmEgY292YXJpYW56YSBzdGFuZGFyZGl6emF0YToKCiQkClxyaG9fe3h5fSA9IFxmcmFje1xzaWdtYV97eHl9fXtcc2lnbWFfeFxzaWdtYV95fQokJAoKUGVyIHN0YW5kYXJkaXp6YXJlIGRvYmJpYW1vIGRpdmlkZXJlIHBlciBsZSBkdWUgZGV2aWF6aW9uaSBzdGFuZGFyZC4gSW5pemlhbW8gZHVucXVlIGEgY2FsY29sYXJlIGxlIHZhcmlhbnplIGRlbGxlIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllICRVJCBlICRWJDoKCmBgYHtyfQp2X3UgPC0gc3VtKChwdSRVIC0gbXVfdSleMiAqIHB1JHByb2JzKQp2X3UKdl92IDwtIHN1bSgocHYkViAtIG11X3YpXjIgKiBwdiRwcm9icykKdl92CmBgYAoKb3BwdXJlLCBpbiBtYW5pZXJhIGVxdWl2YWxlbnRlCgpgYGB7cn0KdmFyKFUpCnZhcihWKQpgYGAKCkFiYmlhbW8gb3JhIHR1dHRlIGxlIGluZm9ybWF6aW9uaSBuZWNlc3NhcmllIHBlciBpbCBjYWxjb2xvIGRlbGxhIGNvcnJlbGF6aW9uZToKCmBgYHtyfQpzX3V2IC8gc3FydCh2YXIoVSkgKiB2YXIoVikpCmBgYAoKIyMgQ292YXJpYW56YSAoMikKCkNhbGNvbGlhbW8gbnVvdmFtZW50ZSBsYSBjb3ZhcmlhbnphIGluIG1hbmllcmEgcGnDuSBkaXJldHRhLCBvdnZlcm8gYXBwbGljYW5kbyBsYSBmb3JtdWxhIHNlZ3VlbnRlIG1lZGlhbnRlIGR1ZSBjaWNsaSBgZm9yKClgOgoKJCQKXHNpZ21hX3t4eX0gPSBcc3VtX2kgXGJpZyh4X2kgLSBcbWF0aGJie0V9KHgpXGJpZylcYmlnKHlfaSAtIFxtYXRoYmJ7RX0oeSlcYmlnKSBcY2RvdCBwX2koeCx5KQokJApJbml6aWFtbyBjcmVhbmRvIHVuIG9nZ2V0dG8gY2hpYW1hdG8gYHB1dmAgY2hlIGNvbnRpZW5lIGxhIGRpc3RyaWJ1emlvbmUgZGkgcHJvYmFiaWxpdMOgIGNvbmdpdW50YSBkZWxsZSB2YXJpYWJpbGkgJFUkIGUgJFYkOgoKYGBge3J9CnB1diA8LSB4dGFicyhyb3VuZChwcm9icywgMykgfiBVICsgViwgZGF0YSA9IFVWKQpwdXYKYGBgCgpMYSBzb21tYSBkZWdsaSBlbGVtZW50aSBkaSBgcHV2YCBkZXZlIGVzc2VyZSB1Z3VhbGUgYSAxICjDqCBzZW1wcmUgdW5hIGJ1b25hIGlkZWEgY29udHJvbGxhcmUpOgoKYGBge3J9CnN1bShwdXYpCmBgYAoKTGEgdmFyaWFiaWxlIGNhc3VhbGUgYHVgIGFzc3VtZSBpIHZhbG9yaToKCmBgYHtyfQp1IDwtIDI6MTIKdQpgYGAKCkxhIHZhcmlhYmlsZSBjYXN1YWxlIGB2YCBhc3N1bWUgaSB2YWxvcmk6CgpgYGB7cn0KdiA8LSAwOjEKdgpgYGAKCkFiYmlhbW8gZ2nDoCBjYWxjb2xhdG8gaW4gcHJlY2VkZW56YSBpIHZhbG9yaSBhdHRlc2kgZGVsbGUgZHVlIHZhcmlhYmlsaSBjYXN1YWxpLCBjaGUgc29ubyBjaGlhbWF0aSBgbXVfdWAgZSBgbXVfdmA6CgpgYGB7cn0KbXVfdQptdV92CmBgYAoKUGVyIHNlbXBsaWNpdMOgLCBjcmVvIHVuYSBtYXRyaWNlIHZ1b3RhIGRlbGxlIHN0ZXNzZSBkaW1lbnNpb25pIGRlbGwnb2dnZXR0byBgcHV2YDoKCmBgYHtyfQpzdXYgPSBtYXRyaXgoLCBucm93ID0gMTEsIG5jb2wgPSAyKSAjIGVtcHR5IG1hdHJpeApzdXYKYGBgCgpVdGlsaXp6byBkdWUgY2ljbGkgYGZvcigpYCBuaWRpZmljYXRpIChfbmVzdGVkXykgcGVyIGNhbGNvbGFyZSBpbCB2YWxvcmUgZGkgY2lhc2N1biBwcm9kb3R0byAKCiQkClxiaWcodV9pIC0gXG1hdGhiYntFfSh1KVxiaWcpXGJpZyh2X2ogLSBcbWF0aGJie0V9KHYpXGJpZykgXGNkb3QgcF97aSxqfSh1LHYpCiQkIAoKY29uICRpIFxpbiBcezEsIFxkb3RzLCAxMVx9JCBlICRqIFxpbiBcezEsIDJcfSQsIGNoZSB2ZXJyw6Agc2FsdmF0byBuZWwgY29ycmlzcG9uZGVudGUgZWxlbWVudG8gZGVsbGEgbWF0cmljZSBgc3V2YDoKCmBgYHtyfQpmb3IgKGkgaW4gMToxMSkgCiAgZm9yIChqIGluIDE6MikgewogICAgc3V2W2ksIGpdIDwtICh1W2ldIC0gbXVfdSkgKiAodltqXSAtIG11X3YpICogcHV2W2ksIGpdCiAgfQpgYGAKCk5lbCBjYXNvIHByZXNlbnRlLCBzaSBpbml6aWEgY29uIGBpID0gMWAuIFZpZW5lIHF1aW5kaSBzdm9sdG8gaWwgY2ljbG8gaW50ZXJubyBlIHF1aW5kaSwgaW4gZHVlIGVzZWN1emlvbmksIGBqID0gMWAgZSBgaiA9IDJgLiBVbmEgdm9sdGEgY29tcGxldGF0byBpbCBjaWNsbyBpbnRlcm5vLCBpbCB2YWxvcmUgZGVsbCdpbmRpY2UgZGVsIGNpY2xvIGVzdGVybm8gdmFycsOgIGBpID0gMmAuIFNpIHJpcGV0b25vIGxlIGVzZWN1emlvbmkgZGVsIGNpY2xvIGludGVybm8sIGBqID0gMWAgZSBgaiA9IDJgLiBDb3PDrCB2aWEgZmlubyBhIGBpID0gMTFgLiAKCkVzYW1pbmlhbW8gbGEgcHJpbWEgZXNlY3V6aW9uZSBkZWwgY2ljbG8gaW50ZXJubyBwZXIgYGkgPSAxYC4gQ2nDsiBjb3JyaXNwb25kZSBhOgoKYGBge3IsIGV2YWw9RkFMU0V9Cih1WzFdIC0gbXVfdSkgKiAodlsxXSAtIG11X3YpICogcHV2WzEsIDFdCmBgYAoKb3Z2ZXJvCgokJApcYmlnKHVfMSAtIFxtYXRoYmJ7RX0odSlcYmlnKVxiaWcodl8xIC0gXG1hdGhiYntFfSh2KVxiaWcpIFxjZG90IHBfezEsMX0odSx2KQokJApOZWwgc2Vjb25kbyBzdGVwIGF2cmVtbyAKCmBgYHtyLCBldmFsPUZBTFNFfQoodVsxXSAtIG11X3UpICogKHZbMl0gLSBtdV92KSAqIHB1dlsxLCAyXQpgYGAKCm92dmVybwoKJCQKXGJpZyh1XzEgLSBcbWF0aGJie0V9KHUpXGJpZylcYmlnKHZfMiAtIFxtYXRoYmJ7RX0odilcYmlnKSBcY2RvdCBwX3sxLDJ9KHUsdikKJCQKRSBjb3PDrCB2aWEgcGVyIHR1dHRpIGdsaSAkMTFcdGltZXMyJCBlbGVtZW50aSBkZWxsYSBtYXRyaWNlIGNoZSBjb250aWVuZSBsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGEuIAoKw4ggaXJyaWxldmFudGUgcXVhbGUgc2lhIGlsIGNpY2xvIGVzdGVybm8gZSBxdWFsZSBxdWVsbG8gaW50ZXJubywgcXVlc3RvIGNhbWJpYSBzb2x0YW50byBsJ29yZGluZSBjb24gaWwgcXVhbGUgdmVudG9ubyBzdm9sdGUgbGUgb3BlcmF6aW9uaS4KClVuYSB2b2x0YSBzdm9sdGkgaSBjYWxjb2xpIHByZWNlZGVudGksIG5vbiByZXN0YSBjaGUgc29tbWFyZSB0dXR0aSBnbGkgYWRkZW5kaSwgb3Z2ZXJvIGdsaSAkMTFcdGltZXMyJCBlbGVtZW50aSBkZWxsYSBtYXRyaWNlIGBzdXZgLiBDb3PDrCBmYWNlbmRvIHRyb3ZpYW1vIGxhIGNvdmFyaWFuemEgdHJhICRVJCBlICRWJDoKCmBgYHtyfQpzdW0oc3V2KQpgYGAKCklsIHJpc3VsdGF0byByaXByb2R1Y2UgcXVlbGxvIHRyb3ZhdG8gaW4gcHJlY2VkZW56YS4KCgojIyBJbmZvcm1hemlvbmkgc3VsbGEgc2Vzc2lvbmUgZGkgbGF2b3JvCgpgYGB7cn0KdXRpbHM6OnNlc3Npb25JbmZvKCkKYGBgCgoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDExLjAyIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBoaWdobGlnaHQ6IHB5Z21lbnRzCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgiaGVyZSIpCiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJzY2FsZXMiKQogIGxpYnJhcnkoImJheWVzcGxvdCIpCiAgbGlicmFyeSgicHJvYiIpCiAgbGlicmFyeSgiZGlzdHJFeCIpCn0pCgp0aGVtZV9zZXQoYmF5ZXNwbG90Ojp0aGVtZV9kZWZhdWx0KGJhc2Vfc2l6ZSA9IDEyKSkKYmF5ZXNwbG90Ojpjb2xvcl9zY2hlbWVfc2V0KCJncmF5IikKc2V0LnNlZWQoODQ3MzUpCgprbml0cjo6b3B0c19jaHVuayRzZXQoCiAgY29sbGFwc2UgPSBUUlVFLAogIHRpZHkgPSAnc3R5bGVyJywKICBmaWcud2lkdGggPSA2LAogIGZpZy5hc3AgPSAwLjYxOCAjIDEgLyBwaGkKKQpgYGAKCiMgTGEgY292YXJpYW56YSBkaSBkdWUgdmFyaWFiaWxpIGFsZWF0b3JpZSBkaXNjcmV0ZQoKUG9uaWFtb2NpIGlsIHByb2JsZW1hIGRpIGNhbGNvbGFyZSBsYSBjb3ZhcmlhbnphIGUgbGEgY29ycmVsYXppb25lIGRpIGR1ZSB2YXJpYWJpbGkgYWxlYXRvcmllIGRpc2NyZXRlIHV0aWxpenphbmRvIGwnaW5mb3JtYXppb25lIGZvcm5pdGEgZGFsbGEgKmRpc3RyaWJ1emlvbmUgZGkgcHJvYmFiaWxpdMOgIGNvbmdpdW50YSouICAKCkNvbnNpZGVyaWFtbyBsJ2VzcGVyaW1lbnRvIGNhc3VhbGUgY2hlIGNvcnJpc3BvbmRlIGFsIGxhbmNpbyBkaSBkdWUgZGFkaSBiaWxhbmNpYXRpLiBDcmVpYW1vIGxvIHNwYXppbyBjYW1waW9uYXJpbyBkaSBxdWVzdG8gZXNwZXJpbWVudG8gY2FzdWFsZSBlIGRlZmluaWFtbyBzdSBkaSBlc3NvIGxlIHNlZ3VlbnRpIHZhcmlhYmlsaSBhbGVhdG9yaWU6CgotIFU6IHNvbW1hIGRlaSBwdW50aSBkZWkgZHVlIGRhZGksCi0gVjogMSBzZSBpIHB1bnRpIGRlbCBsYW5jaW8gZGVsIHByaW1vIGRhZG8gc29ubyBtaW5vcmkgZGkgNCwgMCBhbHRyaW1lbnRpLgoKQ3JlaWFtbyBsbyBzcGF6aW8gY2FtcGlvbmUgbmVsIG1vZG8gc2VndWVudGU6CgpgYGB7cn0KUyA8LSByb2xsZGllKDIsIG5zaWRlcyA9IDYsIG1ha2VzcGFjZSA9IFRSVUUpClMKYGBgClN1IHRhbGUgc3BhemlvIGNhbXBpb25lIGRlZmluaXNjbyBsZSBkdWUgdmFyaWFiaWxpIGNhc3VhbGkgZGVzY3JpdHRlIGluIHByZWNlZGVuemE6CgpgYGB7cn0KUyA8LSBhZGRydihTLCBVID0gWDErWDIsIFYgPSBpZmVsc2UoWDEgPCA0LCAxLCAwKSkKUwpgYGAKCkxlIGlzdHJ1emlvbmkgcHJlY2VkZW50aSBzcGVjaWZpY2FubywgaW4gY29ycmlzcG9uZGVuemEgZGkgb2duaSBldmVudG8gZWxlbWVudGFyZSBkZWxsbyBzcGF6aW8gY2FtcGlvbmUgLS0gb3Z2ZXJvLCBpbiBjb3JyaXNwb25kZW56YSBkaSBjaWFzY3VuYSByaWdhIGRlbCBEYXRhRnJhbWUgLS0gaWwgdmFsb3JlIGFzc3VudG8gZGFsbGUgZHVlIHZhcmlhYmlsaSBjYXN1YWxpLiAKClBvc3NpYW1vIHNlbXBsaWZpY2FyZSB0YWxlIGRlc2NyaXppb25lIHVzYW5kbyBgcHJvYjo6bWFyZ2luYWwoKWAuIFNpIG5vdGkgbGEgZnVuemlvbmUgYGMoKWAgY2hlIGNvbnNlbnRlIGRpIHNwZWNpZmljYXJlIHVuIHZldHRvcmUgY2hlIGNvbnRpZW5lIGlsIG5vbWUgZGVsbGUgZHVlIHZhcmlhYmlsaToKCmBgYHtyfQpVViA8LSBtYXJnaW5hbChTLCB2YXJzID0gYygiVSIsICJWIikpIApVVgpgYGAKCkwnZWxlbmNvIGRlaSB2YWxvcmkgY2hlIGxlIGR1ZSB2YXJpYWJpbGkgY2FzdWFsaSAkVSQgZSAkViQgcG9zc29ubyBhc3N1bWVyZSwgaW5zaWVtZSBhbGxhIHByb2JhYmlsaXTDoCBkZWwgbG9ybyB2ZXJpZmljYXJzaSwgY29zdGl0dWlzY2UgbGEgKmRpc3RyaWJ1emlvbmUgZGkgcHJvYmFiaWxpdMOgIGNvbmdpdW50YSouIFZlcmlmaWNvIGNoZSBxdWVzdGEgc2lhIHZlcmFtZW50ZSB1bmEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AgY29uZ2l1bnRhOgoKYGBge3J9CnN1bShVViRwcm9icykKYGBgCgrDiCBhbmNoZSBwb3NzaWJpbGUgcHJlc2VudGFyZSBsYSBkaXN0cmlidXppb25lIGRpIHByb2JhYmlsaXTDoCBjb25naXVudGEgaW4gZm9ybWEgdGFidWxhcmUuIEEgdGFsZSBmaW5lIHBvc3NpYW1vIHV0aWxpenphcmUgbGEgZnVuemlvbmUgYHh0YWJzKClgOgoKYGBge3J9Cnh0YWJzKHByb2JzIH4gVSArIFYsIGRhdGEgPSBVVikgJT4lIAogIHJvdW5kKDMpCmBgYAoKQ2FsY29saWFtbyBvcmEgbGUgZHVlIGRpc3RyaWJ1emlvbmkgbWFyZ2luYWxpLiBQZXIgbGEgdmFyaWFiaWxlIGBVYCBvdHRlbmlhbW86CgpgYGB7cn0KcHUgPC0gbWFyZ2luYWwoUywgdmFycyA9ICJVIikKcHUKYGBgCgplIHBlciBsYSB2YXJpYWJpbGUgYFZgIG90dGVuaWFtbzoKCmBgYHtyfQpwdiA8LSBtYXJnaW5hbChTLCB2YXJzID0gIlYiKQpwdgpgYGAKCkluIG1hbmllcmEgZXF1aXZhbGVudGUsIGxvIHN0ZXNzbyByaXN1bHRhdG8gc2kgdHJvdmEgYXBwbGljYW5kbyBsZSBmdW56aW9uaSBgcm93U3VtcygpYCBlIGBjb2xTdW1zKClgIGFsbCdvZ2dldHRvIGNyZWF0byBkYSBgeHRhYnMoKWA6CgpgYGB7cn0KdGVtcCA8LSB4dGFicyhwcm9icyB+IFUgKyBWLCBkYXRhID0gVVYpCnJvd1N1bXModGVtcCkKYGBgCgplCgpgYGB7cn0KY29sU3Vtcyh0ZW1wKQpgYGAKCiMjIFZhbG9yZSBhdHRlc28KCkNhbGNvbGlhbW8gaWwgdmFsb3JlIGF0dGVzbyBkZWxsZSBkdWUgdmFyaWFiaWxpIGNhc3VhbGkuIFV0aWxpenppYW1vIGxhIGZ1bnppb25lIGBEaXNjcmV0ZURpc3RyaWJ1dGlvbigpYC4gSWwgcHJpbW8gYXJnb21lbnRvIHJpY2hpZWRlIHVuIHZldHRvcmUgY2hlIHNwZWNpZmljYSBpbCBzdXBwb3J0byBkZWxsYSB2YXJpYWJpbGUgY2FzdWFsZSBkaXNjcmV0YTsgaWwgc2Vjb25kbyBhcmdvbWVudG8gw6ggdW4gdmV0dG9yZSBjaGUgc3BlY2lmaWNhIGxhIGZ1bnppb25lIGRpIG1hc3NhIGRpIHByb2JhYmlsaXTDoC4gSWwgdmFsb3JlIGF0dGVzbyBkaSBgVWAgw6g6CgpgYGB7cn0KVSA8LSBEaXNjcmV0ZURpc3RyaWJ1dGlvbihzdXBwID0gcHUkVSwgcHJvYiA9IHB1JHByb2JzKQptdV91IDwtIEUoVSkKbXVfdQpgYGAKCklub2x0cmUsIGlsIHZhbG9yZSBhdHRlc28gZGkgYFZgIMOoOgoKYGBge3J9ClYgPC0gRGlzY3JldGVEaXN0cmlidXRpb24oc3VwcCA9IHB2JFYsIHByb2IgPSBwdiRwcm9icykKbXVfdiA8LSBFKFYpCm11X3YKYGBgCgoKIyMgQ292YXJpYW56YQoKUG9zc2lhbW8gb3JhIGNhbGNvbGFyZSBsYSBjb3ZhcmlhbnphIHRyYSAkVSQgZSAkViQuIExhIGZvcm11bGEgZGVsbGEgY292YXJpYW56YQoKJCQKXHNpZ21hX3t4eX0gPSBcc3VtX2kgXGJpZ1t4X2kgLSBcbWF0aGJie0V9KHgpXGJpZ11cYmlnW3lfaSAtIFxtYXRoYmJ7RX0oeSlcYmlnXSBcY2RvdCBwX2koeCx5KQokJAoKcHXDsiBlc3NlcmUgaW1wbGVtZW50YXRhIGluICRcbWF0aHNme1J9JCBuZWwgbW9kbyBzZWd1ZW50ZToKCmBgYHtyfQpzX3V2IDwtIHN1bSgoVVYkVSAtIG11X3UpICogKFVWJFYgLSBtdV92KSAqIFVWJHByb2JzKQpzX3V2CmBgYAoKTG8gc3Rlc3NvIHJpc3VsdGF0byBzaSBvdHRpZW5lIHVzYW5kbyBsYSBmb3JtdWxhIGFsdGVybmF0aXZhIHBlciBpbCBjYWxjb2xvIGRlbGxhIGNvdmFyaWFuemE6CgokJApcc2lnbWFfe3h5fSA9IFxtYXRoYmJ7RX0oeHkpIC1cbWF0aGJie0V9KHgpXG1hdGhiYntFfSh5KQokJApvdnZlcm8gCgpgYGB7cn0Kc3VtKChVViRVICogVVYkVikgKiBVViRwcm9icykgLSBtdV91ICogbXVfdgpgYGAKCgojIyBDb3JyZWxhemlvbmUKCkNvbm9zY2VuZG8gbGEgY292YXJpYW56YSDDqCBwb3NzaWJpbGUgY2FsY29sYXJlIGxhIGNvcnJlbGF6aW9uZS4gTGEgY29ycmVsYXppb25lIGluZmF0dGkgw6ggdW5hIGNvdmFyaWFuemEgc3RhbmRhcmRpenphdGE6CgokJApccmhvX3t4eX0gPSBcZnJhY3tcc2lnbWFfe3h5fX17XHNpZ21hX3hcc2lnbWFfeX0KJCQKClBlciBzdGFuZGFyZGl6emFyZSBkb2JiaWFtbyBkaXZpZGVyZSBwZXIgbGUgZHVlIGRldmlhemlvbmkgc3RhbmRhcmQuIEluaXppYW1vIGR1bnF1ZSBhIGNhbGNvbGFyZSBsZSB2YXJpYW56ZSBkZWxsZSBkdWUgdmFyaWFiaWxpIGNhc3VhbGkgJFUkIGUgJFYkOgoKYGBge3J9CnZfdSA8LSBzdW0oKHB1JFUgLSBtdV91KV4yICogcHUkcHJvYnMpCnZfdQp2X3YgPC0gc3VtKChwdiRWIC0gbXVfdileMiAqIHB2JHByb2JzKQp2X3YKYGBgCgpvcHB1cmUsIGluIG1hbmllcmEgZXF1aXZhbGVudGUKCmBgYHtyfQp2YXIoVSkKdmFyKFYpCmBgYAoKQWJiaWFtbyBvcmEgdHV0dGUgbGUgaW5mb3JtYXppb25pIG5lY2Vzc2FyaWUgcGVyIGlsIGNhbGNvbG8gZGVsbGEgY29ycmVsYXppb25lOgoKYGBge3J9CnNfdXYgLyBzcXJ0KHZhcihVKSAqIHZhcihWKSkKYGBgCgojIyBDb3ZhcmlhbnphICgyKQoKQ2FsY29saWFtbyBudW92YW1lbnRlIGxhIGNvdmFyaWFuemEgaW4gbWFuaWVyYSBwacO5IGRpcmV0dGEsIG92dmVybyBhcHBsaWNhbmRvIGxhIGZvcm11bGEgc2VndWVudGUgbWVkaWFudGUgZHVlIGNpY2xpIGBmb3IoKWA6CgokJApcc2lnbWFfe3h5fSA9IFxzdW1faSBcYmlnKHhfaSAtIFxtYXRoYmJ7RX0oeClcYmlnKVxiaWcoeV9pIC0gXG1hdGhiYntFfSh5KVxiaWcpIFxjZG90IHBfaSh4LHkpCiQkCkluaXppYW1vIGNyZWFuZG8gdW4gb2dnZXR0byBjaGlhbWF0byBgcHV2YCBjaGUgY29udGllbmUgbGEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AgY29uZ2l1bnRhIGRlbGxlIHZhcmlhYmlsaSAkVSQgZSAkViQ6CgpgYGB7cn0KcHV2IDwtIHh0YWJzKHByb2JzIH4gVSArIFYsIGRhdGEgPSBVVikKcHV2CmBgYAoKTGEgc29tbWEgZGVnbGkgZWxlbWVudGkgZGkgYHB1dmAgZGV2ZSBlc3NlcmUgdWd1YWxlIGEgMSAow6ggc2VtcHJlIHVuYSBidW9uYSBpZGVhIGNvbnRyb2xsYXJlKToKCmBgYHtyfQpzdW0ocHV2KQpgYGAKCkxhIHZhcmlhYmlsZSBjYXN1YWxlIGB1YCBhc3N1bWUgaSB2YWxvcmk6CgpgYGB7cn0KdSA8LSAyOjEyCnUKYGBgCgpMYSB2YXJpYWJpbGUgY2FzdWFsZSBgdmAgYXNzdW1lIGkgdmFsb3JpOgoKYGBge3J9CnYgPC0gMDoxCnYKYGBgCgpBYmJpYW1vIGdpw6AgY2FsY29sYXRvIGluIHByZWNlZGVuemEgaSB2YWxvcmkgYXR0ZXNpIGRlbGxlIGR1ZSB2YXJpYWJpbGkgY2FzdWFsaSwgY2hlIHNvbm8gY2hpYW1hdGkgYG11X3VgIGUgYG11X3ZgOgoKYGBge3J9Cm11X3UKbXVfdgpgYGAKClBlciBzZW1wbGljaXTDoCwgY3JlbyB1bmEgbWF0cmljZSB2dW90YSBkZWxsZSBzdGVzc2UgZGltZW5zaW9uaSBkZWxsJ29nZ2V0dG8gYHB1dmA6CgpgYGB7cn0Kc3V2ID0gbWF0cml4KCwgbnJvdyA9IDExLCBuY29sID0gMikgIyBlbXB0eSBtYXRyaXgKc3V2CmBgYAoKVXRpbGl6em8gZHVlIGNpY2xpIGBmb3IoKWAgbmlkaWZpY2F0aSAoX25lc3RlZF8pIHBlciBjYWxjb2xhcmUgaWwgdmFsb3JlIGRpIGNpYXNjdW4gcHJvZG90dG8gCgokJApcYmlnKHVfaSAtIFxtYXRoYmJ7RX0odSlcYmlnKVxiaWcodl9qIC0gXG1hdGhiYntFfSh2KVxiaWcpIFxjZG90IHBfe2ksan0odSx2KQokJCAKCmNvbiAkaSBcaW4gXHsxLCBcZG90cywgMTFcfSQgZSAkaiBcaW4gXHsxLCAyXH0kLCBjaGUgdmVycsOgIHNhbHZhdG8gbmVsIGNvcnJpc3BvbmRlbnRlIGVsZW1lbnRvIGRlbGxhIG1hdHJpY2UgYHN1dmA6CgpgYGB7cn0KZm9yIChpIGluIDE6MTEpIAogIGZvciAoaiBpbiAxOjIpIHsKICAgIHN1dltpLCBqXSA8LSAodVtpXSAtIG11X3UpICogKHZbal0gLSBtdV92KSAqIHB1dltpLCBqXQogIH0KYGBgCgpOZWwgY2FzbyBwcmVzZW50ZSwgc2kgaW5pemlhIGNvbiBgaSA9IDFgLiBWaWVuZSBxdWluZGkgc3ZvbHRvIGlsIGNpY2xvIGludGVybm8gZSBxdWluZGksIGluIGR1ZSBlc2VjdXppb25pLCBgaiA9IDFgIGUgYGogPSAyYC4gVW5hIHZvbHRhIGNvbXBsZXRhdG8gaWwgY2ljbG8gaW50ZXJubywgaWwgdmFsb3JlIGRlbGwnaW5kaWNlIGRlbCBjaWNsbyBlc3Rlcm5vIHZhcnLDoCBgaSA9IDJgLiBTaSByaXBldG9ubyBsZSBlc2VjdXppb25pIGRlbCBjaWNsbyBpbnRlcm5vLCBgaiA9IDFgIGUgYGogPSAyYC4gQ29zw6wgdmlhIGZpbm8gYSBgaSA9IDExYC4gCgpFc2FtaW5pYW1vIGxhIHByaW1hIGVzZWN1emlvbmUgZGVsIGNpY2xvIGludGVybm8gcGVyIGBpID0gMWAuIENpw7IgY29ycmlzcG9uZGUgYToKCmBgYHtyLCBldmFsPUZBTFNFfQoodVsxXSAtIG11X3UpICogKHZbMV0gLSBtdV92KSAqIHB1dlsxLCAxXQpgYGAKCm92dmVybwoKJCQKXGJpZyh1XzEgLSBcbWF0aGJie0V9KHUpXGJpZylcYmlnKHZfMSAtIFxtYXRoYmJ7RX0odilcYmlnKSBcY2RvdCBwX3sxLDF9KHUsdikKJCQKTmVsIHNlY29uZG8gc3RlcCBhdnJlbW8gCgpgYGB7ciwgZXZhbD1GQUxTRX0KKHVbMV0gLSBtdV91KSAqICh2WzJdIC0gbXVfdikgKiBwdXZbMSwgMl0KYGBgCgpvdnZlcm8KCiQkClxiaWcodV8xIC0gXG1hdGhiYntFfSh1KVxiaWcpXGJpZyh2XzIgLSBcbWF0aGJie0V9KHYpXGJpZykgXGNkb3QgcF97MSwyfSh1LHYpCiQkCkUgY29zw6wgdmlhIHBlciB0dXR0aSBnbGkgJDExXHRpbWVzMiQgZWxlbWVudGkgZGVsbGEgbWF0cmljZSBjaGUgY29udGllbmUgbGEgZGlzdHJpYnV6aW9uZSBkaSBwcm9iYWJpbGl0w6AgY29uZ2l1bnRhLiAKCsOIIGlycmlsZXZhbnRlIHF1YWxlIHNpYSBpbCBjaWNsbyBlc3Rlcm5vIGUgcXVhbGUgcXVlbGxvIGludGVybm8sIHF1ZXN0byBjYW1iaWEgc29sdGFudG8gbCdvcmRpbmUgY29uIGlsIHF1YWxlIHZlbnRvbm8gc3ZvbHRlIGxlIG9wZXJhemlvbmkuCgpVbmEgdm9sdGEgc3ZvbHRpIGkgY2FsY29saSBwcmVjZWRlbnRpLCBub24gcmVzdGEgY2hlIHNvbW1hcmUgdHV0dGkgZ2xpIGFkZGVuZGksIG92dmVybyBnbGkgJDExXHRpbWVzMiQgZWxlbWVudGkgZGVsbGEgbWF0cmljZSBgc3V2YC4gQ29zw6wgZmFjZW5kbyB0cm92aWFtbyBsYSBjb3ZhcmlhbnphIHRyYSAkVSQgZSAkViQ6CgpgYGB7cn0Kc3VtKHN1dikKYGBgCgpJbCByaXN1bHRhdG8gcmlwcm9kdWNlIHF1ZWxsbyB0cm92YXRvIGluIHByZWNlZGVuemEuCgoKIyMgSW5mb3JtYXppb25pIHN1bGxhIHNlc3Npb25lIGRpIGxhdm9ybwoKYGBge3J9CnV0aWxzOjpzZXNzaW9uSW5mbygpCmBgYAoKCg==</div>
 
 
 
