@@ -45,7 +45,7 @@ Laddove i valori indicano la frequenza con la quale tale sintomo, riduzione di e
 
 ## Rappresentazione grafica della distribuzione di massa di probabilità
 
-Consideriamo dunque i valori $Y$
+Abbiamo dunque i valori $Y$
 
 ```{r}
 y <- 1:4
