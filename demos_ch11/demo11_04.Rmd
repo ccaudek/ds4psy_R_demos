@@ -33,17 +33,24 @@ knitr::opts_chunk$set(
 
 # Proprietà della covarianza 
 
-Consideriamo le proprietà della covarianza delle variabili aleatorie esaminando, per analogia, le stesse proprietà quando vengono osservate in un campione di osservazioni. Ricordiamo che le variabili casuali sono ignote prima dell'esecuzione dell'esperimento casuale. Una volta svolto l'esperimento casuale, le varibili casuali sono semplicemente un campione di osservazioni. Ovviamente, la nozione di variabile casuale fa riferimento a tutti i possibili campioni che si possono osservare.  Ma per semplicità, qui ne consideramo uno soltanto.
+Consideriamo le proprietà della covarianza delle variabili casuali esaminando, per analogia, le stesse proprietà quando le variabili vengono osservate in un campione di dati. Ricordiamo che le variabili casuali sono ignote prima dell'esecuzione dell'esperimento casuale. Una volta svolto l'esperimento casuale, le variabili casuali sono semplicemente un campione di osservazioni. Ovviamente, la nozione di variabile casuale fa riferimento a tutti i possibili campioni che si possono osservare.  Ma per semplicità, qui ne consideriamo uno soltanto.
 
-Generiamo dei dati a caso di due variabili che chiamiamo $X$ e $Y$.
+Generiamo dei dati a caso per due variabili che chiamiamo $X$ e $Y$:
 
 ```{r}
 set.seed(123)
 n <- 20
 x <- rnorm(n, 20, 3)
 y <- x + rnorm(n, 0, 2)
+```
+
+Le due variabili sono associate:
+
+```{r}
 cor(x, y)
 ```
+
+Un diagramma a dispersione si genera nel modo seguente:
 
 ```{r}
 tibble(x, y) %>% 
@@ -51,9 +58,9 @@ tibble(x, y) %>%
   geom_point()
 ```
 
-Esaminiamo ora le proprietà della covarianza discusse nel capitolo 11 della dispensa.
+Esaminiamo le proprietà della covarianza discusse nel capitolo 11 della dispensa.
 
-## Variana: covarianza di una variabile con se stessa
+## Varianza: la covarianza di una variabile con se stessa
 
 Il modo più semplice per ricordare che cos'è la covarianza è di pensare alla varianza come alla covarianza di una variabile con se stessa:
 
@@ -106,6 +113,8 @@ z <- x + y
 z
 ```
 
+La varianza di $Z$ è
+
 ```{r}
 var(z)
 ```
@@ -125,15 +134,17 @@ w <- y + rnorm(n, 0, 4)
 Esaminiamo la matrice di correlazioni:
 
 ```{r}
-cor(cbind(x, y, w))
+cor(cbind(x, y, w)) %>% 
+  round(2)
 ```
 
-Sommiamo 
-
+Creiamo una nuova variabile casuale, $T$, nel modo seguente: $T = X + Y + Z$. 
 ```{r}
 t <- x + y + w
 t
 ```
+
+Calcoliamo la varianza di $T$:
 
 ```{r}
 var(t)
@@ -144,6 +155,10 @@ ovvero
 ```{r}
 var(x) + var(y) + var(w) + 2*cov(x, y) + 2*cov(x, w) + 2*cov(w, y) 
 ```
+
+## Conclusione {-}
+
+Si noti che, in tutte le dimostrazioni prevedenti, ho usato le funzioni di $\mathsf{R}$ `var()` e `cov()`, le quali hanno $n-1$ al denominatore. Se facciamo riferimento alle variabili casuali e alla varianza e alla covarianza delle variabili casuali, NON bisogna usare $n-1$ al denominatore. In questo demo ho usato le funzioni `var()` e `cov()` solo per semplicità, per illustrare la logica che sta alla base delle proprietà della varianza e della covarianza delle variabili casuali. Se vogliamo i risultati numerici esatti, dobbiamo, per gli esempi presenti, usare $n$ al denominatore delle formule della varianza e della covarianza.
 
 
 ## Informazioni sulla sessione di lavoro
