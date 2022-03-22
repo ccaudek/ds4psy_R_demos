@@ -32,15 +32,14 @@ knitr::opts_chunk$set(
 
 Lanciamo 3 monete.  Sia $Y$ il numero di volte in cui si ossserva Testa.  Si trovi il valore atteso di $Y$, la sua varianza e la sua deviazione standard.
 
-
-Lo spazio campione è
+Usando le funzioni di `prob` generiamo lo spazio campione di questo esperimento casuale:
 
 ```{r}
 S <- tosscoin(3, makespace = TRUE)
 S
 ```
 
-Trasformo `H` in 1 e `T` in 0:
+Su questo spazio campione definisco la variabile casuale $Y$. Per trovare $Y$, prima assegno il valore 1 ad `H` e il valore 0 a `T`. Per fare questo, operativamente, semplicemente trasformo `H` in 1 e `T` in 0:
 
 ```{r}
 S <- S %>% 
@@ -53,35 +52,51 @@ S <- S %>%
 S
 ```
 
-Ora posso creare la variabile casuale $Y$:
+Adesso posso creare la variabile casuale $Y$ facendo la somma dei valori delle tre colonne `toss1`, `toss2`, `toss3`. A tale fine uso la funzione `addrv()`. Dal file di aiuto possiamo infatti leggere: *Adds a column to a data frame probability space containing the values of a random variable computed from the existing columns of the space.* Come argomento specifichiamo `sum`, dato che vogliamo combinare le tre colonne del DataFrame con una somma, e `name = "Y"`.
 
 ```{r}
 S <- addrv(S, sum, name = "Y")
 S
 ```
 
-La distribuzione di massa di probabilità di $Y$ è
+Quindi, la colonna `Y` nel DataFrame `S` riporta i valori della variabile casuale che abbiamo definito, *in corrispondenza di ciascun evento elementare dello spazio campione*.
+
+Per generare la distribuzione di massa di probabilità di $Y$ uso la funzione `marginal()`. Per esempio, dato che $Y$ assume il valore 1 in corrispondenza di tre eventi eleentari dello spazio campione, ciascun con probabilità 0.125, la probabilità dell'evento composto $Y = 3$ sarà uguale alla somma delle probabilità degli eventi elementari che lo compongono, ovvero $0.125+ 0.125+ 0.125 = 0.375$. E così via per tutti gli altri valori che $Y$ può assumere.
 
 ```{r}
 p_mar <- marginal(S, vars = c("Y"))
 p_mar
 ```
 
-Per semplicità, estraggo i valori della variabile casuale e le rispettive probabilità; salvo questi valori in due vettori:
+Per semplicità, estraggo da `p_mar` i valori della variabile casuale e le rispettive probabilità; salvo questi valori in due vettori:
 
 ```{r}
 y <- p_mar$Y
 p <- p_mar$probs
 ```
 
-Calcolo il valore atteso:
+Calcolo il valore atteso
+
+$$
+\mathbb{E}(Y) = \sum_{y \in Y} y P(Y = y)
+$$
 
 ```{r}
 mu <- sum(y * p)
 mu
 ```
 
-la varianza
+La varianza si può calcolare in due modi:
+
+$$
+\mathbb{V}(Y) = \mathbb{E}\big[(y - \mathbb{E}(Y))^2\big]
+$$
+cioè
+
+$$
+\mathbb{V}(Y) = \sum_{y \in Y}(y - \mathbb{E}(Y))^2 P(y = Y)
+$$
+In $\mathsf{R}$:
 
 ```{r}
 sigma2 <- sum((y - mu)^2 * p)
@@ -89,6 +104,10 @@ sigma2
 ```
 
 Verifico il risultato con la formula alternativa della varianza:
+
+$$
+\mathbb{V}(Y) = \mathbb{E}(Y^2) - \big[\mathbb{E}(Y)\big]^2
+$$
 
 ```{r}
 sum(y^2 * p) - (sum(y * p))^2 
@@ -105,31 +124,40 @@ La distribuzione cumulativa di probabilità si ottiene nel modo seguente:
 
 ```{r}
 F = cumsum(p) 
-F
+tibble(y, F)
 ```
 
 ## Pacchetto `distrEx`
 
-Uso le funzioni di `distrEx` per eseguire in maniera più semplice gli stessi calcoli descritti sopra:
+Uso le funzioni di `distrEx` per eseguire in maniera più semplice gli stessi calcoli descritti sopra. Creo un oggetto di classe `DiscreteDistribution`:
 
 ```{r}
 Y <- DiscreteDistribution(
   supp = 0:3, 
   prob = c(1, 3, 3, 1) / 8
   )
+class(Y)
 ```
+
+Tale oggetto può essere passato come argomento alla funzione `plot()`:
 
 ```{r}
 plot(Y)
 ```
 
+Calcolo il valore atteso:
+
 ```{r}
 distrEx::E(Y)
 ```
 
+Calcolo la varianza:
+
 ```{r}
 distrEx::var(Y)
 ```
+
+Calcolo la deviazione standard:
 
 ```{r}
 distrEx::sd(Y)
