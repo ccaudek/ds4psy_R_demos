@@ -32,9 +32,16 @@ knitr::opts_chunk$set(
 
 # Esercizi sulla distribuzione binomiale
 
+In $\mathsf{R}$, possiamo manipolare le distribuzione di massa o di densità usando quattro funzioni. Tali funzioni iniziano con la seguente lettera:
+
+- `r`: random -- si ottiene un campione casuale di osservazioni dalla distribuzione indicata;
+- `p`: probability -- si ottiene il valore della funzione di ripartizione (l'area nella coda di sinistra) in corrispondenza del quantile indicato;
+- `q`: quantile -- si ottiene il quantile che corrisponde al valore specificato della funzione di ripartizione;
+- `d`: density -- si ottiene l'ordinata della funzione di massa di probabilità o di densità di probabilità in corrispondenza del valore indicato della funzione di ripartizione.
+
 ## Esercizio 1
 
-Consideriamo una famiglia di cinque figli. Ogni bambino può essere femmina o maschio. Per semplicità supponiamo che $P(femmina) = P(maschio) = 1/2$ e che il genere di ciascun bambino sia indipendentemente da quello degli altri bambini. Sia $X$ il numero di bambine. Allora $X \sim \mbox{Bin}(n = 5, p = 1/2)$. Si trovino $P(X = 2)$ e $P(X <= 2)$. Si fornisca una rappresentazione grafica della distribuzione di massa di probabilità e della funzione di distribuzione della variabile casuale $X$.
+Consideriamo una famiglia di cinque figli. Ogni bambino può essere femmina o maschio. Per semplicità supponiamo che $P(femmina) = P(maschio) = 1/2$ e che il genere di ciascun bambino sia indipendentemente da quello degli altri bambini. Sia $X$ il numero di bambine. Allora $X \sim \mbox{Bin}(n = 5, p = 1/2)$. Si trovino $P(X = 2)$ e $P(X <= 2)$. Si fornisca una rappresentazione grafica della distribuzione di massa di probabilità e della funzione di distribuzione della variabile casuale $X = \{0, 1, 2, 3, 4, 5\}$.
 
 La distribuzione di massa di probabilità di $X$ è
 
@@ -42,23 +49,23 @@ La distribuzione di massa di probabilità di $X$ è
 dbinom(x = 0:5, size = 5, prob = 0.5)
 ```
 
-Ovviamente, $P(X = 2)$ è
+La probabilità $P(X = 2)$ è
 
 ```{r}
 dbinom(x = 2, size = 5, prob = 0.5)
 ```
 
-Per trovare la funzione di distribuzione di $X$ possiamo usare il pacchetto `distr`.
+La funzione di ripartizione di $X$ è
+
+```{r}
+cumsum(dbinom(x = 0:5, size = 5, prob = 0.5))
+```
+
+Ovvero, usando le funzioni del pacchetto `distr`:
 
 ```{r}
 X <- Binom(size = 5, prob = 1/2)
 p(X)(0:5)
-```
-
-Lo stesso risultato si ottiene nel modo seguente:
-
-```{r}
-cumsum(dbinom(x = 0:5, size = 5, prob = 0.5))
 ```
 
 Quindi, la probabilità di non più di due femmine, ovvero, $P(X <= 2)$, è  
@@ -71,6 +78,18 @@ cumsum(dbinom(x = 0:5, size = 5, prob = 0.5))[3]
 oppure
 
 ```{r}
+dbinom(0, 5, 0.5) + dbinom(1, 5, 0.5) + dbinom(2, 5, 0.5) 
+```
+
+oppure
+
+```{r}
+sum(dbinom(0:2, 5, 0.5))
+```
+
+oppure
+
+```{r}
 p(X)(2)
 ```
 
@@ -78,6 +97,24 @@ Le variabili casuali create con le funzioni del pacchetto `distr` possono essere
 
 ```{r}
 plot(X)
+```
+
+ovvero
+
+```{r}
+tibble(
+  y = 0:5,
+  py = dbinom(0:5, 5, 0.5)
+) %>% 
+  ggplot(aes(y, py)) +
+  geom_point(size = 4) +
+  geom_linerange(aes(x=y, ymax=py, ymin=0.0)) +
+  ylim(0, 0.55) +
+  labs(
+    title = "Distribuzione binomiale di parametri n = 5, p = 0.5",
+    x = "Numero di successi",
+    y = "Probabilità"
+  )
 ```
 
 ## Esercizio 2
