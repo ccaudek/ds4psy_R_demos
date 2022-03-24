@@ -36,6 +36,13 @@ Una funzione gaussiana è una funzione della seguente forma:
 
 $$
 f(x) = \frac{1}{\sigma\sqrt{2\pi}} 
+  e^\left( -\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^{\!2}\,\right)
+$$
+
+dove $e$ (il numero di Eulero) è il numero irrazionale 2.7182818... (la base dei logaritmi naturali). Più convenientemente, la funzione viene scritta come
+
+$$
+f(x) = \frac{1}{\sigma\sqrt{2\pi}} 
   \exp\left( -\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^{\!2}\,\right)
 $$
 
@@ -78,14 +85,33 @@ Disegnamo la funzione di densità usando, come parametri, $\mu$ = 100 e $\sigma$
 ```{r}
 mu <- 100
 sigma <- 15
-x <- seq(55, 145, length.out = 1e3)
-plot(x, gauss(x, mu, sigma), type = 'l', ylab = "Densità")
+tibble(
+  x = seq(55, 145, length.out = 1e3), 
+  y = gauss(x, mu, sigma)
+  ) %>% 
+  ggplot(aes(x, y)) +
+  geom_line() +
+  labs(
+    x = "x",
+    y = "f(x)"
+  )
 ```
 
 Lo stesso risultato si ottene con 
 
 ```{r}
-plot(x, dnorm(x, 100, 15), type = 'l', ylab = "Densità")
+mu <- 100
+sigma <- 15
+tibble(
+  x = seq(55, 145, length.out = 1e3), 
+  y = dnorm(x, 100, 15)
+  ) %>% 
+  ggplot(aes(x, y)) +
+  geom_line() +
+  labs(
+    x = "x",
+    y = "f(x)"
+  )
 ```
 
 
@@ -106,31 +132,44 @@ Definiamo i seguenti quantili e calcoliamo la densità corrispondente per il cas
 
 ```{r}
 quants <- c(-1.96, 0, 1.96)
-gauss(quants, 0, 1)
+gauss(quants, mu = 0, sigma = 1)
 ```
 
 Lo stesso risultato si ottene con 
 
 ```{r}
-dnorm(quants, 0, 1)
+dnorm(quants, mean = 0, sd = 1)
 ```
 
 ## La probabilità
 
-Calcoliamo ora le probabilità, ovvero le aree.  Iniziamo con la probabilità $P(X < 115)$ per il QI.
+Calcoliamo ora la probabilità che la variabile casuale $X \sim \mathcal{N}(\mu, \sigma)$ assuma valori in un determinato intervallo. Una tale probabilità corrisponde all'area sottesa alla funzione di densità nell'intervallo specificato.
+
+Per fare un esempio, consideriamo il quoziente d'intelligenza, QI, perché sappiamo che è distribuito secondo la legge gaussiana con media 100 e deviazione standard 15, ovvero $QI \sim \mathcal{N}(\mu = 100, \sigma = 15)$. 
+
+Ci chiediamo qual è la probabilità che un individuo preso a caso abbia un QI $< 115$. Rispondere a tale domanda significa calcolare
+
+$$
+P(\mbox{X} < 115), \quad \mbox{X} \sim \mathcal{N}(\mu = 100, \sigma = 15).
+$$
+Dato che la probabilità è l'area sottesa alla funzione di densità nell'intervallo specificato, il problema ci chiede di calcolare l'area sottesa alla funzione $\mathcal{N}(\mu = 100, \sigma = 15)$ nell'intervallo $[-\infty, 115]$.
+
+Iniziamo evidenziando, in un grafico, l'area cercata:
 
 ```{r}
-df <- data.frame(x = seq(55, 165, length.out = 100)) %>% 
-  mutate(y = dnorm(x, mean=100, sd=15))
-
-ggplot(df, aes(x, y)) + 
-  geom_area(fill = "sky blue") + 
+tibble(
+  x = seq(55, 165, length.out = 100)
+  ) %>% 
+  mutate(
+    y = dnorm(x, mean=100, sd=15)
+  ) %>% 
+  ggplot(aes(x, y)) + 
+  geom_area(fill = "dark gray") + 
   gghighlight(x < 115) +
   labs(
     x = "QI",
     y = "Densità"
-  ) +
-  papaja::theme_apa()
+  )
 ```
 
 Il risultato cercato è
@@ -147,23 +186,25 @@ integrate(
 ovvero 
 
 ```{r}
-pnorm(115, 100, 15)
+pnorm(115, mean = 100, sd = 15)
 ```
 
 Consideriamo ora l'area sottesa alla funzione di densità nell'intervallo $\mu \pm 1.96 \sigma$.
 
 ```{r}
-df <- data.frame(x = seq(55, 165, length.out = 100)) %>% 
-  mutate(y = dnorm(x, mean=100, sd=15))
-
-ggplot(df, aes(x, y)) + 
-  geom_area(fill = "sky blue") + 
+tibble(
+  x = seq(55, 165, length.out = 100)
+  ) %>% 
+  mutate(
+    y = dnorm(x, mean=100, sd=15)
+  ) %>% 
+  ggplot(aes(x, y)) + 
+  geom_area(fill = "dark gray") + 
   gghighlight(x > 100 - 1.96*15 & x < 100 + 1.96*15) +
   labs(
     x = "QI",
     y = "Densità"
-  ) +
-  papaja::theme_apa()
+  ) 
 ```
 
 La probabilità cercata è
@@ -186,8 +227,9 @@ pnorm(100 + 1.96 * 15, 100, 15) - pnorm(100 - 1.96 * 15, 100, 15)
 ## Il valore atteso
 
 Il valore atteso di una variabile aleatoria continua $X$ è
+
 $$
-\mathbb{E}(X) = \mu_X = \int xf_X(x)dx.
+\mathbb{E}(X) = \mu_X = \int x \,f(x) \,\operatorname {d}\!x.
 $$
 
 Per calcolare il valore numerico dell'integrale con `R` definiamo la seguente funzione:
@@ -211,9 +253,9 @@ EX
 
 La varianza di una variabile aleatoria continua $X$ è
 $$
-var(X) = \mu_X = \int (x - \mu)^2f_X(x)dx.
+\mathbb{V}(X) = \sigma^2_X = \int_{\mathbb{R}} (x - \mu)^2 \, f(x) \,\operatorname {d}\!x.
 $$
-In `R` definiamo la seguente funzione
+In `R` definiamo la funzione
 
 ```{r}
 h <- function(x) x^2 * gauss(x, 100, 15)
@@ -228,8 +270,14 @@ VarX <- integrate(
   upper = Inf
 )$value - EX^2 
 VarX
+```
+
+La deviazione standard è
+
+```{r}
 sqrt(VarX)
 ```
+
 
 
 ## Interpretazione dei parametri
