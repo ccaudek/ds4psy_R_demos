@@ -9,6 +9,20 @@ output:
     code_download: true
 ---
 
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
 ```{r}
 suppressPackageStartupMessages({
   library("here")
@@ -22,7 +36,7 @@ set.seed(84735)
 
 knitr::opts_chunk$set(
   collapse = TRUE,
-  tidy = 'styler',
+  # tidy = 'styler',
   fig.width = 6,
   fig.asp = 0.618 # 1 / phi
 )
@@ -30,24 +44,28 @@ knitr::opts_chunk$set(
 
 # Funzione beta
 
-La funzione beta di Eulero è una funzione matematica, non è una distribuzione di densità.
+La funzione beta di Eulero, indicata con $\mbox{B}(\alpha, \beta)$, è una funzione matematica, **non** è una distribuzione di densità. La funzione beta dipende da due parametri, $\alpha$ e $\beta$, ed è definita nel modo seguente:
 
-Nella dispensa abbiamo visto che dipende da due parametri, $\alpha$ e $\beta$. 
+$$
+\mbox{beta}(\alpha, \beta) = \frac{\gamma(\alpha) \gamma(\beta)}{\gamma(\alpha + \beta)},
+$$
 
-Ad esempio, fissiamo i parametri ai valori seguenti:
+con $\gamma(x) = (x-1)!$. 
+
+Ad esempio, fissando i parametri ai valori seguenti
 
 ```{r}
 alpha <- 2
 beta <- 4
 ```
 
-Così facendo otteniamo il seguente risultato:
+la funzione $\mbox{B}(\alpha, \beta)$ assume il valore seguente:
 
 ```{r}
 beta(alpha, beta)
 ```
 
-Questo risultato si ottiene nel modo seguente:
+Replichiamo il risultato precedente svolgendo i calcoli in modo esplicito:
 
 ```{r}
 gamma(alpha) * gamma(beta) / gamma(alpha + beta)
@@ -56,35 +74,29 @@ gamma(alpha) * gamma(beta) / gamma(alpha + beta)
 ovvero
 
 ```{r}
-(factorial(alpha - 1) * factorial(beta - 1)) / 
-  (factorial(alpha + beta - 1))
+(factorial(alpha - 1) * factorial(beta - 1)) / (factorial(alpha + beta - 1))
 ```
-
-Ciò significa che la funzione gamma è uguale a:
-
-```{r, eval=FALSE}
-factorial(x - 1)
-```
-
-Possiamo denotare la funzione beta con $\mbox{B}(\alpha, \beta)$.
 
 
 ## Distribuzione beta
 
-La distribuzione beta è definita come
+Si dice che una variabile casuale continua $\pi \in [0, 1]$ segue la distribuzione Beta se la sua densità di probabilità di parametri $\alpha$ e $\beta$ è uguale a
 
 $$
-\mbox{Beta}(\alpha, \beta) = \frac{1}{\mbox{B}(\alpha, \beta)} \pi^{\alpha-1}\pi^{\beta-1}.
+\mbox{Beta}(\alpha, \beta) = \frac{1}{\mbox{B}(\alpha, \beta)} \pi^{\alpha-1}\pi^{\beta-1},
 $$
 
-La distribuzione beta è dunque una distribuzione continua con supporto $[0, 1]$.
+dove $\mbox{B}(\alpha, \beta)$ è la funzione beta.
 
-Per esempio, la funzione beta di parametri 
+Per fare un esempio, consideriamo la distribuzione Beta di parametri $\alpha = 2$ e $\beta = 4$. Una rappresentazione grafica di tale funzione di densità si ottiene nel modo seguente:
 
 ```{r}
-x <- seq(0, 1, length.out = 1e3)
-y <- dbeta(x, 2, 4)
-tibble(x, y) %>% 
+tibble(
+  x = seq(0, 1, length.out = 1e3)
+) %>% 
+  mutate(
+    y = dbeta(x, 2, 4)
+) %>% 
   ggplot(aes(x, y)) +
   geom_line()
 ```
@@ -93,21 +105,24 @@ ovvero
 
 ```{r}
 beta_fnc <- function(alpha, beta) {
-    (factorial(alpha - 1) * factorial(beta - 1)) / 
-  (factorial(alpha + beta - 1))
-  }
+  (factorial(alpha - 1) * factorial(beta - 1)) / (factorial(alpha + beta - 1))
+}
 
 beta_dens <- function(alpha, beta, pi) {
   (1 / beta_fnc(alpha, beta)) * (pi^(alpha-1) * (1 - pi)^(beta -1))
 }
 
-y <- beta_dens(2, 4, x)
-tibble(x, y) %>% 
+tibble(
+  x = seq(0, 1, length.out = 1e3)
+) %>% 
+  mutate(
+    y = beta_dens(2, 4, x)
+) %>% 
   ggplot(aes(x, y)) +
   geom_line()
 ```
 
-Possiamo anche usare
+Lo stesso risultato si ottiene usando la funzione `plot_beta()` del pacchetto `bayesrules`:
 
 ```{r}
 bayesrules::plot_beta(alpha, beta)
@@ -117,34 +132,32 @@ L'area sottesa alla funzione di densità è
 
 ```{r}
 integrand <- function(p) {
- 1 / beta_fnc(alpha, beta) * p^{alpha - 1}*(1 - p)^{beta - 1}
+ 1 / beta_fnc(alpha, beta) * p^{alpha - 1} * (1 - p)^{beta - 1}
 }
 
 integrate(integrand, lower = 0, upper = 1)
 ```
 
-
-Dato che il kernel della distribuzione beta, ovvero $\pi^{\alpha-1}\pi^{\beta-1}$ è moltiplicato per $1/\mbox{B}(\alpha, \beta)$, questo significa che la funzione beta viene utilizzata per normalizzare la densità del kernel della funzione beta. In altre parole, il valore della funzione beta
+Dato che il kernel della distribuzione beta, ovvero $\pi^{\alpha-1}\pi^{\beta-1}$, è moltiplicato per $1/\mbox{B}(\alpha, \beta)$, questo significa che $\mbox{B}(\alpha, \beta)$ viene utilizzata per normalizzare $\pi^{\alpha-1}\pi^{\beta-1}$. In altre parole, il valore della funzione beta
 
 ```{r}
 beta(alpha, beta)
 ```
 
-è uguale all'area del kernel della distribuzione beta:
+è uguale all'area del kernel della distribuzione Beta:
 
 ```{r}
 integrand <- function(p) {
- p^{alpha - 1}*(1 - p)^{beta - 1}
+ p^{alpha - 1} * (1 - p)^{beta - 1}
 }
-
 integrate(integrand, lower = 0, upper = 1)
 ```
 
-La funzione beta fornisce dunque una costante di normalizzazione per il kernel della distribuzione beta.
+La funzione $\mbox{B}(\alpha, \beta)$ fornisce dunque una costante di normalizzazione per il kernel della distribuzione Beta.
 
 ### Valore atteso
 
-Calcoliamo il valore atteso:
+Calcoliamo il valore atteso di una variabile casuale $\pi$ che segue una  distribuzione Beta di parametri $\alpha = 2$ e $\beta = 4$:
 
 $$
 \mathbb{E}(\pi) = \frac{\alpha}{\alpha + \beta}
@@ -158,16 +171,15 @@ ex
 ovvero
 
 $$
-\mathbb{E}(\pi) = \int x f(x) dx
+\mathbb{E}(\pi) = \int_0^1 \pi \, f(\pi) \,\operatorname {d}\!\pi .
 $$
 
-```{r}
-a <- alpha
-b <- beta
-integrand <- function(p) {
- p * 1 / beta_fnc(a, b) * p^{a - 1}*(1 - p)^{b - 1}
-  }
+laddove $f(\pi)$ è la funzione di densità Beta. Per i dati dell'esempio abbiamo:
 
+```{r}
+integrand <- function(p) {
+ p * 1 / beta_fnc(alpha, beta) * p^{alpha - 1} * (1 - p)^{beta - 1}
+}
 integrate(integrand, lower = 0, upper = 1)
 ```
 
@@ -189,17 +201,20 @@ var_beta_distr(alpha, beta)
 
 ovvero
 
-```{r}
-a <- alpha
-b <- beta
-integrand <- function(p) {
- (p - ex)^2 * 1 / beta_fnc(a, b) * p^{a - 1}*(1 - p)^{b - 1}
-}
+$$
+\mathbb{V}(\pi) = \int_0^1 \big(\pi - \mathbb{E}(\pi)\big)^2 f(\pi)  \,\operatorname {d}\!\pi ,
+$$
 
+laddove $f(\pi)$ è la funzione di densità Beta. Per i dati dell'esempio abbiamo:
+
+```{r}
+integrand <- function(p) {
+ (p - ex)^2 * 1 / beta_fnc(alpha, beta) * p^{alpha - 1}*(1 - p)^{beta - 1}
+}
 integrate(integrand, lower = 0, upper = 1)
 ```
 
-In maniera equivalente
+In maniera equivalente possiamo usare la funzione $\mathsf{R}$ `dbeta()`:
 
 ```{r}
 integrand <- function(p) {
@@ -211,18 +226,17 @@ integrate(integrand, lower = 0, upper = 1)
 Gli stessi risultati si ottengono con `summarize_beta()`:
 
 ```{r}
- bayesrules::summarize_beta(alpha, beta)
+bayesrules::summarize_beta(alpha, beta)
 ```
 
 ## Interpretazione
 
-Iniziamo a calcolare la *mediana* della distribuzione Beta. 
-
-Un valore **approssimativo** della mediana è dato da:
+Iniziamo a calcolare la *mediana* della distribuzione Beta. Un valore **approssimativo** della mediana è dato da:
 
 $$
 \mbox{Md} \approx \frac{\alpha - \frac{1}{3}}{\alpha + \beta - \frac{2}{3}}
 $$
+
 Implementiamo questa funzione in $\mathsf{R}$:
 
 ```{r}
@@ -231,19 +245,34 @@ median_beta <- function(a, b) {
 }
 ```
 
-Per i parametri dell'esempio, otteniamo:
+Per il caso dell'esempio in discussione, otteniamo:
 
 ```{r}
 med <- median_beta(alpha, beta)
 med
 ```
 
-Che interpretazione può essere assegnata alla mediana nel caso di una funzione di densità?
+Nel caso di una funzione di densità, che interpretazione può essere assegnata alla mediana?
 
-Nel caso delle variabili casuali continue, abbiamo visto che la media coincide con il centro di massa della distribuzione. Questa idea può essere estesa al caso delle funzioni di densità. In questo secondo caso, però, è la mediana, $x_m$, che divide l'area sottesa alla funzione di densità in due porzioni uguali:
+Nel caso delle variabili casuali discrete, abbiamo visto che la media coincide con il centro di massa della distribuzione:
+
+```{r}
+x <- runif(10, 1, 100) %>% round()
+x
+```
+
+```{r}
+x - mean(x)
+```
+
+```{r}
+(x - mean(x)) %>% sum()
+```
+
+Questa idea può essere estesa al caso delle variabili casuali continue. Nel caso di una funzione di densità $p(x)$, però, è la mediana, $x_m$, che divide l'area sottesa alla curva di densità di probabilità in due porzioni uguali:
 
 $$
-\int_{-\infty}^{x_m} p(x) dx = \int_{x_m}^{-\infty} p(x) dx = \frac{1}{2}.
+\int_{-\infty}^{x_m} p(x) \,\operatorname {d}\!x = \int_{x_m}^{-\infty} p(x) \,\operatorname {d}\!x = \frac{1}{2}.
 $$
 
 Segue da tale definizione che la mediana è il valore $x$ per il quale la distribuzione cumulativa soddisfa
@@ -252,28 +281,41 @@ $$
 F(x_m) = \frac{1}{2}.
 $$
 
-
 Verifichiamo questa affermazione nel caso della distribuzione Beta in esame:
 
 ```{r}
-a <- alpha
-b <- beta
 integrand <- function(p) {
-  1 / beta_fnc(a, b) * p^{a - 1}*(1 - p)^{b - 1}
-  }
-
-integrate(integrand, lower = 0, upper = median_beta(a, b))
+  1 / beta_fnc(alpha, beta) * p^{alpha - 1} * (1 - p)^{beta - 1}
+}
+integrate(integrand, lower = 0, upper = median_beta(alpha, beta))
+integrate(integrand, lower = median_beta(alpha, beta), upper = 1)
 ```
 
-Al valore atteso e alla varianza possiamo invece assegnare l'interpretazione usuale:
+
+Se facciamo riferimento al valore atteso, invece, otteniamo
+
+```{r}
+integrand <- function(p) {
+  1 / beta_fnc(alpha, beta) * p^{alpha - 1} * (1 - p)^{beta - 1}
+}
+integrate(integrand, lower = 0, upper = 1/3)
+integrate(integrand, lower = 1/3, upper = 1)
+```
+
+
+Al valore atteso e alla varianza possiamo invece assegnare l'interpretazione usuale. Se consideriamo un enorme numero di realizzazioni della variabiel casuale $\pi$
 
 ```{r}
 x <- rbeta(1e6, alpha, beta)
 ```
 
+allora la media di tali valori approssima $\mathbb{E}(\pi)$ 
+
 ```{r}
 mean(x)
 ```
+
+e la varianza di tali valori approssima $\mathbb{V}(\pi)$ 
 
 ```{r}
 var(x)
@@ -293,12 +335,11 @@ Il valore atteso della variabile casuale $X$ è
 ```{r}
 alpha <- 8.28
 beta <- 3.16
-
 ev <- alpha / (alpha + beta)
 ev
 ```
 
-Ora dobbiamo calcolare $P(X < \mathbb{E}(X))$. Per fare questo possiamo usare la funzione `pbeta()`, la quale restituisce il valore della funzione di ripartizione in corrispondenza del quantile indicato -- ovvero, l'area sottesa alla funzione di densità nella coda di sinistra da $-\infty$ fino al punto indicato:
+Ora dobbiamo calcolare $P(X < \mathbb{E}(X))$. Per fare questo possiamo usare la funzione `pbeta()`, la quale restituisce il valore della funzione di ripartizione in corrispondenza del quantile indicato -- ovvero, l'area sottesa alla funzione di densità nella coda di sinistra da $-\infty$ fino al quantile indicato:
 
 ```{r}
 pbeta(ev, alpha, beta)
