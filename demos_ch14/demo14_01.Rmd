@@ -30,13 +30,35 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Verosimiglianza della gaussiana
+# Funzione di verosimiglianza
 
-Consideriamo un campione iid di 30 osservazioni, ciascuna delle quali può essere considerata come una realizzazione di una variabile casuale gaussiana di media comune sconosciuta e di deviazione standard 15.
+La funzione di verosmiglianza è la funzione di massa o di densità di probabilità dei dati $y$ vista come una funzione del parametro sconosciuto (o dei parametri sconosciuti) $\theta$. Consideriamo qui la funzione gaussiana:
+
+$$
+{\displaystyle f(x)={\frac {1}{\sigma {\sqrt {2\pi }}}}e^{-{\frac {1}{2}}\left({\frac {x-\mu }{\sigma }}\right)^{2}}}
+$$
+
+Ci poniamo il problema di costruire la funzione di verosimiglianza per questa densità. Consideriamo prima il caso in cui i dati corrispondono ad una singola osservazione $x$.
+
+La formula precedente dipende dai parametri $\mu$ e $\sigma$ e dai dati $x$. Per costruire la funzione di verosimiglianza, dobbiamo dunque inserire nella formula precedente il singolo valore $x$ che abbiamo ed esaminnare il risultato della funzione per tutti i possibili valori di $\mu$ e $\sigma$. Per semplicità, consideriamo $\sigma$ noto e uguale a 15. Poniamo $x = 114$.
+
+```{r}
+x <- 114
+mu <- seq(70, 160, length.out = 1e3)
+fx <- dnorm(x, mu, sd = 15)
+```
+
+Otteniamo così una funzione che ha la forma della gaussiana (ma non ha area unitaria), con il massimo in corrispondenza di 114.
+
+```{r}
+plot(mu, fx, type = 'l')
+abline(v = 114)
+```
+
+Consideriamo ora il caso di 30 osservazioni indipendenti iid, ciascuna delle quali può essere considerata come una realizzazione di una variabile casuale gaussiana di media comune sconosciuta e di deviazione standard 15.
 
 ```{r}
 n <- 30 
-# Population standard deviation. This parameter is assumed to be known.
 true_sigma <- 15 
 ```
 
@@ -44,18 +66,34 @@ Generiamo i dati
 
 ```{r}
 set.seed(123)
-# Population mean. This is the unknown parameter.
 true_mu <- 100 
 x <- rnorm(n, true_mu, true_sigma)
+x
 ```
 
-La media del campione è la stima di massima verosimiglianza:
+La media del campione corrispondenrà alla stima di massima verosimiglianza:
 
 ```{r}
 mean(x)
 ```
 
-Costruiamo ora la funzione di verosimiglianza allo scopo di trovare il massimo della funzione.  Lavoriamo con la log-verosimiglianza.
+Costruiamo ora la funzione di verosimiglianza. 
+
+Con solo due osservazioni, si può calcolare la distribuzione congiunta $p(X_1, X_2) = p(X_1) p(X_2 \mid X_1)$. Se le due variabili casuali sono indipendenti, abbiamo semplicemente $p(X_1, X_2) = p(X_1) p(X_2)$. 
+
+Nel caso di $n$ v.c. iid, cascuna distribuita come $\mathcal{N}(\mu, \sigma)$, avremo
+
+$$
+p(X_1, \dots, X_n ; \mu, \sigma) = \prod p(X_i; \mu, \sigma).
+$$
+
+Il logaritmo della funzione di densità congiunta diventa
+
+$$
+\log p(X_1, \dots, X_n ; \mu, \sigma) = \sum \log p(X_i; \mu, \sigma).
+$$
+
+Facendo variare i parametri e tenendo costanti i dati, otteniamo la funzione di log-verosmiglianza:
 
 ```{r}
 log_likelihood <- function(x, mu, sigma = true_sigma) {
@@ -63,7 +101,7 @@ log_likelihood <- function(x, mu, sigma = true_sigma) {
 }
 ```
 
-Per creare un grafico, decidiamo di utiliazzare
+Per creare un grafico, possiamo utiliazzare
 
 ```{r}
 # number of points of the plot

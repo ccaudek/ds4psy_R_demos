@@ -34,12 +34,21 @@ knitr::opts_chunk$set(
 
 ## Esercizio 1
 
-Sia $X$ una variabile continua con funzione di densità $f(x) = 3x^2$, $0 < x < 1$. Si fornisca un grafico di tale funzione e si trovi la probabilità $p(0.14 <= x <= 0.71)$.
+Sia $X$ una variabile continua con funzione di densità 
+
+$$f(x) = 3x^2, \quad x \in [0, 1].$$
+
+1. Si crei un grafico della funzione $f$. 
+2. Si verifichi che l'area sottesa alla curva di densità sia 1. 
+3. Si trovi la probabilità $p(0.14 <= x <= 0.71)$.
+
+Inizio creando in $\mathsf{R}$ la funzione `f()`:
 
 ```{r}
 f <- function(x) 3 * x^2
-integrate(f, lower = 0.14, upper = 0.71)
 ```
+
+Genero un grafico della funzione:
 
 ```{r}
 x <- seq(0, 1, length.out = 1e3)
@@ -48,28 +57,77 @@ tibble(x = x, y = f(x)) %>%
   geom_line()
 ```
 
+Verifico che $f()$ sia una funzione di densità:
+
+```{r}
+integrate(f, lower = 0, upper = 1)
+```
+
+Calcolo la probabilità $p(0.14 <= x <= 0.71)$:
+
+```{r}
+integrate(f, lower = 0.14, upper = 0.71)
+```
+
+
 ## Esercizio 2
 
-Per i dati dell'esercizio 1, si trovino il valore atteso e la varianza di $X$.
+Per i dati dell'esercizio 1, si trovino 
+
+1. il valore atteso di $X$,
+2. la varianza di $X$.
+
+Risolviamo il problema in due modi equivalenti: usando la funzione `AbscontDistribution()` del pacchetto `distr`, oppure usando direttamente le formule del valore atteso e della varianza di variabili casuali continue. 
+
+### Valore atteso
 
 ```{r}
 X <- AbscontDistribution(d = f, low1 = 0, up1 = 1)
 ```
 
-
 ```{r}
 E(X)
 ```
+
+Replichiamo il risultato precedente utilizzando la definizione di valore atteso per poi utilizzare `integrate()` per calcolare l'integrale richiesto:
+
+$$
+\mathbb{E}(X) = \int_0^1 x \, f(x) \,\operatorname {d}\!x
+$$
+
+```{r}
+integrate(
+  function(x){x * f(x)}, 
+  0, 1
+)
+```
+
+### Varianza
 
 ```{r}
 var(X)
 ```
 
-<!-- Possiamo anche replicare il risultato dell'esercizio 1 nel modo seguente: -->
+Ricordando che la varianza è
 
-<!-- ```{r} -->
-<!-- p(X)(0.71) - p(X)(0.14) -->
-<!-- ``` -->
+$$
+\mathbb{V}(X) = \mathbb{E}(X^2) - [\mathbb{E}(X)]^2
+$$
+scrivo la formula della varianza nel modo seguente:
+
+$$
+\mathbb{V}(X) = \int_0^1 x^2 f(x) \, dx - \mu^{2}
+$$
+Dunque
+
+```{r}
+mu <- 0.75
+integrate(
+  function(x){x^2 * f(x) - mu^2}, 
+  0, 1
+)
+```
+
 
 
 ## Informazioni sulla sessione di lavoro
