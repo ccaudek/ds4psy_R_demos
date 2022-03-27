@@ -83,6 +83,8 @@ tibble(theta, post) %>%
 
 Si vede che l'approssimazione numerica riproduce perfettamente il risultato ottenuto per via analitica.
 
+## Funzioni di `bayesrules`
+
 Lo stesso risultato si ottiene con la funzione `summarize_beta_binomial()`:
 
 ```{r}
@@ -90,7 +92,6 @@ bayesrules:::summarize_beta_binomial(
   alpha = 23.4, beta = 6.6, y = 23, n = 30
 )
 ```
-
 
 Un grafico della distribuzione a priori, della verosimiglianza e della distribuzione a posteriori si ottiene con:
 
@@ -102,6 +103,24 @@ Un grafico della distribuzione a priori, della verosimiglianza e della distribuz
 
 Con questa scelta della distribuzione a priori, le tre funzioni sono molto simili tra loro.
 
+## Verifica di ipotesi bayesiana
+
+È facile trovare la risposta a domande del tipo: qual è la probabilità che $\theta$ assuma un valore maggiore di 0.90?
+
+```{r}
+1 - pbeta(0.9, 46.4, 13.6)
+```
+
+```{r}
+ProbBayes::beta_area(lo = 0.9, hi = 1.0, shape_par = c(46.4, 13.6))
+```
+## Intervalli di credibilità
+
+Qual è l'intervallo della distribuzione a posteriori che include il 50% dell'area? Ovvero, qual è l'intervallo che ha la probabilità a posteriori del 50% di contenere il vero valore del parametro $\theta$?
+
+```{r}
+ProbBayes::beta_interval(0.5, c(46.4, 13.6))
+```
 
 ## Informazioni sulla sessione di lavoro
 
