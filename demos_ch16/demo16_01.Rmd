@@ -70,7 +70,7 @@ tibble(theta, post) %>%
   geom_linerange(aes(x = theta, ymax = post, ymin = 0)) 
 ```
 
-Alla soluzione ottenuta per via numerica (rappresetata nella figura precedente), sovrapponiamo la distribuzione Beta di parametri $alphs = 23.4 + 23 = 46.4$ e $\beta = 6.6 + 30 - 23 = 13.6$ (indicata nella figura dalla spezzata -- in quanto l'abbiamo definita solo in corrispondenza di 20 punti):
+Alla soluzione ottenuta per via numerica (rappresetata nella figura precedente), sovrapponiamo la distribuzione Beta di parametri $\alpha = 23.4 + 23 = 46.4$ e $\beta = 6.6 + 30 - 23 = 13.6$ (indicata nella figura dalla spezzata -- in quanto l'abbiamo definita solo in corrispondenza di 20 punti):
 
 ```{r}
 beta_post <- dbeta(theta, 46.4, 13.6) / sum(dbeta(theta, 46.4, 13.6))
@@ -81,8 +81,26 @@ tibble(theta, post) %>%
   geom_line(aes(x = theta, y = beta_post))
 ```
 
-
 Si vede che l'approssimazione numerica riproduce perfettamente il risultato ottenuto per via analitica.
+
+Lo stesso risultato si ottiene con la funzione `summarize_beta_binomial()`:
+
+```{r}
+bayesrules:::summarize_beta_binomial(
+  alpha = 23.4, beta = 6.6, y = 23, n = 30
+)
+```
+
+
+Un grafico della distribuzione a priori, della verosimiglianza e della distribuzione a posteriori si ottiene con:
+
+```{r}
+ bayesrules::plot_beta_binomial(
+  alpha = 23.4, beta = 6.6, y = 23, n = 30
+)
+```
+
+Con questa scelta della distribuzione a priori, le tre funzioni sono molto simili tra loro.
 
 
 ## Informazioni sulla sessione di lavoro
@@ -90,5 +108,3 @@ Si vede che l'approssimazione numerica riproduce perfettamente il risultato otte
 ```{r}
 utils::sessionInfo()
 ```
-
-
