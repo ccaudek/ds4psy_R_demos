@@ -1,0 +1,94 @@
+---
+title: "Data science per psicologi - demo 16.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("scales")
+  library("bayesplot")
+  library("distrEx")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Lo schema beta-binomiale
+
+Abbiamo imparato che, nel caso di una distribuzione a priori $\mbox{Beta}(\alpha, \beta)$ e una verosimiglianza $\mbox{Bin}(n, y \mid \theta)$, allora la distribuzione a posteriori del parametro $\theta$ sarà una distribuzione $\mbox{Beta}(\alpha + y, \beta + n - y)$.
+
+Consideriamo nuovamente i dati di Zetsche et al. (2019), ovvero 23 successi in 30 prove.
+
+Nel tutorial che abbiamo considerato in precedenza, abbiamo usato una $\mbox{Beta}(\alpha = 23.4, \beta = 6.6)$ quale distribuzione a priori. Considerando soli 20 valori $\theta$, abbiamo ottenuto la seguente distribuzione a posteriori:
+
+```{r, echo=FALSE}
+n <- 20
+theta <- seq(0, 1, length.out = n)
+alpha <- 23.4
+beta <- 6.6
+fx <- dbeta(theta, alpha, beta)
+prior <- fx / sum(fx)
+like <- dbinom(23, 30, theta)
+post_distr <- prior * like
+post <- post_distr / sum(post_distr)
+
+tibble(theta, post) %>% 
+  ggplot(aes(x = theta, y = post)) +
+  geom_point(size = 3) +
+  geom_linerange(aes(x = theta, ymax = post, ymin = 0)) 
+```
+
+Alla soluzione ottenuta per via numerica (rappresetata nella figura precedente), sovrapponiamo la distribuzione Beta di parametri $alphs = 23.4 + 23 = 46.4$ e $\beta = 6.6 + 30 - 23 = 13.6$ (indicata nella figura dalla spezzata -- in quanto l'abbiamo definita solo in corrispondenza di 20 punti):
+
+```{r}
+beta_post <- dbeta(theta, 46.4, 13.6) / sum(dbeta(theta, 46.4, 13.6))
+tibble(theta, post) %>% 
+  ggplot(aes(x = theta, y = post)) +
+  geom_point(size = 3) +
+  geom_linerange(aes(x = theta, ymax = post, ymin = 0)) +
+  geom_line(aes(x = theta, y = beta_post))
+```
+
+
+Si vede che l'approssimazione numerica riproduce perfettamente il risultato ottenuto per via analitica.
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
