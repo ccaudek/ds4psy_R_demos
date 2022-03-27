@@ -9,6 +9,20 @@ output:
     code_download: true
 ---
 
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
 ```{r}
 suppressPackageStartupMessages({
   library("here")

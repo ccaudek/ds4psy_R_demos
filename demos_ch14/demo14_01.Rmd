@@ -9,6 +9,21 @@ output:
     code_download: true
 ---
 
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
+
 ```{r}
 suppressPackageStartupMessages({
   library("here")
@@ -30,121 +45,352 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Meccanismo generatore dei dati
+
+Esaminiamo i dati di Zetsche et al. (2019) focalizzandoci sui valori BDI-II dei 30 pazienti clinici. Il problema che ci poniamo è quello di stimare la probabilità di depressione grave, ovvero un punteggio BDI-II maggiore di 30, nella popolazione dei pazienti clinici depressi. Chiamiamo $\theta$ una tale probabilità. Si noti che non vogliamo solo descrivere le proprietà di un particolare campione, ma vogliamo stimare una tale proprietà nella popolazione generale dalla quale il campione esaminato è stato estratto.
+
+I campioni sono, per definizione, diversi gli uni dagli altri, e diversi dalla popolazione. Un tale fenomeno va sotto il nome di *variabilità campionaria*. Il nostro problema è quello di capire cosa ci dicono le informazioni fornite dal campione osservato, al di là della variabilità campionaria, a proposito delle caratteristiche generali della popolazione da cui quel campione è stato estratto. Siamo interessati *alla popolazione*, non al campione.
+
+Per affrontare questo problema, la prima cosa che dobbiamo fare è quella di capire qual è il processo statistico che ha generato il campione che abbiamo a disposizione. Nel nostro caso, immaginiamo che i 30 soggetti esaminati da Zetsche et al. (2019) siano un campione casuale estratto dalla popolazione dei soggetti depressi che si rivolgono ad uno psicologo o uno psichiatra. Di tali pazienti è stato misurato il punteggio BDI-II. Possiamo considerare il punteggio BDI-II come una variabile casuale che, per ogni paziente estratto a caso dalla popolazione considerata, assume un valore diverso.
+
+Per semplificare il problema, anziché considerare il punteggio BDI-II, lo riduciamo ad un evento dicotomico: presenza di depressione grave (BDI-II $> 30$) oppure no (BDI-II $\leq 30$). Avendo codificato i dati in un tale modo, possiamo considerare ciascun punteggio come il risultato di una prova Bernoulliana, nella quale osserviamo un "successo" (ovvero, un valore BDI-II > 30) oppure un insuccesso. Il nostro campione corrisponde dunque ad una sequenza di $n = 30$ prove Bernoulliane nella quale stati osservati 23 "successi" (ovvero, 23 pazienti con depressione grave).
+
+La distribuzione dei possibili valori ottenibili da un sequenza di prove Bernoulliane viene descritta dalla distribuzione Binomiale. Nel caso presente, dunque, il meccanismo generatore dei dati corrisponde ad un modello statistico Binomiale di parametri $n = 30$ e $\theta$ (probabilità di successo in ciascuna singola prova) sconosciuto. Nel campione a disposizione sono stati osservati $y = 23$ successi; questi sono i nostri dati.
+
+Il meccanismo generatore dei dati è dunque:
+
+$$
+P(Y = y) = \binom{y}{n} \theta^y (1 - \theta)^{n-y} = \frac{n!}{y! (n-y)!}  \theta^y (1 - \theta)^{n-y} 
+$$
+
+In maniera equivalente, e più succinta, possiamo dire che
+
+$$
+y \sim \mbox{Binom}(n, \theta)
+$$
+Il parametro ignoto $\theta$ è l'oggetto dell'inferenza.
+
+
+## Il teorema di Bayes 
+
+In precedenza abbiamo utilizzato la funzione 
+
+$$
+P(Y = y) = \binom{y}{n} \theta^y (1 - \theta)^{n-y} 
+$$
+
+come uno strumento per determinare la probabilità di osservare $y = 0, 1, \dots, n$ successi in $n$ prove Bernoulliane, assumendo noto $\theta$ (la probabilità di successo in una singola prova). 
+
+Ora ci poniamo un problema diverso: quello di stimare $\theta$ che è un parametro ignoto che descrive una proprietà della popolazione.  
+
+Per giungere ad una stima di $\theta$ abbiamo già fatto un primo passo importante: ovvero abbiamo capito qual è la relazione che lega tra loro i termini del problema: $P(Y = y)$, $n$, $y$ e $\theta$.  Queste diverse "dimensioni" del problema sono tra loro legate così come indicato dalla formula della distribuzione Binomiale. Questo è il *meccanismo generatore dei dati*. 
+
+Una volta stabilito qual è il meccanismo generatore dei dati, ci rendiamo conto che esso dipende da uno o più parametri incogniti.  In questo caso c'è solo un parametro incognito: $\theta$. L'inferenza bayesiana si pone il problema di giungere alla migliore descrizione possibile dei parametri incogniti -- in questo caso, $\theta$ -- seguendo la procedura seguente:
+
+- viene assunto noto il meccanismo generatore dei dati -- nel caso presente è la distribuzione Binomiale;
+- vengono utilizzate le informazioni fornite da un campione di dati -- nel caso presente, $y$ = 23 successi in $n$ = 30 prove Bernoulliane indipendenti;
+- vengono utilizzate le nostre conoscenze precedenti rispetto al parametro ignoto;
+- le informazioni fornite dal meccanismo generatore dei dati, dai dati e dalle nostre conoscenze pregresse vengono combinate mediante il teorema di Bayes:
+
+$$
+p(\theta \mid y) = \frac{p(y \mid \theta) p(\theta)}{\int_{\Theta}p(y \mid \theta) p(\theta) \,\operatorname {d}\!\theta} \quad \theta \in \Theta.
+$$
+
+Nella forma precedente, il teorema di Bayes è costituito da quattro elementi:
+
+- la *distribuzione a priori*, $p(\theta)$, che descrive le nostre conoscenze pregresse relative ai possibili valori del parametro oggetto di inferenza;
+- la *verosimiglianza*, $p(y \mid \theta)$, la quale, sulla base del meccanismo generatore dei dati ipotizzato, descrive la plausibilità relativa dei dati osservati in funzione di tutti i possibili valori del parametro incognitov $\theta$;
+- la *verosimiglianza marginale*, $\int_{\Theta}p(y \mid \theta) p(\theta) d\, \theta$, che è una costante di normalizzazione il cui scopo è di fare in modo che la funzione a numeratore abbia area unitaria;
+- la *distribuzione a posteriori*, $p(\theta \mid y)$, la quale descrive l'aggiornamento della nostra credenza su $\theta$ dopo avere esaminato i dati del campione; si dice *a posteriori* perché trasforma la nostra credenza a priori su $\theta$ (prima di avere osservato i dati del campione) in una nuova opinione soggettiva relativa ai possibili valori $\theta$, la quale integra le nostre convinzioni precedenti con le informazioni fornite dai dati.
+
+
+## Quantificare l'incertezza
+
+Nella formula che descrive il teorema di Bayes così come è stata riportata sopra, a numeratore ci sono due funzioni, la distribuzione a priori e la verosimiglianza. A sinistra del segno di uguale troviamo un'altra funzione, la distribuzione a posteriori. Il numeratore dell'equazione precedente, invece, è uno scalare (ovvero, un singolo numero).
+
+Abbiamo visto sopra che il denominatore, pur essendo, in generale, molto difficile da calcolare (perché contiene un integrale), è di facile interpretazione: ha lo scopo di normalizzare la funzione descritta a numeratore.
+
+Oltre al denominatore, dunque, abbiamo tre funzioni: due al numeratore e una a sinistra del segno di uguale. Consideriamo il numeratore. Che interpretazione può essere data alle due funzioni di cui dobbiamo calcolare il prodotto?
+
+Una di esse, $p(\theta)$, è stata chiamata *distribuzione a priori*. Abbiamo detto che rappresenta le nostre opinioni soggettive relative ai valori possibili del parametro incognito $\theta$. Si presti attenzione a questo punto importante: 
+
+- assumiamo che $\theta$ abbia un valore fisso e incognito;
+- descriviamo le nostre opinioni relative ai valori possibili di $\theta$ con una funzione; tale funzione viene detta *distribuzione a priori*.
+
+Quindi, descriviamo le nostre opinioni su $\theta$ mediante una funzione. Nel caso presente, $\theta \in [0,1]$. Le nostre opinioni su  $\theta$ possono essere di diversi tipi
+
+Ad esempio, potremmo non sapere nulla di $\theta$ e potremmo considerare tutti i valori $\theta$ come egualmente verosimili. Tuttavia, questo è molto insolito. Solitamente sappiamo che almeno alcuni valori $\theta$ hanno una plausibilità diversa dagli altri valori. Ad esempio, nel caso presente, consideriamo il valore $\theta = 0$. Dire che $\theta = 0$ significa dire quanto segue. Ciascuna prova dell'esperimento casuale è la misurazione del livello di depressione mediante il BDI-II. Consideriamo solo i pazienti che si rivolgono ad uno psicologo o uno psichiatra per problemi inerenti la depressione. Dire che $\theta = 0$ significa dire che consideriamo un evento impossibile il fatto che un paziente con le caratteristiche descritte sopra abbia un valore BDI-II > 30.  Una tale affermazione è evidentemente assurda: ci sono certamente pazienti che si rivolgono ad uno psicologo il cui BDI-II ha un valore > 30. Anziché essere un evento impossibile, questo è un evento piuttosto comune; infatti, 23 di questi pazienti sono stati osservati nel campione di Zetsche et al. (2019). Quindi direi piuttosto che $\theta = 0$ è un evento impossibile.
+
+Consideriamo ora l'estremo opposto: $\theta = 1$. Ciò significa pensare che tutti i pazienti depressi che si rivolgono ad uno psicologo o uno psichiatra abbiano necessariamente punteggi sul BDI-II > 30.  Ma questo non è vero. Infatti, nel campione di Zetsche et al. (2019), ad esempio, 7 pazienti su 30 non avevano un punteggio BDI-II > 30. Quindi, anche il valore $\theta = 1$ è impossibile. 
+
+Possiamo dunque concludere che non è vero che le nostre conoscenze a priori su $\theta$ siano così scarse da dovere considerare come egualmente verosimili tutti i valori $\theta \in [0,1]$. Infatti, sappiamo per certo che due di questi valori, $\theta = 0$ e $\theta = 1$ sono eventi impossibili. 
+
+Che dire degli altri valori possibili del parametro $\theta$?  È ovvio che, nel mondo empirico, i fenomeni non manifestano discontinuità brusche: non si passa improvvisamente "da tutto a niente". C'è sempre una variazione graduale, con tassi di variazione più o meno grandi, ma sempre graduali.
+
+Dunque, se $\theta = 0$ era un evento impossibile, una plausibilità molto piccola andrà attribuita a valori $\theta$ molto vicini a 0, in modo tale che tale plausibilità aumenti via via che ci si allontanta da tale estremo. Lo stesso si può dire dell'etremo opposto, nel quale $\theta = 1$. 
+
+Possiamo dunque descrivere la nostra credenza relativa alla plausibilità relativa dei valori $\theta$ con una funzione continua. L'unica classe di funzioni che possiamo usare è quella delle funzioni di densità, perché la nostra credenza totale deve essere uguale a 1 -- in altre parole, l'evento certo deve valere 1, laddove l'evento certo è l'osservazione di un risultato qualsiasi dell'esperimento casuale -- nel caso presente l'unione di tutti i valori $\theta$ possibili. Questo evento deve avere probabilità 1. Quindi, la funzione che descrive la nostra opinione su $\theta$ deve essere descritta mediante una funzione di densità.
+
+Cerchiamo una funzione di densità con supporto $[0, 1]$. L'unica funzione di densità che abbiamo descritto che soddisfi questo requisito è la distribuzione Beta. Sarà dunque necessario descrivere le nostre opinioni a priori su $\theta$ mediante una distribuzione Beta. 
+
+# Distribuzione a priori
+
+Ci sono infinite distribuzioni Beta. Quale vogliamo usare per descrivere le nostre opinioni a priori su $\theta$? Dipende da quali sono le nostre opinioni a priori.
+
+Il caso di una distribuzione uniforme (assenza di qualunque opinione a priori) corrisponde ad una Beta di parametri $\alpha = 1$ e $\beta = 1$. Abbiamo visto che questo è il caso che vogliamo evitare. Tuttavia, vediamo come si implementa in $\mathsf{R}$ una tale distribuzione.
+
+Ci sono infiniti valori nell'intervallo [0, 1]. Consideriamone 100:
+
+```{r}
+n <- 20
+x <- seq(0, 1, length.out = n)
+x[1:20]
+```
+
+Ora calcoliamo il valore della funzione Beta in corrispondenza di ciascun valore $X = x$:
+
+```{r}
+y <- dbeta(x, shape1 = 1, shape2 = 1)
+y[1:20]
+```
+
+Generiamo una rappresentazione grafica del risultato ottenuto:
+
+```{r}
+tibble(
+  x = x,
+  y = y
+) %>% 
+  ggplot(aes(x, y)) +
+  geom_line()
+```
+
+È chiaro che questa funzione *continua* ha area unitaria: la sua rappresentazione geometrica è un rettangolo di base 1 e altezza 1.
+
+Se invece consideriamo $X$ come una variabile discreta, allora non abbiamo più una distribuzione di densità, ma una distribuzione di massa di probabilità. Nel tal caso, l'ordinata rappresenta $P(X = x)$  e la somma di tutte le probabilità $\sum_{x \in X}P(X = x)$ deve essere uguale a 1.0. 
+
+Per ottenere questo risultato dobbiamo normalizzare i valori $y$
+
+```{r}
+y_n <- y / n
+```
+
+così da ottenere
+
+```{r}
+tibble(
+  x = x,
+  y = y_n
+) %>% 
+  ggplot(aes(x, y)) +
+  geom_point(size = 3) +
+  geom_linerange(aes(x=x, ymax = y, ymin = 0))
+```
+
+È ovvio che 
+
+```{r}
+sum(y_n)
+```
+
+Avendo visto come creare una distribuzione uniforme con la distribuzione Beta (ovvero, una *distribuzione non informativa*), possiamo ora esaminare altri candidati possibili per la descrizione della nostra incertezza a priori su $\theta$.
+
+Una distribuzione *debolmente informativa* può essere ottenuta con una Beta(2, 2):
+
+```{r}
+y <- dbeta(x, 2, 2)
+# normalizziamo
+y_n <- y / n
+# distribuzione di massa di probabilità
+tibble(
+  x = x,
+  y = y_n
+) %>% 
+  ggplot(aes(x, y)) +
+  geom_point(size = 3) +
+  geom_linerange(aes(x=x, ymax = y, ymin = 0))
+```
+
+Se invece consideriamo la distribuzione continua abbiamo:
+
+```{r}
+y <- dbeta(x, 2, 2)
+tibble(
+  x = x,
+  y = y
+) %>% 
+  ggplot(aes(x, y)) +
+  geom_line() 
+```
+ 
+ In questo secondo caso, è l'area sottesa alla funzione Beta ad avere area unitaria:
+ 
+```{r}
+a <- 2
+b <- 2
+integrand <- function(p) {
+  # 1 / beta(a, b) * p^{a - 1} * (1 - p)^{b - 1}
+  dbeta(p, shape1 = a, shape2 = b)
+}
+integrate(integrand, lower = 0, upper = 1)
+```
+ 
+Supponiamo di credere, sulla base dei dati in letteratura o delle nostre esperienze precedenti, che il 90% dei pazienti depressi che si rivolgono a uno psicologo manifestino una depressione grave. Quindi la moda della distribuzione Beta è 0.9. Poniamo che $\alpha + beta = 30$ (ampiezza campionaria). In tali circostanze
+
+In tali circostanze, i parametri della distribuzione Beta sono:
+
+```{r}
+alpha <- 0.9 * 28 + 1
+beta <- 30 - alpha
+```
+
+Verifico
+
+```{r}
+(alpha - 1) / (alpha + beta - 2)
+```
+
+La distribuzione a priori è dunque una $Beta(23.4, 6.6)$:
+
+```{r}
+tibble(
+  x = seq(0, 1, length.out = 1e3)
+) %>% 
+  mutate(
+    y = dbeta(x, alpha, beta)
+) %>% 
+  ggplot(aes(x, y)) +
+  geom_line()
+```
+
+Se avessimo avuto un campione di 300 osservazioni, la nostra certezza sarebbe stata maggiore e può essere rappresentata da una Beta(293.4, 60.6):
+
+```{r}
+alpha <- 0.9 * 298 + 1
+beta <- (300) - alpha
+
+tibble(
+  x = seq(0, 1, length.out = 1e3)
+) %>% 
+  mutate(
+    y = dbeta(x, alpha, beta)
+) %>% 
+  ggplot(aes(x, y)) +
+  geom_line()
+```
+
+
 # Funzione di verosimiglianza
 
-La funzione di verosmiglianza è la funzione di massa o di densità di probabilità dei dati $y$ vista come una funzione del parametro sconosciuto (o dei parametri sconosciuti) $\theta$. Consideriamo qui la funzione gaussiana:
+La funzione di verosmiglianza ci dice qual è la verosimiglianza relativa dei dati, alla luce del modello generatore dei dati che è stato assunto e tenendo fissi i dati che abbiamo osservato. Nel caso presente, il modello generatore dei dati è
 
 $$
-{\displaystyle f(x)={\frac {1}{\sigma {\sqrt {2\pi }}}}e^{-{\frac {1}{2}}\left({\frac {x-\mu }{\sigma }}\right)^{2}}}
+P(Y = y) = \binom{y}{n} \theta^y (1 - \theta)^{n-y}.
 $$
 
-Ci poniamo il problema di costruire la funzione di verosimiglianza per questa densità. Consideriamo prima il caso in cui i dati corrispondono ad una singola osservazione $x$.
+In precedenza, abbiamo tenuto $\theta$ fisso e abbiamo fatto variare $y$ in modo tale da fargli assumere tutti i suoi possibili valori, ovvero $y = 0, 1, \dots, n$. Ciò che abbiamo ottenuto in questo modo è la funzione di massa di probabilità della distribuzione binomiale, nella quale $\sum_{x \in X} P(X = x) = 1$.
 
-La formula precedente dipende dai parametri $\mu$ e $\sigma$ e dai dati $x$. Per costruire la funzione di verosimiglianza, dobbiamo dunque inserire nella formula precedente il singolo valore $x$ che abbiamo ed esaminnare il risultato della funzione per tutti i possibili valori di $\mu$ e $\sigma$. Per semplicità, consideriamo $\sigma$ noto e uguale a 15. Poniamo $x = 114$.
+Ora utilizziamo la stessa formula (lo stesso meccanismo generatore dei dati), ma teniamo fissi i dati, ovvero $y$. Nel nostro caso, $y = 23$, con $n = 30$. Facciamo variare $\theta \in [0, 1]$ facendogli assumere tutti i valori possibili. Per esempio, con $\theta = 0.6$ otteniamo
+
+
+$$
+P(Y = y) = \binom{23}{30} 0.6^{23} (1 - 0.6)^{30-23};
+$$
+con $\theta = 0.61$ otteniamo
+
+$$
+P(Y = y) = \binom{23}{30} 0.61^{23} (1 - 0.61)^{30-23},
+$$
+
+e così via.
+
+Per i 20 possibili valori $\theta$
 
 ```{r}
-x <- 114
-mu <- seq(70, 160, length.out = 1e3)
-fx <- dnorm(x, mu, sd = 15)
+theta <- seq(0, 1, length.out = 20)
+theta
 ```
 
-Otteniamo così una funzione che ha la forma della gaussiana (ma non ha area unitaria), con il massimo in corrispondenza di 114.
+i valori della funzione sono
 
 ```{r}
-plot(mu, fx, type = 'l')
-abline(v = 114)
+ly <- choose(30, 23) * theta^(23) * (1 - theta)^(30 - 23)
+ly
 ```
 
-Consideriamo ora il caso di 30 osservazioni indipendenti iid, ciascuna delle quali può essere considerata come una realizzazione di una variabile casuale gaussiana di media comune sconosciuta e di deviazione standard 15.
+Una rappresentazione grafica è
 
 ```{r}
-n <- 30 
-true_sigma <- 15 
+tibble(theta, ly) %>% 
+  ggplot(aes(x = theta, y = ly)) +
+  geom_point()
 ```
 
-Generiamo i dati
+Ovviamente otteniamo una rappresentazione migliore se usiamo più punti:
 
 ```{r}
-set.seed(123)
-true_mu <- 100 
-x <- rnorm(n, true_mu, true_sigma)
-x
+theta <- seq(0, 1, length.out = 1e3)
+ly <- choose(30, 23) * theta^(23) * (1 - theta)^(30 - 23)
+tibble(theta, ly) %>% 
+  ggplot(aes(x = theta, y = ly)) +
+  geom_line()
 ```
 
-La media del campione corrispondenrà alla stima di massima verosimiglianza:
+Ciò che è importante notare è che la funzione di verosimiglianza *non* è una funzione di densità: non ha area unitaria. Verifichiamo:
 
 ```{r}
-mean(x)
-```
-
-Costruiamo ora la funzione di verosimiglianza. 
-
-Con solo due osservazioni, si può calcolare la distribuzione congiunta $p(X_1, X_2) = p(X_1) p(X_2 \mid X_1)$. Se le due variabili casuali sono indipendenti, abbiamo semplicemente $p(X_1, X_2) = p(X_1) p(X_2)$. 
-
-Nel caso di $n$ v.c. iid, cascuna distribuita come $\mathcal{N}(\mu, \sigma)$, avremo
-
-$$
-p(X_1, \dots, X_n ; \mu, \sigma) = \prod p(X_i; \mu, \sigma).
-$$
-
-Il logaritmo della funzione di densità congiunta diventa
-
-$$
-\log p(X_1, \dots, X_n ; \mu, \sigma) = \sum \log p(X_i; \mu, \sigma).
-$$
-
-Facendo variare i parametri e tenendo costanti i dati, otteniamo la funzione di log-verosmiglianza:
-
-```{r}
-log_likelihood <- function(x, mu, sigma = true_sigma) {
-  sum(dnorm(x, mu, sigma, log = TRUE))
+y <- 23
+n <- 30
+integrand <- function(p) {
+  dbinom(y, n, p)
 }
+integrate(integrand, lower = 0, upper = 1)
 ```
 
-Per creare un grafico, possiamo utiliazzare
+Allora che interpretazione possiamo attribuire alla funzione di verosimiglianza? A tale funzione possiamo attribuire la seguente interpretazione. È possibile fare un confronto tra due valori del parametro, ad esempio, $\theta = 0.625$ e $\theta = 0.75$. In corrispondenza di questi due valori, la funzione di verosimiglianza assume un valore maggiore nel caso di $\theta = 0.75$ rispetto a $\theta = 0.625$. Possiamo dunque dire che, alla luce dei dati osservati ($y = 23$ nel caso di $n = 30$ prove), è più verosimile che $\theta$ sia 0.75 piuttosto che 0.625. Quanto più verosimile?
 
 ```{r}
-# number of points of the plot
-nrep <- 1e4
-# Values of the parameter mu for which the LL function will be evaluated.
-mu <- seq(90, 110, length.out = nrep)
+(choose(30, 23) * 0.75^(23) * (1 - 0.75)^(30 - 23)) / 
+  (choose(30, 23) * 0.625^(23) * (1 - 0.625)^(30 - 23))
 ```
 
-Per ciascun possibile valore del parametro $\mu$ calcoliamo il valore della funzione congiunta di verosimiglianza di tutte le 30 osservazioni. Salviamo i risultati nel vettore `ll`.
+Esattamente 3.877 volte più verosimile. 
+
+In conclusione, la funzione di verosimiglianza ci dire qual è la verosimiglianza relativa dei diversi valori $\theta$ *avendo osservato i dati* $y = 23$ su $n = 30$. Se noi consideriamo soltanto i dati, il valore $\theta$ più verosimile è $\theta_{ML} = 0.767$, ovvero la moda della funzione di verosimiglianza. Con metodi analitici si può dimostrare che il valore $\theta$ in corrispondenza del massimo della funzione di verosimiglianza (la moda) è
 
 ```{r}
-ll <- rep(NA, nrep)
-for (i in 1:nrep) {
-  ll[i] <- log_likelihood(x, mu[i], true_sigma)
-}
+23 / 30
 ```
 
-Creaiamo un grafico della funzione di log-verosimiglianza.
+Tale valore viene chiamato *stima di massima verosimiglianza*:
 
 ```{r}
-ggplot(
-  data.frame(mu, ll),
-  aes(x = mu, y = ll)
-) +
-  geom_line() +
-  vline_at(mean(x), color = "red", linetype="dashed") +
-  labs(
-    y = "Log-verosimiglianza",
-    x = c("Parametro \u03BC")
-  ) 
-```
-
-## Stima di massima verosimiglianza
-
-Troviamo ora la stima di massima verosimiglianza. Tale stima deve coincidere con la media del campione.
-
-```{r}
-mu[which.max(ll)]
-mean(x)
+theta[which.max(ly)]
 ```
 
 L'approssimazione deriva dal fatto che abbiamo utilizzato un numero finito di punti.
 
+
+## Distribuzione a posteriori
+
+La distribuzione a posteriori, $p(\theta \mid y)$, è *proporzionale* al prodotto della distribuzione a priori e della verosimiglianza. Diciamo che è *l'aggiornamento* delle nostre credenze a priori alla luce dei dati che sono stati osservati. La distribuzione a posteriori *non normalizzata* si ottiene semplicemente facendo il prodotto, per ciascun possibile valore $\theta$, dell'ordinata della funzione di verosimiglianza e dell'ordinata della funzione a priori. La funzione ottenuta in questo modo non ha area unitaria e va dunque scalata per una costante di normalizzazione. 
+
+## Il denominatore bayesiano
+
+La costante di normalizzazione fornita al denominatore della formula di Bayes contiene un integrale che, in generale, è impossibile da risolvere per via analitica. Pertanto, in generale, la distribuzione a posteriori si ottiene mediante approssimazione numerica.
+
+Una volta ottenuta la distribuzione a posteriori $p(\theta \mid y)$, che non assegna a $\theta$ un unico valore, ma una distribuzione di valori, è anche possibile calcolare due distribuzioni: 
+
+- la distribuzione predittiva a posteriori,
+- la distribuzione predittiva a priori.
+
+## La distribuzione predittiva a posteriori
+
+La distribuzione predittiva a posteriori ci fornisce un'inidicazione dei possibili dati futuri che potrebbero venire osservati, alla luce dei dati ottenuti nel campione osservato, e considerata la distribuzione a posteriori dei possibili valori che può assumere il parametro $\theta$. Questa distribuzione è utile, non solo per fare previsioni, ma anche per valutare il modello usato: la distribuzione predittiva a posteriori deve almeno essere coerente con i dati che abbiamo osservato!
+
+## La distribuzione predittiva a priori
+
+La distribuzione predittiva a priori si calcola esattamente nello stesso modo della distribuzione predittiva a posteriori, ma senza considerare i dati $y$. La distribuzione predittiva a priori ci dice quali caratteristiche ci aspettiamo dai dati del campione, sulla base delle caratteristiche del modello e tenuto conto delle distribuzioni a priori che abbiamo scelto. La distribuzione predittiva a priori viene utilizzata per capire se le distribuzioni a priori che abbiamo scelto sono sensate. Se tutto va bene, la distribuzione predittiva a priori dovrebbe essere simile ai dati che abbiamo osservato nel campione, ma un po' più ampia. "Un po' più ampia" significa "ragionevolmente un po' più ampia", non "molti ordini di grandezza più ampia". Se la distribuzione predittiva a priori è molto diversa dai dati, è necessario rivedere il modo in cui le distribuzioni a priori sono state formulate. Questo dovrebbe essere il primo passa da compiere all'interno di quel processo che è chiamato "flusso di lavoro bayesiano".
 
 ## Informazioni sulla sessione di lavoro
 
