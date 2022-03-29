@@ -31,6 +31,7 @@ suppressPackageStartupMessages({
   library("scales")
   library("bayesplot")
   library("distrEx")
+  library("bayesrules")
 })
 
 theme_set(bayesplot::theme_default(base_size = 12))
@@ -45,7 +46,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Meccanismo generatore dei dati
+# L'inferenza bayesiana
 
 Consideriamo nuovamente i dati di Zetsche et al. (2019), ovvero 23 successi in 30 prove. Abbiamo visto come il modello generativo per i dati è 
 
@@ -55,13 +56,17 @@ $$
 
 Il parametro ignoto $\theta$ è l'oggetto dell'inferenza.
 
+## L'aggiornamento bayesiano
+
 L'inferenza si svolge mediante l'aggiornamento bayesiano:
 
 $$
-p(\theta \mid y) = \frac{p(y \mid \theta) p(\theta)}{\int_{\Theta}p(y \mid \theta) p(\theta) \,\operatorname {d}\!\theta} \quad \theta \in \Theta.
+p(\theta \mid y) = \frac{p(y \mid \theta) p(\theta)}{\int_{\Theta}p(y \mid \theta) p(\theta) \,\operatorname {d}\!\theta}, \quad \theta \in \Theta.
 $$
 
-Consideriamo ora un'approssimazione discreta dell'equazione precedente, ovvero il caso in cui considerimo soltanto 20 possibili valori $\theta$:
+### Un esempio concreto
+
+Consideriamo ora un'approssimazione discreta all'equazione precedente, ovvero il caso in cui vengono esaminati soltanto 20 possibili valori $\theta$:
 
 ```{r}
 n <- 20
@@ -69,7 +74,7 @@ theta <- seq(0, 1, length.out = n)
 theta
 ```
 
-## Distribuzione a priori
+### La distribuzione a priori
 
 Decidiamo di descrivere le nostre opinioni a priori sui valori possibili del parametro $\theta$ mediante una distribuzione Beta di parametri $\alpha = 23.4$ e $\beta = 6.6$.
 
@@ -78,13 +83,19 @@ alpha <- 23.4
 beta <- 6.6
 ```
 
-Dato che esaminiamo soltanto 20 valori $\theta$, possiamo discretizzare anche la distribuzione a priori in modo da considerare solo l'ordinata della distribuzione Beta in corrispondenza dei valori $\theta$ presi in considerazione: 
+ovvero
+
+```{r}
+plot_beta(alpha, beta, mean = FALSE, mode = FALSE)
+```
+
+Dato che esaminiamo soltanto 20 valori $\theta$, discretizziamo la distribuzione a priori in modo da considerare l'ordinata della distribuzione Beta solo in corrispondenza dei 20 valori $\theta$ considerati: 
 
 ```{r}
 fx <- dbeta(theta, alpha, beta)
 ```
 
-Discretizzando, dobbiamo definire una funzione di massa di probabilità -- ovvero dobbiamo fare in modo da avere una somma unitaria per i valori di probabilità considerati:
+Dato che abbiamo discretizzato la variabile casuale $\theta$, dobbiamo generare una funzione di massa di probabilità -- ovvero dobbiamo fare in modo che la somma dei valori di probabilità considerati sia uguale a 1:
 
 ```{r}
 prior <- fx / sum(fx)
@@ -107,16 +118,16 @@ tibble(
   )
 ```
 
-# Funzione di verosimiglianza
+### La funzione di verosimiglianza
 
-Per generare la funzione di verosimiglianza dobbiamo utilizzare il modello Binomiale tenendo costante i dati $y = 23, n = 30$, ma variando il valore $\theta$. Per i 20 possibili valori $\theta$ che stiamo considerando, otteniamo:
+Per generare la funzione di verosimiglianza dobbiamo utilizzare il modello Binomiale tenendo costante i dati $y = 23, n = 30$ e variando il valore $\theta$. Per i 20 possibili valori $\theta$ che stiamo considerando, otteniamo:
 
 ```{r}
 like <- dbinom(23, 30, theta)
 like
 ```
 
-Una rappresentazione grafica è
+Una rappresentazione grafica della funzione di verosimiglianza (discretizzata) è
 
 ```{r}
 tibble(theta, like) %>% 
@@ -126,7 +137,7 @@ tibble(theta, like) %>%
 ```
 
 
-## Distribuzione a posteriori
+### La distribuzione a posteriori
 
 La distribuzione a posteriori, $p(\theta \mid y)$, è *proporzionale* al prodotto della distribuzione a priori e della verosimiglianza. 
 
@@ -134,20 +145,20 @@ La distribuzione a posteriori, $p(\theta \mid y)$, è *proporzionale* al prodott
 post_distr = like * prior
 ```
 
-La somma non è 1:
+Se ora calcolo la somma dei valori della distribuzione a posteriori (discretizzata), mi rendo conto che non è 1:
 
 ```{r}
 sum(post_distr)
 ```
 
-Dunque, normalizzo:
+Pertanto, normalizzo:
 
 ```{r}
 post <- post_distr / sum(post_distr)
 sum(post)
 ```
 
-Una rappresentazione grafica è la seguente:
+Una rappresentazione grafica della distribuzione a posteriori (normalizzata) si ottiene nel modo seguente:
 
 ```{r}
 tibble(theta, post) %>% 
@@ -156,6 +167,7 @@ tibble(theta, post) %>%
   geom_linerange(aes(x = theta, ymax = post, ymin = 0)) 
 ```
 
+Se immaginiamo di ripetere la procedura descritta sopra con tanti punti $\theta$ (anziché solo 20), congiungendo i punti otteniamo una linea continua. Tale curva rappresenta la funzione di densità a posteriori.
 
 ## Informazioni sulla sessione di lavoro
 
