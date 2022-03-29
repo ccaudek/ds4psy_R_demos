@@ -207,7 +207,7 @@ tibble(mu, ll) %>%
 Troviamo ora la stima di massima verosimiglianza, ovvero il valore del paraemtro che massimizza la funzione di (log-) verosimiglianza:
 
 $$
-\bar{x} = \mbox{arg max}_{\mu} \, \ell (x \mid \mu).
+\hat{\mu} = \mbox{arg max}_{\mu} \, \ell (x \mid \mu).
 $$
 
 ```{r}
