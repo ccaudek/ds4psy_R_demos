@@ -386,7 +386,27 @@ Una volta ottenuta la distribuzione a posteriori $p(\theta \mid y)$, che non ass
 
 ## La distribuzione predittiva a posteriori
 
-La distribuzione predittiva a posteriori ci fornisce un'inidicazione dei possibili dati futuri che potrebbero venire osservati, alla luce dei dati ottenuti nel campione osservato, e considerata la distribuzione a posteriori dei possibili valori che può assumere il parametro $\theta$. Questa distribuzione è utile, non solo per fare previsioni, ma anche per valutare il modello usato: la distribuzione predittiva a posteriori deve almeno essere coerente con i dati che abbiamo osservato!
+La distribuzione predittiva a posteriori ci fornisce un'inidicazione dei possibili dati futuri che potrebbero venire osservati, alla luce dei dati ottenuti nel campione osservato, e considerata la distribuzione a posteriori dei possibili valori che può assumere il parametro $\theta$. Questa distribuzione è utile, non solo per fare previsioni, ma anche per valutare il modello usato: la distribuzione predittiva a posteriori deve almeno essere coerente con i dati che abbiamo effettivamente osservato!
+
+Come vedremo nel capitolo 22 della dispensa, la distribuzione predittiva a posteriori, nel caso di un modello come il presente (distribuzione a priori beta, verosimiglianza binomiale, distribuzione a posteriori beta) viene generata nel modo seguente. Dopo l'aggiornamento bayesiano (da $p(\theta)$ a $p(\theta \mid y)$), disponiamo della distribuzione a posteriori per il parametro $\theta$. Il nostro campione è costituito da 30 prove Bernoulliane. Per generare un nuovo campione di possibili 30 prove future, usiamo la seguente procedura.
+
+Estraiamo un valore $\theta'$ a caso dalla distribuzione a posteriori $p(\theta \mid y)$ -- non tutti i valori $\theta$ sono ugualmente possibili; l'estrazione casuale tiene in considerazione il fatto che alcuni valori sono più probabili di altri. 
+
+Con il valore $\theta'$ così estratto generiamo 30 valori di una variabile casuale Bernoulliana la cui probabilità di successo è uguale a $\theta'$. Poniamo che $\theta'$ sia uguale a 0.32, allora 
+
+```{r}
+suppressPackageStartupMessages(library("Rlab")) 
+rbern(30, 0.32)
+```
+
+Otteniamo così un campione casuale di 30 prove Bernoulliane per il quale $\theta$ ha assunto il valore $\theta'$ estratto a caso dalla distribuzione $p(\theta \mid y)$.
+
+Ma $\theta'$ non è l'unico valore possibile per $\theta$. Quindi estraiamo un altro valore $\theta''$ a caso dalla distribuzione $p(\theta \mid y)$ e, con questo secondo valore, generiamo un'altra sequenza di 30 valori di una variabile casuale Bernoulliana la cui probabilità di successo è uguale a $\theta''$.
+
+Ripetiamo questo processo qualche migliaio di volte. 
+
+Sulla base di tutte queste sequenze di 30 prove, calcoliamo la proporzione di sequenze il cui numero di successi in 30 prove è uguale a 0; calcoliamo la proporzione di sequenze il cui numero di successi in 30 prove è uguale a 1; ...; calcoliamo la proporzione di sequenze il cui numero di successi in 30 prove è uguale a 30. Questa è una stima della distribuzione predittiva a posteriori, ovvero, una stima della probabilità associata a ciascuno dei possibili numeri di “successi” in $m$ = 30 nuove prove future.
+
 
 ## La distribuzione predittiva a priori
 
