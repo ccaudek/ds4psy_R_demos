@@ -11,7 +11,7 @@
 
 <meta name="author" content="Corrado Caudek" />
 
-<meta name="date" content="2022-03-27" />
+<meta name="date" content="2022-03-29" />
 
 <title>Data science per psicologi - demo 14.02</title>
 
@@ -547,7 +547,7 @@ pre code {
 <h1 class="title toc-ignore">Data science per psicologi - demo
 14.02</h1>
 <h4 class="author">Corrado Caudek</h4>
-<h4 class="date">2022-03-27</h4>
+<h4 class="date">2022-03-29</h4>
 
 </div>
 
@@ -609,7 +609,7 @@ parametri: <span class="math inline">\(\mu\)</span> e <span class="math inline">
 <p>Per semplicità, consideriamo il caso in cui si ipotizza <span class="math inline">\(\sigma\)</span> noto e uguale a 15. Poniamo <span class="math inline">\(x = 114\)</span>.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">114</span></span></code></pre></div>
 <p>Esamineremo qui l’andamento della funzione nell’intervallo di valori
-<span class="math inline">\(x\)</span> compreso tra 70 e 160:</p>
+<span class="math inline">\(\mu\)</span> compreso tra 70 e 160:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">70</span>, <span class="dv">160</span>, <span class="at">length.out =</span> <span class="fl">1e3</span>)</span></code></pre></div>
 <p>La formula della distribuzione Gaussiana è implementata in <span class="math inline">\(\mathsf{R}\)</span> nella funzione
 <code>dnorm()</code>. La funzione <code>dnorm()</code> ha tre
@@ -619,25 +619,19 @@ argomenti:</p>
 <li>la media, ovvero il parametro <span class="math inline">\(\mu\)</span>,</li>
 <li>la deviazione standard, ovvero il parametro <span class="math inline">\(\sigma\)</span>.</li>
 </ul>
-<p>Come nel caso della Binomiale, teniamo costante i dati – nel caso
-presente, il valore <span class="math inline">\(x = 114\)</span>. Il
-parametro <span class="math inline">\(\sigma\)</span> è assunto noto,
-per cui ad esso attribuiamo il valore 15. Rimane il valore (ignoto) del
-parametro <span class="math inline">\(\mu\)</span>. Anche in questo
-caso, dunque, procediamo come nel caso della verosimiglianza della
-Binomiale, ovvero ci chiediamo quale forma assuma la funzione di
-verosimiglianza al variare dei valori del parametro incognito. Nella
-presente simulazione consideriamo 1000 possibile valori del parametro
-<span class="math inline">\(\mu\)</span>, ovvero i valori compresi
-nell’intervallo <span class="math inline">\([70, 160]\)</span>.
+<p>Come nel caso della Binomiale, anche ora, per calcolare la funzione
+di verosimiglianza, teniamo costante i dati – nel caso presente, il
+singolo valore <span class="math inline">\(x = 114\)</span>, e facciamo
+variare il valore dei parametri – qui, solo <span class="math inline">\(\mu\)</span>, dato che il parametro <span class="math inline">\(\sigma\)</span> è assunto noto, <span class="math inline">\(\sigma = 15\)</span>.</p>
+<p>Nella presente simulazione consideriamo 1000 possibile valori del
+parametro <span class="math inline">\(\mu \in [70, 160]\)</span>.
 Applichiamo dunque 1000 volte la formula della densità Gaussiana, una
 volta per ciascuno dei 1000 possibili valori <span class="math inline">\(\mu\)</span>, tenendo costanti gli altri valori
 nella formula, ovvero <span class="math inline">\(x = 114\)</span> e
 <span class="math inline">\(\sigma = 15\)</span>. Otteniamo così 1000
-punti (ovvero, 1000 coppie <span class="math inline">\(x\)</span> e
-<span class="math inline">\(f(x)\)</span>). La curva che interpola tali
-punti è la funzione di verosimiglianza.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fx <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="dv">15</span>)</span></code></pre></div>
+punti – ovvero, 1000 coppie di valori <span class="math inline">\(\mu\)</span> e <span class="math inline">\(f(\mu)\)</span>. La curva che interpola tali punti
+è la funzione di verosimiglianza.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>f_mu <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="dv">15</span>)</span></code></pre></div>
 <p>Si noti che la funzione di verosimiglianza ha la forma della
 distribuzione Gaussiana. Nel caso di una singola osservazione (ma solo
 in questo caso), ha anche un’area unitaria:</p>
@@ -649,9 +643,9 @@ in questo caso), ha anche un’area unitaria:</p>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">integrate</span>(integrand, <span class="at">lower =</span> <span class="sc">-</span><span class="dv">10000</span>, <span class="at">upper =</span> <span class="dv">10000</span>)</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 with absolute error &lt; 1.6e-06</span></span></code></pre></div>
 <p>La moda di tale funzione è 114:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(mu, fx) <span class="sc">%&gt;%</span></span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(mu, f_mu) <span class="sc">%&gt;%</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> fx)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> f_mu)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vline_at</span>(<span class="dv">114</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>) <span class="sc">+</span></span>
@@ -666,11 +660,10 @@ in questo caso), ha anche un’area unitaria:</p>
 <p>Consideriamo ora il caso di 30 osservazioni indipendenti iid,
 ciascuna delle quali può essere considerata come la realizzazione di una
 variabile casuale Gaussiana di media comune sconosciuta e di deviazione
-standard 15.</p>
+standard pari a 15.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">30</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>true_sigma <span class="ot">&lt;-</span> <span class="dv">15</span></span></code></pre></div>
-<p>Generiamo i dati assumendo <span class="math inline">\(\mu =
-100\)</span>:</p>
+<p>Generiamo un campione di dati assumendo che il valore ignoto di <span class="math inline">\(\mu\)</span> sia pari a 100:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>true_mu <span class="ot">&lt;-</span> <span class="dv">100</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, true_mu, true_sigma)</span>
@@ -680,27 +673,34 @@ standard 15.</p>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="do">## [15]  91.66238 126.80370 107.46776  70.50074 110.52034  92.90813  83.98264</span></span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="do">## [22]  96.73038  84.60993  89.06663  90.62441  74.69960 112.56681 102.30060</span></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="do">## [29]  82.92795 118.80722</span></span></code></pre></div>
+<p>Supponiamo che questi siano i dati osservati.</p>
 <p>Costruiamo ora la funzione di verosimiglianza.</p>
-<p>Abbiamo visto in precedenza come, nel caso di due variabi casuali, si
-può costruire la funzione distribuzione congiunta nel modo seguente:
-<span class="math inline">\(p(X_1, X_2) = p(X_1) p(X_2 \mid
-X_1)\)</span>. Se le due variabili casuali sono indipendenti, abbiamo
-semplicemente <span class="math inline">\(p(X_1, X_2) = p(X_1)
-p(X_2)\)</span>. Possiamo generalizzare tale risultato dicendo che, nel
-caso di <span class="math inline">\(n\)</span> v.c. iid, cascuna
-distribuita come <span class="math inline">\(\mathcal{N}(\mu,
-\sigma)\)</span>, avremo che</p>
+<p>Abbiamo visto in precedenza che, nel caso di due variabili casuali
+<span class="math inline">\(X_1\)</span> e <span class="math inline">\(X_2\)</span>, è la probabilità congiunta è:</p>
+<p><span class="math display">\[
+P(X_1, X_2) = P(X_1) P(X_2 \mid X_1).
+\]</span></p>
+<p>Se le due variabili casuali sono indipendenti, abbiamo
+semplicemente</p>
+<p><span class="math display">\[
+P(X_1, X_2) = P(X_1) P(X_2).
+\]</span></p>
+<p>Possiamo generalizzare tale risultato al caso delle distribuzioni di
+densità di probabilità. In particolare, nel caso di <span class="math inline">\(n\)</span> v.c. iid, cascuna distribuita come
+<span class="math inline">\(\mathcal{N}(\mu, \sigma)\)</span>, avremo
+che</p>
 <p><span class="math display">\[
 p(X_1, \dots, X_n ; \mu, \sigma) = \prod p(X_i; \mu, \sigma).
 \]</span></p>
 <p>Dato che fare il prodotto di 30 valori minori di 1 produce un numero
-molto piccolo, calcoliamo invece la log-verosimiglianza. Il logaritmo
-della funzione di densità congiunta è dato da una somma:</p>
+molto piccolo, calcoliamo invece la <em>log-verosimiglianza</em>. Il
+logaritmo della funzione di densità congiunta è dato da una somma:</p>
 <p><span class="math display">\[
-\log p(X_1, \dots, X_n ; \mu, \sigma) = \sum \log p(X_i; \mu, \sigma).
+\log p(X_1, \dots, X_n ; \mu, \sigma) = \log \Big( \prod p(X_i; \mu,
+\sigma)\Big) =  \sum \log p(X_i; \mu, \sigma).
 \]</span></p>
-<p>Nella funzione così costruita, facciamo nuovamente variare il valore
-dei parametri (in questo caso, solo il possibile valore <span class="math inline">\(\mu\)</span>) e teniamo costante tutto il resto
+<p>Nella funzione di densità congiunta, facciamo nuovamente variare il
+valore dei parametri (in questo caso, solo <span class="math inline">\(\mu\)</span>) e teniamo costante tutto il resto
 (ovvero, i dati e <span class="math inline">\(\sigma\)</span>). Così
 facendo otteniamo la funzione di log-verosmiglianza che in <span class="math inline">\(\mathsf{R}\)</span> si può scrivere così:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>log_likelihood <span class="ot">&lt;-</span> <span class="cf">function</span>(x, mu, <span class="at">sigma =</span> true_sigma) {</span>
@@ -713,17 +713,18 @@ facendo otteniamo la funzione di log-verosmiglianza che in <span class="math inl
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [15]  91.66238 126.80370 107.46776  70.50074 110.52034  92.90813  83.98264</span></span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [22]  96.73038  84.60993  89.06663  90.62441  74.69960 112.56681 102.30060</span></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="do">## [29]  82.92795 118.80722</span></span></code></pre></div>
-<p>Nel caso presente, consideriamo valori <span class="math inline">\(\mu\)</span> compresi nell’intervallo <span class="math inline">\([70, 130]\)</span>:</p>
+<p>Nella simulazione, per generare la figura consideriamo valori <span class="math inline">\(\mu \in [70, 130]\)</span>:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>nrep <span class="ot">&lt;-</span> <span class="fl">1e5</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">70</span>, <span class="dv">130</span>, <span class="at">length.out =</span> nrep)</span></code></pre></div>
 <p>Per ciascuno di questi possibili valori del parametro <span class="math inline">\(\mu\)</span> calcoliamo il valore della funzione
-congiunta di verosimiglianza di tutte le 30 osservazioni. Salviamo i
-risultati nel vettore <code>ll</code>:</p>
+congiunta di verosimiglianza usando tutte le 30 osservazioni del
+campione. Salviamo i risultati nel vettore <code>ll</code>:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ll <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, nrep)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nrep) {</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  ll[i] <span class="ot">&lt;-</span> <span class="fu">log_likelihood</span>(x, mu[i], true_sigma)</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<p>Generiamo un grafico della funzione di log-verosimiglianza:</p>
+<p>Possiamo ora generare un grafico della funzione di
+log-verosimiglianza:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(mu, ll) <span class="sc">%&gt;%</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> ll)</span>
@@ -738,11 +739,15 @@ risultati nel vettore <code>ll</code>:</p>
 </div>
 <div id="stima-di-massima-verosimiglianza" class="section level2">
 <h2>Stima di massima verosimiglianza</h2>
-<p>Troviamo ora la stima di massima verosimiglianza.</p>
+<p>Troviamo ora la stima di massima verosimiglianza, ovvero il valore
+del paraemtro che massimizza la funzione di (log-) verosimiglianza:</p>
+<p><span class="math display">\[
+\bar{x} = \mbox{arg max}_{\mu} \, \ell (x \mid \mu).
+\]</span></p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mu[<span class="fu">which.max</span>(ll)]</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 99.29349</span></span></code></pre></div>
 <p>Sappiamo che la stima di massima verosimiglianza coincide con la
-media del campione:</p>
+media del campione. Verifichiamo:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 99.29344</span></span></code></pre></div>
 <p>L’approssimazione deriva dal fatto che abbiamo utilizzato un numero
@@ -780,7 +785,7 @@ finito di punti.</p>
 <span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="do">## [21] R.utils_2.11.0    R.oo_1.24.0       styler_1.7.0      rmarkdown_2.13   </span></span>
 <span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="do">## [25] labeling_0.4.2    munsell_0.5.0     broom_0.7.12      compiler_4.1.3   </span></span>
 <span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="do">## [29] modelr_0.1.8      xfun_0.30         pkgconfig_2.0.3   htmltools_0.5.2  </span></span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="do">## [33] tidyselect_1.1.2  fansi_1.0.3       crayon_1.5.1      tzdb_0.2.0       </span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="do">## [33] tidyselect_1.1.2  fansi_1.0.3       crayon_1.5.1      tzdb_0.3.0       </span></span>
 <span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="do">## [37] dbplyr_2.1.1      withr_2.5.0       R.methodsS3_1.8.1 MASS_7.3-56      </span></span>
 <span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="do">## [41] grid_4.1.3        jsonlite_1.8.0    gtable_0.3.0      lifecycle_1.0.1  </span></span>
 <span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="do">## [45] DBI_1.1.2         magrittr_2.0.2    cli_3.2.0         stringi_1.7.6    </span></span>
@@ -792,7 +797,7 @@ finito di punti.</p>
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDE0LjAyIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBoaWdobGlnaHQ6IHB5Z21lbnRzCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgiaGVyZSIpCiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJzY2FsZXMiKQogIGxpYnJhcnkoImJheWVzcGxvdCIpCiAgbGlicmFyeSgiZGlzdHJFeCIpCn0pCgp0aGVtZV9zZXQoYmF5ZXNwbG90Ojp0aGVtZV9kZWZhdWx0KGJhc2Vfc2l6ZSA9IDEyKSkKYmF5ZXNwbG90Ojpjb2xvcl9zY2hlbWVfc2V0KCJncmF5IikKc2V0LnNlZWQoODQ3MzUpCgprbml0cjo6b3B0c19jaHVuayRzZXQoCiAgY29sbGFwc2UgPSBUUlVFLAogIHRpZHkgPSAnc3R5bGVyJywKICBmaWcud2lkdGggPSA2LAogIGZpZy5hc3AgPSAwLjYxOCAjIDEgLyBwaGkKKQpgYGAKCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+CiAgYm9keXsKICBmb250LXNpemU6IDEzcHQ7Cn0KY29kZS5yewogIGZvbnQtc2l6ZTogMTNwdDsKICBmb250LWZhbWlseTogJ0luY29uc29sYXRhJzsKfQouY3VzdG9tLWlubGluZSB7CiAgZm9udC1zaXplOiAxM3B0OwogIGZvbnQtZmFtaWx5OiAnSW5jb25zb2xhdGEnOwp9Cjwvc3R5bGU+CgojIEZ1bnppb25lIGRpIHZlcm9zaW1pZ2xpYW56YSBHYXVzc2lhbmEKCkxhIGZ1bnppb25lIGRpIHZlcm9zbWlnbGlhbnphIMOoIGxhIGZ1bnppb25lIGRpIG1hc3NhIG8gZGkgZGVuc2l0w6AgZGkgcHJvYmFiaWxpdMOgIGRlaSBkYXRpICR5JCB2aXN0YSBjb21lIHVuYSBmdW56aW9uZSBkZWwgcGFyYW1ldHJvIHNjb25vc2NpdXRvIChvIGRlaSBwYXJhbWV0cmkgc2Nvbm9zY2l1dGkpICRcdGhldGEkLiBOZWwgdHV0b3JpYWwgcHJlY2VkZW50ZSBhYmJpYW1vIHZpc3RvIGNvbWUgY29zdHJ1aXJlIGxhIGZ1bnppb25lIGRpIHZlcm9zaW1pZ2xpYW56YSBuZWwgY2FzbyBkaSB1biBtb2RlbGxvIEJpbm9taWFsZS4gQ29uc2lkZXJpYW1vIHF1aSBpbCBtb2RlbGxvIGdhdXNzaWFubzoKCiQkCntcZGlzcGxheXN0eWxlIGYoeCk9e1xmcmFjIHsxfXtcc2lnbWEge1xzcXJ0IHsyXHBpIH19fX1lXnste1xmcmFjIHsxfXsyfX1cbGVmdCh7XGZyYWMge3gtXG11IH17XHNpZ21hIH19XHJpZ2h0KV57Mn19fS4KJCQKCkNpIHBvbmlhbW8gaWwgcHJvYmxlbWEgZGkgY29zdHJ1aXJlIGxhIGZ1bnppb25lIGRpIHZlcm9zaW1pZ2xpYW56YSBwZXIgcXVlc3RhIGZ1bnppb25lIGRpIGRlbnNpdMOgIGRpIHByb2JhYmlsaXTDoC4gCgojIyBVbmEgc2luZ29sYSBvc3NlcnZhemlvbmUKCkNvbnNpZGVyaWFtbyBwcmltYSBpbCBjYXNvIGluIGN1aSBpIGRhdGkgY29ycmlzcG9uZG9ubyBhZCB1bmEgc2luZ29sYSBvc3NlcnZhemlvbmUgJHgkLiBMYSBmb3JtdWxhIHByZWNlZGVudGUgZGlwZW5kZSBkYWkgcGFyYW1ldHJpICRcbXUkIGUgJFxzaWdtYSQgZSBkYWkgZGF0aSAkeCQuIFBlciBjb3N0cnVpcmUgbGEgZnVuemlvbmUgZGkgdmVyb3NpbWlnbGlhbnphLCBkb2JiaWFtbyBkdW5xdWUgaW5zZXJpcmUgbmVsbGEgZm9ybXVsYSBwcmVjZWRlbnRlIHVuIHNpbmdvbG8gdmFsb3JlICR4JC4gSW4gb3V0cHV0IGFiYmlhbW8gaWwgcmlzdWx0YXRvIGNoZSBzaSBvdHRpZW5lIHZhcmlhbmRvLCBuZWxsYSBmdW56aW9uZSwgaSB2YWxvcmkgZGkgZHVlIHBhcmFtZXRyaTogJFxtdSQgZSAkXHNpZ21hJC4gCgpQZXIgc2VtcGxpY2l0w6AsIGNvbnNpZGVyaWFtbyBpbCBjYXNvIGluIGN1aSBzaSBpcG90aXp6YSAkXHNpZ21hJCBub3RvIGUgdWd1YWxlIGEgMTUuIFBvbmlhbW8gJHggPSAxMTQkLgoKYGBge3J9CnggPC0gMTE0CmBgYAoKRXNhbWluZXJlbW8gcXVpIGwnYW5kYW1lbnRvIGRlbGxhIGZ1bnppb25lIG5lbGwnaW50ZXJ2YWxsbyBkaSB2YWxvcmkgJHgkIGNvbXByZXNvIHRyYSA3MCBlIDE2MDoKCmBgYHtyfQptdSA8LSBzZXEoNzAsIDE2MCwgbGVuZ3RoLm91dCA9IDFlMykKYGBgCgpMYSBmb3JtdWxhIGRlbGxhIGRpc3RyaWJ1emlvbmUgR2F1c3NpYW5hIMOoIGltcGxlbWVudGF0YSBpbiAkXG1hdGhzZntSfSQgbmVsbGEgZnVuemlvbmUgYGRub3JtKClgLiBMYSBmdW56aW9uZSBgZG5vcm0oKWAgaGEgdHJlIGFyZ29tZW50aToKCi0gaWwgdmFsb3JlICR4JCAobyBpbCB2ZXR0b3JlICR4JCksCi0gbGEgbWVkaWEsIG92dmVybyBpbCBwYXJhbWV0cm8gJFxtdSQsCi0gbGEgZGV2aWF6aW9uZSBzdGFuZGFyZCwgb3Z2ZXJvIGlsIHBhcmFtZXRybyAkXHNpZ21hJC4KCkNvbWUgbmVsIGNhc28gZGVsbGEgQmlub21pYWxlLCB0ZW5pYW1vIGNvc3RhbnRlIGkgZGF0aSAtLSBuZWwgY2FzbyBwcmVzZW50ZSwgaWwgdmFsb3JlICR4ID0gMTE0JC4gSWwgcGFyYW1ldHJvICRcc2lnbWEkIMOoIGFzc3VudG8gbm90bywgcGVyIGN1aSBhZCBlc3NvIGF0dHJpYnVpYW1vIGlsIHZhbG9yZSAxNS4gUmltYW5lIGlsIHZhbG9yZSAoaWdub3RvKSBkZWwgcGFyYW1ldHJvICRcbXUkLiBBbmNoZSBpbiBxdWVzdG8gY2FzbywgZHVucXVlLCBwcm9jZWRpYW1vIGNvbWUgbmVsIGNhc28gZGVsbGEgdmVyb3NpbWlnbGlhbnphIGRlbGxhIEJpbm9taWFsZSwgb3Z2ZXJvIGNpIGNoaWVkaWFtbyBxdWFsZSBmb3JtYSBhc3N1bWEgbGEgZnVuemlvbmUgZGkgdmVyb3NpbWlnbGlhbnphIGFsIHZhcmlhcmUgZGVpIHZhbG9yaSBkZWwgcGFyYW1ldHJvIGluY29nbml0by4gTmVsbGEgcHJlc2VudGUgc2ltdWxhemlvbmUgY29uc2lkZXJpYW1vIDEwMDAgcG9zc2liaWxlIHZhbG9yaSBkZWwgcGFyYW1ldHJvICRcbXUkLCBvdnZlcm8gaSB2YWxvcmkgY29tcHJlc2kgbmVsbCdpbnRlcnZhbGxvICRbNzAsIDE2MF0kLiBBcHBsaWNoaWFtbyBkdW5xdWUgMTAwMCB2b2x0ZSBsYSBmb3JtdWxhIGRlbGxhIGRlbnNpdMOgIEdhdXNzaWFuYSwgdW5hIHZvbHRhIHBlciBjaWFzY3VubyBkZWkgMTAwMCBwb3NzaWJpbGkgdmFsb3JpICRcbXUkLCB0ZW5lbmRvIGNvc3RhbnRpIGdsaSBhbHRyaSB2YWxvcmkgbmVsbGEgZm9ybXVsYSwgb3Z2ZXJvICR4ID0gMTE0JCBlICRcc2lnbWEgPSAxNSQuIE90dGVuaWFtbyBjb3PDrCAxMDAwIHB1bnRpIChvdnZlcm8sIDEwMDAgY29wcGllICR4JCBlICRmKHgpJCkuIExhIGN1cnZhIGNoZSBpbnRlcnBvbGEgdGFsaSBwdW50aSDDqCBsYSBmdW56aW9uZSBkaSB2ZXJvc2ltaWdsaWFuemEuCgpgYGB7cn0KZnggPC0gZG5vcm0oeCwgbWVhbiA9IG11LCBzZCA9IDE1KQpgYGAKClNpIG5vdGkgY2hlIGxhIGZ1bnppb25lIGRpIHZlcm9zaW1pZ2xpYW56YSBoYSBsYSBmb3JtYSBkZWxsYSBkaXN0cmlidXppb25lIEdhdXNzaWFuYS4gTmVsIGNhc28gZGkgdW5hIHNpbmdvbGEgb3NzZXJ2YXppb25lIChtYSBzb2xvIGluIHF1ZXN0byBjYXNvKSwgaGEgYW5jaGUgdW4nYXJlYSB1bml0YXJpYTogCgpgYGB7cn0KaW50ZWdyYW5kIDwtIGZ1bmN0aW9uKG11KSB7CiAgeCA9IDExNAogIHNpZ21hID0gMTUKICBkbm9ybSh4LCBtdSwgc2lnbWEpCn0KaW50ZWdyYXRlKGludGVncmFuZCwgbG93ZXIgPSAtMTAwMDAsIHVwcGVyID0gMTAwMDApCmBgYAoKTGEgbW9kYSBkaSB0YWxlIGZ1bnppb25lIMOoIDExNDoKCmBgYHtyfQp0aWJibGUobXUsIGZ4KSAlPiUgCiAgZ2dwbG90KAogICAgYWVzKHggPSBtdSwgeSA9IGZ4KQogICkgKwogICAgZ2VvbV9saW5lKCkgKwogICAgdmxpbmVfYXQoMTE0LCBjb2xvciA9ICJyZWQiLCBsaW5ldHlwZT0iZGFzaGVkIikgKwogICAgICBsYWJzKAogICAgICB5ID0gIlZlcm9zaW1pZ2xpYW56YSIsCiAgICAgIHggPSBjKCJQYXJhbWV0cm8gXHUwM0JDIikKICAgICkgCmBgYAoKCiMjIFVuIGNhbXBpb25lIGRpIG9zc2VydmF6aW9uaQoKQ29uc2lkZXJpYW1vIG9yYSBpbCBjYXNvIGRpIDMwIG9zc2VydmF6aW9uaSBpbmRpcGVuZGVudGkgaWlkLCBjaWFzY3VuYSBkZWxsZSBxdWFsaSBwdcOyIGVzc2VyZSBjb25zaWRlcmF0YSBjb21lIGxhIHJlYWxpenphemlvbmUgZGkgdW5hIHZhcmlhYmlsZSBjYXN1YWxlIEdhdXNzaWFuYSBkaSBtZWRpYSBjb211bmUgc2Nvbm9zY2l1dGEgZSBkaSBkZXZpYXppb25lIHN0YW5kYXJkIDE1LgoKYGBge3J9Cm4gPC0gMzAgCnRydWVfc2lnbWEgPC0gMTUgCmBgYAoKR2VuZXJpYW1vIGkgZGF0aSBhc3N1bWVuZG8gJFxtdSA9IDEwMCQ6CgpgYGB7cn0Kc2V0LnNlZWQoMTIzKQp0cnVlX211IDwtIDEwMCAKeCA8LSBybm9ybShuLCB0cnVlX211LCB0cnVlX3NpZ21hKQp4CmBgYAoKQ29zdHJ1aWFtbyBvcmEgbGEgZnVuemlvbmUgZGkgdmVyb3NpbWlnbGlhbnphLiAKCkFiYmlhbW8gdmlzdG8gaW4gcHJlY2VkZW56YSBjb21lLCBuZWwgY2FzbyBkaSBkdWUgdmFyaWFiaSBjYXN1YWxpLCBzaSBwdcOyIGNvc3RydWlyZSBsYSBmdW56aW9uZSBkaXN0cmlidXppb25lIGNvbmdpdW50YSBuZWwgbW9kbyBzZWd1ZW50ZTogJHAoWF8xLCBYXzIpID0gcChYXzEpIHAoWF8yIFxtaWQgWF8xKSQuIFNlIGxlIGR1ZSB2YXJpYWJpbGkgY2FzdWFsaSBzb25vIGluZGlwZW5kZW50aSwgYWJiaWFtbyBzZW1wbGljZW1lbnRlICRwKFhfMSwgWF8yKSA9IHAoWF8xKSBwKFhfMikkLiBQb3NzaWFtbyBnZW5lcmFsaXp6YXJlIHRhbGUgcmlzdWx0YXRvIGRpY2VuZG8gY2hlLCBuZWwgY2FzbyBkaSAkbiQgdi5jLiBpaWQsIGNhc2N1bmEgZGlzdHJpYnVpdGEgY29tZSAkXG1hdGhjYWx7Tn0oXG11LCBcc2lnbWEpJCwgYXZyZW1vIGNoZQoKJCQKcChYXzEsIFxkb3RzLCBYX24gOyBcbXUsIFxzaWdtYSkgPSBccHJvZCBwKFhfaTsgXG11LCBcc2lnbWEpLgokJAoKRGF0byBjaGUgZmFyZSBpbCBwcm9kb3R0byBkaSAzMCB2YWxvcmkgbWlub3JpIGRpIDEgcHJvZHVjZSB1biBudW1lcm8gbW9sdG8gcGljY29sbywgY2FsY29saWFtbyBpbnZlY2UgbGEgbG9nLXZlcm9zaW1pZ2xpYW56YS4gSWwgbG9nYXJpdG1vIGRlbGxhIGZ1bnppb25lIGRpIGRlbnNpdMOgIGNvbmdpdW50YSDDqCBkYXRvIGRhIHVuYSBzb21tYToKCiQkClxsb2cgcChYXzEsIFxkb3RzLCBYX24gOyBcbXUsIFxzaWdtYSkgPSBcc3VtIFxsb2cgcChYX2k7IFxtdSwgXHNpZ21hKS4KJCQKCk5lbGxhIGZ1bnppb25lIGNvc8OsIGNvc3RydWl0YSwgZmFjY2lhbW8gbnVvdmFtZW50ZSB2YXJpYXJlIGlsIHZhbG9yZSBkZWkgcGFyYW1ldHJpIChpbiBxdWVzdG8gY2Fzbywgc29sbyBpbCBwb3NzaWJpbGUgdmFsb3JlICRcbXUkKSAgZSB0ZW5pYW1vIGNvc3RhbnRlIHR1dHRvIGlsIHJlc3RvIChvdnZlcm8sIGkgZGF0aSBlICRcc2lnbWEkKS4gQ29zw6wgZmFjZW5kbyBvdHRlbmlhbW8gbGEgZnVuemlvbmUgZGkgbG9nLXZlcm9zbWlnbGlhbnphIGNoZSBpbiAkXG1hdGhzZntSfSQgc2kgcHXDsiBzY3JpdmVyZSBjb3PDrDoKCmBgYHtyfQpsb2dfbGlrZWxpaG9vZCA8LSBmdW5jdGlvbih4LCBtdSwgc2lnbWEgPSB0cnVlX3NpZ21hKSB7CiAgc3VtKGRub3JtKHgsIG11LCBzaWdtYSwgbG9nID0gVFJVRSkpCn0KYGBgCgpOZWwgY2FzbyBwcmVzZW50ZSwgaSBkYXRpIHNvbm86CgpgYGB7cn0KeApgYGAKCk5lbCBjYXNvIHByZXNlbnRlLCBjb25zaWRlcmlhbW8gdmFsb3JpICRcbXUkIGNvbXByZXNpIG5lbGwnaW50ZXJ2YWxsbyAkWzcwLCAxMzBdJDoKCmBgYHtyfQpucmVwIDwtIDFlNQptdSA8LSBzZXEoNzAsIDEzMCwgbGVuZ3RoLm91dCA9IG5yZXApCmBgYAoKUGVyIGNpYXNjdW5vIGRpIHF1ZXN0aSBwb3NzaWJpbGkgdmFsb3JpIGRlbCBwYXJhbWV0cm8gJFxtdSQgY2FsY29saWFtbyBpbCB2YWxvcmUgZGVsbGEgZnVuemlvbmUgY29uZ2l1bnRhIGRpIHZlcm9zaW1pZ2xpYW56YSBkaSB0dXR0ZSBsZSAzMCBvc3NlcnZhemlvbmkuIFNhbHZpYW1vIGkgcmlzdWx0YXRpIG5lbCB2ZXR0b3JlIGBsbGA6CgpgYGB7cn0KbGwgPC0gcmVwKE5BLCBucmVwKQpmb3IgKGkgaW4gMTpucmVwKSB7CiAgbGxbaV0gPC0gbG9nX2xpa2VsaWhvb2QoeCwgbXVbaV0sIHRydWVfc2lnbWEpCn0KYGBgCgpHZW5lcmlhbW8gdW4gZ3JhZmljbyBkZWxsYSBmdW56aW9uZSBkaSBsb2ctdmVyb3NpbWlnbGlhbnphOgoKYGBge3J9CnRpYmJsZShtdSwgbGwpICU+JSAKICBnZ3Bsb3QoCiAgICBhZXMoeCA9IG11LCB5ID0gbGwpCiAgKSArCiAgICBnZW9tX2xpbmUoKSArCiAgICB2bGluZV9hdChtZWFuKHgpLCBjb2xvciA9ICJyZWQiLCBsaW5ldHlwZT0iZGFzaGVkIikgKwogICAgbGFicygKICAgICAgeSA9ICJMb2ctdmVyb3NpbWlnbGlhbnphIiwKICAgICAgeCA9IGMoIlBhcmFtZXRybyBcdTAzQkMiKQogICAgKSAKYGBgCgojIyBTdGltYSBkaSBtYXNzaW1hIHZlcm9zaW1pZ2xpYW56YQoKVHJvdmlhbW8gb3JhIGxhIHN0aW1hIGRpIG1hc3NpbWEgdmVyb3NpbWlnbGlhbnphLiAKCmBgYHtyfQptdVt3aGljaC5tYXgobGwpXQpgYGAKClNhcHBpYW1vIGNoZSBsYSBzdGltYSBkaSBtYXNzaW1hIHZlcm9zaW1pZ2xpYW56YSBjb2luY2lkZSBjb24gbGEgbWVkaWEgZGVsIGNhbXBpb25lOgoKYGBge3J9Cm1lYW4oeCkKYGBgCgpMJ2FwcHJvc3NpbWF6aW9uZSBkZXJpdmEgZGFsIGZhdHRvIGNoZSBhYmJpYW1vIHV0aWxpenphdG8gdW4gbnVtZXJvIGZpbml0byBkaSBwdW50aS4KCgojIyBJbmZvcm1hemlvbmkgc3VsbGEgc2Vzc2lvbmUgZGkgbGF2b3JvCgpgYGB7cn0KdXRpbHM6OnNlc3Npb25JbmZvKCkKYGBgCgoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBzY2llbmNlIHBlciBwc2ljb2xvZ2kgLSBkZW1vIDE0LjAyIgphdXRob3I6ICJDb3JyYWRvIENhdWRlayIKZGF0ZTogImByIGZvcm1hdChTeXMuRGF0ZSgpKWAiCm91dHB1dDoKICBodG1sX2RvY3VtZW50OgogICAgdGhlbWU6IHJlYWRhYmxlCiAgICBoaWdobGlnaHQ6IHB5Z21lbnRzCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCi0tLQoKYGBge3J9CnN1cHByZXNzUGFja2FnZVN0YXJ0dXBNZXNzYWdlcyh7CiAgbGlicmFyeSgiaGVyZSIpCiAgbGlicmFyeSgidGlkeXZlcnNlIikKICBsaWJyYXJ5KCJzY2FsZXMiKQogIGxpYnJhcnkoImJheWVzcGxvdCIpCiAgbGlicmFyeSgiZGlzdHJFeCIpCn0pCgp0aGVtZV9zZXQoYmF5ZXNwbG90Ojp0aGVtZV9kZWZhdWx0KGJhc2Vfc2l6ZSA9IDEyKSkKYmF5ZXNwbG90Ojpjb2xvcl9zY2hlbWVfc2V0KCJncmF5IikKc2V0LnNlZWQoODQ3MzUpCgprbml0cjo6b3B0c19jaHVuayRzZXQoCiAgY29sbGFwc2UgPSBUUlVFLAogIHRpZHkgPSAnc3R5bGVyJywKICBmaWcud2lkdGggPSA2LAogIGZpZy5hc3AgPSAwLjYxOCAjIDEgLyBwaGkKKQpgYGAKCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+CiAgYm9keXsKICBmb250LXNpemU6IDEzcHQ7Cn0KY29kZS5yewogIGZvbnQtc2l6ZTogMTNwdDsKICBmb250LWZhbWlseTogJ0luY29uc29sYXRhJzsKfQouY3VzdG9tLWlubGluZSB7CiAgZm9udC1zaXplOiAxM3B0OwogIGZvbnQtZmFtaWx5OiAnSW5jb25zb2xhdGEnOwp9Cjwvc3R5bGU+CgojIEZ1bnppb25lIGRpIHZlcm9zaW1pZ2xpYW56YSBHYXVzc2lhbmEKCkxhIGZ1bnppb25lIGRpIHZlcm9zbWlnbGlhbnphIMOoIGxhIGZ1bnppb25lIGRpIG1hc3NhIG8gZGkgZGVuc2l0w6AgZGkgcHJvYmFiaWxpdMOgIGRlaSBkYXRpICR5JCB2aXN0YSBjb21lIHVuYSBmdW56aW9uZSBkZWwgcGFyYW1ldHJvIHNjb25vc2NpdXRvIChvIGRlaSBwYXJhbWV0cmkgc2Nvbm9zY2l1dGkpICRcdGhldGEkLiBOZWwgdHV0b3JpYWwgcHJlY2VkZW50ZSBhYmJpYW1vIHZpc3RvIGNvbWUgY29zdHJ1aXJlIGxhIGZ1bnppb25lIGRpIHZlcm9zaW1pZ2xpYW56YSBuZWwgY2FzbyBkaSB1biBtb2RlbGxvIEJpbm9taWFsZS4gQ29uc2lkZXJpYW1vIHF1aSBpbCBtb2RlbGxvIGdhdXNzaWFubzoKCiQkCntcZGlzcGxheXN0eWxlIGYoeCk9e1xmcmFjIHsxfXtcc2lnbWEge1xzcXJ0IHsyXHBpIH19fX1lXnste1xmcmFjIHsxfXsyfX1cbGVmdCh7XGZyYWMge3gtXG11IH17XHNpZ21hIH19XHJpZ2h0KV57Mn19fS4KJCQKCkNpIHBvbmlhbW8gaWwgcHJvYmxlbWEgZGkgY29zdHJ1aXJlIGxhIGZ1bnppb25lIGRpIHZlcm9zaW1pZ2xpYW56YSBwZXIgcXVlc3RhIGZ1bnppb25lIGRpIGRlbnNpdMOgIGRpIHByb2JhYmlsaXTDoC4gCgojIyBVbmEgc2luZ29sYSBvc3NlcnZhemlvbmUKCkNvbnNpZGVyaWFtbyBwcmltYSBpbCBjYXNvIGluIGN1aSBpIGRhdGkgY29ycmlzcG9uZG9ubyBhZCB1bmEgc2luZ29sYSBvc3NlcnZhemlvbmUgJHgkLiBMYSBmb3JtdWxhIHByZWNlZGVudGUgZGlwZW5kZSBkYWkgcGFyYW1ldHJpICRcbXUkIGUgJFxzaWdtYSQgZSBkYWkgZGF0aSAkeCQuIFBlciBjb3N0cnVpcmUgbGEgZnVuemlvbmUgZGkgdmVyb3NpbWlnbGlhbnphLCBkb2JiaWFtbyBkdW5xdWUgaW5zZXJpcmUgbmVsbGEgZm9ybXVsYSBwcmVjZWRlbnRlIHVuIHNpbmdvbG8gdmFsb3JlICR4JC4gSW4gb3V0cHV0IGFiYmlhbW8gaWwgcmlzdWx0YXRvIGNoZSBzaSBvdHRpZW5lIHZhcmlhbmRvLCBuZWxsYSBmdW56aW9uZSwgaSB2YWxvcmkgZGkgZHVlIHBhcmFtZXRyaTogJFxtdSQgZSAkXHNpZ21hJC4gCgpQZXIgc2VtcGxpY2l0w6AsIGNvbnNpZGVyaWFtbyBpbCBjYXNvIGluIGN1aSBzaSBpcG90aXp6YSAkXHNpZ21hJCBub3RvIGUgdWd1YWxlIGEgMTUuIFBvbmlhbW8gJHggPSAxMTQkLgoKYGBge3J9CnggPC0gMTE0CmBgYAoKRXNhbWluZXJlbW8gcXVpIGwnYW5kYW1lbnRvIGRlbGxhIGZ1bnppb25lIG5lbGwnaW50ZXJ2YWxsbyBkaSB2YWxvcmkgJFxtdSQgY29tcHJlc28gdHJhIDcwIGUgMTYwOgoKYGBge3J9Cm11IDwtIHNlcSg3MCwgMTYwLCBsZW5ndGgub3V0ID0gMWUzKQpgYGAKCkxhIGZvcm11bGEgZGVsbGEgZGlzdHJpYnV6aW9uZSBHYXVzc2lhbmEgw6ggaW1wbGVtZW50YXRhIGluICRcbWF0aHNme1J9JCBuZWxsYSBmdW56aW9uZSBgZG5vcm0oKWAuIExhIGZ1bnppb25lIGBkbm9ybSgpYCBoYSB0cmUgYXJnb21lbnRpOgoKLSBpbCB2YWxvcmUgJHgkIChvIGlsIHZldHRvcmUgJHgkKSwKLSBsYSBtZWRpYSwgb3Z2ZXJvIGlsIHBhcmFtZXRybyAkXG11JCwKLSBsYSBkZXZpYXppb25lIHN0YW5kYXJkLCBvdnZlcm8gaWwgcGFyYW1ldHJvICRcc2lnbWEkLgoKQ29tZSBuZWwgY2FzbyBkZWxsYSBCaW5vbWlhbGUsIGFuY2hlIG9yYSwgcGVyIGNhbGNvbGFyZSBsYSBmdW56aW9uZSBkaSB2ZXJvc2ltaWdsaWFuemEsIHRlbmlhbW8gY29zdGFudGUgaSBkYXRpIC0tIG5lbCBjYXNvIHByZXNlbnRlLCBpbCBzaW5nb2xvIHZhbG9yZSAkeCA9IDExNCQsIGUgZmFjY2lhbW8gdmFyaWFyZSBpbCB2YWxvcmUgZGVpIHBhcmFtZXRyaSAtLSBxdWksIHNvbG8gJFxtdSQsIGRhdG8gY2hlIGlsIHBhcmFtZXRybyAkXHNpZ21hJCDDqCBhc3N1bnRvIG5vdG8sICRcc2lnbWEgPSAxNSQuIAoKTmVsbGEgcHJlc2VudGUgc2ltdWxhemlvbmUgY29uc2lkZXJpYW1vIDEwMDAgcG9zc2liaWxlIHZhbG9yaSBkZWwgcGFyYW1ldHJvICRcbXUgXGluIFs3MCwgMTYwXSQuIEFwcGxpY2hpYW1vIGR1bnF1ZSAxMDAwIHZvbHRlIGxhIGZvcm11bGEgZGVsbGEgZGVuc2l0w6AgR2F1c3NpYW5hLCB1bmEgdm9sdGEgcGVyIGNpYXNjdW5vIGRlaSAxMDAwIHBvc3NpYmlsaSB2YWxvcmkgJFxtdSQsIHRlbmVuZG8gY29zdGFudGkgZ2xpIGFsdHJpIHZhbG9yaSBuZWxsYSBmb3JtdWxhLCBvdnZlcm8gJHggPSAxMTQkIGUgJFxzaWdtYSA9IDE1JC4gT3R0ZW5pYW1vIGNvc8OsIDEwMDAgcHVudGkgLS0gb3Z2ZXJvLCAxMDAwIGNvcHBpZSBkaSB2YWxvcmkgJFxtdSQgZSAkZihcbXUpJC4gTGEgY3VydmEgY2hlIGludGVycG9sYSB0YWxpIHB1bnRpIMOoIGxhIGZ1bnppb25lIGRpIHZlcm9zaW1pZ2xpYW56YS4KCmBgYHtyfQpmX211IDwtIGRub3JtKHgsIG1lYW4gPSBtdSwgc2QgPSAxNSkKYGBgCgpTaSBub3RpIGNoZSBsYSBmdW56aW9uZSBkaSB2ZXJvc2ltaWdsaWFuemEgaGEgbGEgZm9ybWEgZGVsbGEgZGlzdHJpYnV6aW9uZSBHYXVzc2lhbmEuIE5lbCBjYXNvIGRpIHVuYSBzaW5nb2xhIG9zc2VydmF6aW9uZSAobWEgc29sbyBpbiBxdWVzdG8gY2FzbyksIGhhIGFuY2hlIHVuJ2FyZWEgdW5pdGFyaWE6IAoKYGBge3J9CmludGVncmFuZCA8LSBmdW5jdGlvbihtdSkgewogIHggPSAxMTQKICBzaWdtYSA9IDE1CiAgZG5vcm0oeCwgbXUsIHNpZ21hKQp9CmludGVncmF0ZShpbnRlZ3JhbmQsIGxvd2VyID0gLTEwMDAwLCB1cHBlciA9IDEwMDAwKQpgYGAKCkxhIG1vZGEgZGkgdGFsZSBmdW56aW9uZSDDqCAxMTQ6CgpgYGB7cn0KdGliYmxlKG11LCBmX211KSAlPiUgCiAgZ2dwbG90KAogICAgYWVzKHggPSBtdSwgeSA9IGZfbXUpCiAgKSArCiAgICBnZW9tX2xpbmUoKSArCiAgICB2bGluZV9hdCgxMTQsIGNvbG9yID0gInJlZCIsIGxpbmV0eXBlPSJkYXNoZWQiKSArCiAgICAgIGxhYnMoCiAgICAgIHkgPSAiVmVyb3NpbWlnbGlhbnphIiwKICAgICAgeCA9IGMoIlBhcmFtZXRybyBcdTAzQkMiKQogICAgKSAKYGBgCgoKIyMgVW4gY2FtcGlvbmUgZGkgb3NzZXJ2YXppb25pCgpDb25zaWRlcmlhbW8gb3JhIGlsIGNhc28gZGkgMzAgb3NzZXJ2YXppb25pIGluZGlwZW5kZW50aSBpaWQsIGNpYXNjdW5hIGRlbGxlIHF1YWxpIHB1w7IgZXNzZXJlIGNvbnNpZGVyYXRhIGNvbWUgbGEgcmVhbGl6emF6aW9uZSBkaSB1bmEgdmFyaWFiaWxlIGNhc3VhbGUgR2F1c3NpYW5hIGRpIG1lZGlhIGNvbXVuZSBzY29ub3NjaXV0YSBlIGRpIGRldmlhemlvbmUgc3RhbmRhcmQgcGFyaSBhIDE1LgoKYGBge3J9Cm4gPC0gMzAgCnRydWVfc2lnbWEgPC0gMTUgCmBgYAoKR2VuZXJpYW1vIHVuIGNhbXBpb25lIGRpIGRhdGkgYXNzdW1lbmRvIGNoZSBpbCB2YWxvcmUgaWdub3RvIGRpICRcbXUkIHNpYSBwYXJpIGEgMTAwOgoKYGBge3J9CnNldC5zZWVkKDEyMykKdHJ1ZV9tdSA8LSAxMDAgCnggPC0gcm5vcm0obiwgdHJ1ZV9tdSwgdHJ1ZV9zaWdtYSkKeApgYGAKClN1cHBvbmlhbW8gY2hlIHF1ZXN0aSBzaWFubyBpIGRhdGkgb3NzZXJ2YXRpLgoKQ29zdHJ1aWFtbyBvcmEgbGEgZnVuemlvbmUgZGkgdmVyb3NpbWlnbGlhbnphLiAKCkFiYmlhbW8gdmlzdG8gaW4gcHJlY2VkZW56YSBjaGUsIG5lbCBjYXNvIGRpIGR1ZSB2YXJpYWJpbGkgY2FzdWFsaSAkWF8xJCBlICRYXzIkLCDDqCBsYSBwcm9iYWJpbGl0w6AgY29uZ2l1bnRhIMOoOiAKCiQkClAoWF8xLCBYXzIpID0gUChYXzEpIFAoWF8yIFxtaWQgWF8xKS4KJCQKClNlIGxlIGR1ZSB2YXJpYWJpbGkgY2FzdWFsaSBzb25vIGluZGlwZW5kZW50aSwgYWJiaWFtbyBzZW1wbGljZW1lbnRlIAoKJCQKUChYXzEsIFhfMikgPSBQKFhfMSkgUChYXzIpLgokJAoKUG9zc2lhbW8gZ2VuZXJhbGl6emFyZSB0YWxlIHJpc3VsdGF0byBhbCBjYXNvIGRlbGxlIGRpc3RyaWJ1emlvbmkgZGkgZGVuc2l0w6AgZGkgcHJvYmFiaWxpdMOgLiBJbiBwYXJ0aWNvbGFyZSwgbmVsIGNhc28gZGkgJG4kIHYuYy4gaWlkLCBjYXNjdW5hIGRpc3RyaWJ1aXRhIGNvbWUgJFxtYXRoY2Fse059KFxtdSwgXHNpZ21hKSQsIGF2cmVtbyBjaGUKCiQkCnAoWF8xLCBcZG90cywgWF9uIDsgXG11LCBcc2lnbWEpID0gXHByb2QgcChYX2k7IFxtdSwgXHNpZ21hKS4KJCQKCkRhdG8gY2hlIGZhcmUgaWwgcHJvZG90dG8gZGkgMzAgdmFsb3JpIG1pbm9yaSBkaSAxIHByb2R1Y2UgdW4gbnVtZXJvIG1vbHRvIHBpY2NvbG8sIGNhbGNvbGlhbW8gaW52ZWNlIGxhICpsb2ctdmVyb3NpbWlnbGlhbnphKi4gSWwgbG9nYXJpdG1vIGRlbGxhIGZ1bnppb25lIGRpIGRlbnNpdMOgIGNvbmdpdW50YSDDqCBkYXRvIGRhIHVuYSBzb21tYToKCiQkClxsb2cgcChYXzEsIFxkb3RzLCBYX24gOyBcbXUsIFxzaWdtYSkgPSBcbG9nIFxCaWcoIFxwcm9kIHAoWF9pOyBcbXUsIFxzaWdtYSlcQmlnKSA9ICBcc3VtIFxsb2cgcChYX2k7IFxtdSwgXHNpZ21hKS4KJCQKCk5lbGxhIGZ1bnppb25lIGRpIGRlbnNpdMOgIGNvbmdpdW50YSwgZmFjY2lhbW8gbnVvdmFtZW50ZSB2YXJpYXJlIGlsIHZhbG9yZSBkZWkgcGFyYW1ldHJpIChpbiBxdWVzdG8gY2Fzbywgc29sbyAkXG11JCkgIGUgdGVuaWFtbyBjb3N0YW50ZSB0dXR0byBpbCByZXN0byAob3Z2ZXJvLCBpIGRhdGkgZSAkXHNpZ21hJCkuIENvc8OsIGZhY2VuZG8gb3R0ZW5pYW1vIGxhIGZ1bnppb25lIGRpIGxvZy12ZXJvc21pZ2xpYW56YSBjaGUgaW4gJFxtYXRoc2Z7Un0kIHNpIHB1w7Igc2NyaXZlcmUgY29zw6w6CgpgYGB7cn0KbG9nX2xpa2VsaWhvb2QgPC0gZnVuY3Rpb24oeCwgbXUsIHNpZ21hID0gdHJ1ZV9zaWdtYSkgewogIHN1bShkbm9ybSh4LCBtdSwgc2lnbWEsIGxvZyA9IFRSVUUpKQp9CmBgYAoKTmVsIGNhc28gcHJlc2VudGUsIGkgZGF0aSBzb25vOgoKYGBge3J9CngKYGBgCgpOZWxsYSBzaW11bGF6aW9uZSwgcGVyIGdlbmVyYXJlIGxhIGZpZ3VyYSBjb25zaWRlcmlhbW8gdmFsb3JpICRcbXUgXGluIFs3MCwgMTMwXSQ6CgpgYGB7cn0KbnJlcCA8LSAxZTUKbXUgPC0gc2VxKDcwLCAxMzAsIGxlbmd0aC5vdXQgPSBucmVwKQpgYGAKClBlciBjaWFzY3VubyBkaSBxdWVzdGkgcG9zc2liaWxpIHZhbG9yaSBkZWwgcGFyYW1ldHJvICRcbXUkIGNhbGNvbGlhbW8gaWwgdmFsb3JlIGRlbGxhIGZ1bnppb25lIGNvbmdpdW50YSBkaSB2ZXJvc2ltaWdsaWFuemEgdXNhbmRvIHR1dHRlIGxlIDMwIG9zc2VydmF6aW9uaSBkZWwgY2FtcGlvbmUuIFNhbHZpYW1vIGkgcmlzdWx0YXRpIG5lbCB2ZXR0b3JlIGBsbGA6CgpgYGB7cn0KbGwgPC0gcmVwKE5BLCBucmVwKQpmb3IgKGkgaW4gMTpucmVwKSB7CiAgbGxbaV0gPC0gbG9nX2xpa2VsaWhvb2QoeCwgbXVbaV0sIHRydWVfc2lnbWEpCn0KYGBgCgpQb3NzaWFtbyBvcmEgZ2VuZXJhcmUgdW4gZ3JhZmljbyBkZWxsYSBmdW56aW9uZSBkaSBsb2ctdmVyb3NpbWlnbGlhbnphOgoKYGBge3J9CnRpYmJsZShtdSwgbGwpICU+JSAKICBnZ3Bsb3QoCiAgICBhZXMoeCA9IG11LCB5ID0gbGwpCiAgKSArCiAgICBnZW9tX2xpbmUoKSArCiAgICB2bGluZV9hdChtZWFuKHgpLCBjb2xvciA9ICJyZWQiLCBsaW5ldHlwZT0iZGFzaGVkIikgKwogICAgbGFicygKICAgICAgeSA9ICJMb2ctdmVyb3NpbWlnbGlhbnphIiwKICAgICAgeCA9IGMoIlBhcmFtZXRybyBcdTAzQkMiKQogICAgKSAKYGBgCgojIyBTdGltYSBkaSBtYXNzaW1hIHZlcm9zaW1pZ2xpYW56YQoKVHJvdmlhbW8gb3JhIGxhIHN0aW1hIGRpIG1hc3NpbWEgdmVyb3NpbWlnbGlhbnphLCBvdnZlcm8gaWwgdmFsb3JlIGRlbCBwYXJhZW10cm8gY2hlIG1hc3NpbWl6emEgbGEgZnVuemlvbmUgZGkgKGxvZy0pIHZlcm9zaW1pZ2xpYW56YToKCiQkClxiYXJ7eH0gPSBcbWJveHthcmcgbWF4fV97XG11fSBcLCBcZWxsICh4IFxtaWQgXG11KS4KJCQKCmBgYHtyfQptdVt3aGljaC5tYXgobGwpXQpgYGAKClNhcHBpYW1vIGNoZSBsYSBzdGltYSBkaSBtYXNzaW1hIHZlcm9zaW1pZ2xpYW56YSBjb2luY2lkZSBjb24gbGEgbWVkaWEgZGVsIGNhbXBpb25lLiBWZXJpZmljaGlhbW86CgpgYGB7cn0KbWVhbih4KQpgYGAKCkwnYXBwcm9zc2ltYXppb25lIGRlcml2YSBkYWwgZmF0dG8gY2hlIGFiYmlhbW8gdXRpbGl6emF0byB1biBudW1lcm8gZmluaXRvIGRpIHB1bnRpLgoKCiMjIEluZm9ybWF6aW9uaSBzdWxsYSBzZXNzaW9uZSBkaSBsYXZvcm8KCmBgYHtyfQp1dGlsczo6c2Vzc2lvbkluZm8oKQpgYGAKCgo=</div>
 
 
 

@@ -64,7 +64,7 @@ Per semplicità, consideriamo il caso in cui si ipotizza $\sigma$ noto e uguale 
 x <- 114
 ```
 
-Esamineremo qui l'andamento della funzione nell'intervallo di valori $x$ compreso tra 70 e 160:
+Esamineremo qui l'andamento della funzione nell'intervallo di valori $\mu$ compreso tra 70 e 160:
 
 ```{r}
 mu <- seq(70, 160, length.out = 1e3)
@@ -76,10 +76,12 @@ La formula della distribuzione Gaussiana è implementata in $\mathsf{R}$ nella f
 - la media, ovvero il parametro $\mu$,
 - la deviazione standard, ovvero il parametro $\sigma$.
 
-Come nel caso della Binomiale, teniamo costante i dati -- nel caso presente, il valore $x = 114$. Il parametro $\sigma$ è assunto noto, per cui ad esso attribuiamo il valore 15. Rimane il valore (ignoto) del parametro $\mu$. Anche in questo caso, dunque, procediamo come nel caso della verosimiglianza della Binomiale, ovvero ci chiediamo quale forma assuma la funzione di verosimiglianza al variare dei valori del parametro incognito. Nella presente simulazione consideriamo 1000 possibile valori del parametro $\mu$, ovvero i valori compresi nell'intervallo $[70, 160]$. Applichiamo dunque 1000 volte la formula della densità Gaussiana, una volta per ciascuno dei 1000 possibili valori $\mu$, tenendo costanti gli altri valori nella formula, ovvero $x = 114$ e $\sigma = 15$. Otteniamo così 1000 punti (ovvero, 1000 coppie $x$ e $f(x)$). La curva che interpola tali punti è la funzione di verosimiglianza.
+Come nel caso della Binomiale, anche ora, per calcolare la funzione di verosimiglianza, teniamo costante i dati -- nel caso presente, il singolo valore $x = 114$, e facciamo variare il valore dei parametri -- qui, solo $\mu$, dato che il parametro $\sigma$ è assunto noto, $\sigma = 15$. 
+
+Nella presente simulazione consideriamo 1000 possibile valori del parametro $\mu \in [70, 160]$. Applichiamo dunque 1000 volte la formula della densità Gaussiana, una volta per ciascuno dei 1000 possibili valori $\mu$, tenendo costanti gli altri valori nella formula, ovvero $x = 114$ e $\sigma = 15$. Otteniamo così 1000 punti -- ovvero, 1000 coppie di valori $\mu$ e $f(\mu)$. La curva che interpola tali punti è la funzione di verosimiglianza.
 
 ```{r}
-fx <- dnorm(x, mean = mu, sd = 15)
+f_mu <- dnorm(x, mean = mu, sd = 15)
 ```
 
 Si noti che la funzione di verosimiglianza ha la forma della distribuzione Gaussiana. Nel caso di una singola osservazione (ma solo in questo caso), ha anche un'area unitaria: 
@@ -96,9 +98,9 @@ integrate(integrand, lower = -10000, upper = 10000)
 La moda di tale funzione è 114:
 
 ```{r}
-tibble(mu, fx) %>% 
+tibble(mu, f_mu) %>% 
   ggplot(
-    aes(x = mu, y = fx)
+    aes(x = mu, y = f_mu)
   ) +
     geom_line() +
     vline_at(114, color = "red", linetype="dashed") +
@@ -111,14 +113,14 @@ tibble(mu, fx) %>%
 
 ## Un campione di osservazioni
 
-Consideriamo ora il caso di 30 osservazioni indipendenti iid, ciascuna delle quali può essere considerata come la realizzazione di una variabile casuale Gaussiana di media comune sconosciuta e di deviazione standard 15.
+Consideriamo ora il caso di 30 osservazioni indipendenti iid, ciascuna delle quali può essere considerata come la realizzazione di una variabile casuale Gaussiana di media comune sconosciuta e di deviazione standard pari a 15.
 
 ```{r}
 n <- 30 
 true_sigma <- 15 
 ```
 
-Generiamo i dati assumendo $\mu = 100$:
+Generiamo un campione di dati assumendo che il valore ignoto di $\mu$ sia pari a 100:
 
 ```{r}
 set.seed(123)
@@ -127,21 +129,35 @@ x <- rnorm(n, true_mu, true_sigma)
 x
 ```
 
+Supponiamo che questi siano i dati osservati.
+
 Costruiamo ora la funzione di verosimiglianza. 
 
-Abbiamo visto in precedenza come, nel caso di due variabi casuali, si può costruire la funzione distribuzione congiunta nel modo seguente: $p(X_1, X_2) = p(X_1) p(X_2 \mid X_1)$. Se le due variabili casuali sono indipendenti, abbiamo semplicemente $p(X_1, X_2) = p(X_1) p(X_2)$. Possiamo generalizzare tale risultato dicendo che, nel caso di $n$ v.c. iid, cascuna distribuita come $\mathcal{N}(\mu, \sigma)$, avremo che
+Abbiamo visto in precedenza che, nel caso di due variabili casuali $X_1$ e $X_2$, è la probabilità congiunta è: 
+
+$$
+P(X_1, X_2) = P(X_1) P(X_2 \mid X_1).
+$$
+
+Se le due variabili casuali sono indipendenti, abbiamo semplicemente 
+
+$$
+P(X_1, X_2) = P(X_1) P(X_2).
+$$
+
+Possiamo generalizzare tale risultato al caso delle distribuzioni di densità di probabilità. In particolare, nel caso di $n$ v.c. iid, cascuna distribuita come $\mathcal{N}(\mu, \sigma)$, avremo che
 
 $$
 p(X_1, \dots, X_n ; \mu, \sigma) = \prod p(X_i; \mu, \sigma).
 $$
 
-Dato che fare il prodotto di 30 valori minori di 1 produce un numero molto piccolo, calcoliamo invece la log-verosimiglianza. Il logaritmo della funzione di densità congiunta è dato da una somma:
+Dato che fare il prodotto di 30 valori minori di 1 produce un numero molto piccolo, calcoliamo invece la *log-verosimiglianza*. Il logaritmo della funzione di densità congiunta è dato da una somma:
 
 $$
-\log p(X_1, \dots, X_n ; \mu, \sigma) = \sum \log p(X_i; \mu, \sigma).
+\log p(X_1, \dots, X_n ; \mu, \sigma) = \log \Big( \prod p(X_i; \mu, \sigma)\Big) =  \sum \log p(X_i; \mu, \sigma).
 $$
 
-Nella funzione così costruita, facciamo nuovamente variare il valore dei parametri (in questo caso, solo il possibile valore $\mu$)  e teniamo costante tutto il resto (ovvero, i dati e $\sigma$). Così facendo otteniamo la funzione di log-verosmiglianza che in $\mathsf{R}$ si può scrivere così:
+Nella funzione di densità congiunta, facciamo nuovamente variare il valore dei parametri (in questo caso, solo $\mu$)  e teniamo costante tutto il resto (ovvero, i dati e $\sigma$). Così facendo otteniamo la funzione di log-verosmiglianza che in $\mathsf{R}$ si può scrivere così:
 
 ```{r}
 log_likelihood <- function(x, mu, sigma = true_sigma) {
@@ -155,14 +171,14 @@ Nel caso presente, i dati sono:
 x
 ```
 
-Nel caso presente, consideriamo valori $\mu$ compresi nell'intervallo $[70, 130]$:
+Nella simulazione, per generare la figura consideriamo valori $\mu \in [70, 130]$:
 
 ```{r}
 nrep <- 1e5
 mu <- seq(70, 130, length.out = nrep)
 ```
 
-Per ciascuno di questi possibili valori del parametro $\mu$ calcoliamo il valore della funzione congiunta di verosimiglianza di tutte le 30 osservazioni. Salviamo i risultati nel vettore `ll`:
+Per ciascuno di questi possibili valori del parametro $\mu$ calcoliamo il valore della funzione congiunta di verosimiglianza usando tutte le 30 osservazioni del campione. Salviamo i risultati nel vettore `ll`:
 
 ```{r}
 ll <- rep(NA, nrep)
@@ -171,7 +187,7 @@ for (i in 1:nrep) {
 }
 ```
 
-Generiamo un grafico della funzione di log-verosimiglianza:
+Possiamo ora generare un grafico della funzione di log-verosimiglianza:
 
 ```{r}
 tibble(mu, ll) %>% 
@@ -188,13 +204,17 @@ tibble(mu, ll) %>%
 
 ## Stima di massima verosimiglianza
 
-Troviamo ora la stima di massima verosimiglianza. 
+Troviamo ora la stima di massima verosimiglianza, ovvero il valore del paraemtro che massimizza la funzione di (log-) verosimiglianza:
+
+$$
+\bar{x} = \mbox{arg max}_{\mu} \, \ell (x \mid \mu).
+$$
 
 ```{r}
 mu[which.max(ll)]
 ```
 
-Sappiamo che la stima di massima verosimiglianza coincide con la media del campione:
+Sappiamo che la stima di massima verosimiglianza coincide con la media del campione. Verifichiamo:
 
 ```{r}
 mean(x)
