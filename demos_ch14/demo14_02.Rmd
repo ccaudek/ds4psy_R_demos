@@ -9,27 +9,6 @@ output:
     code_download: true
 ---
 
-```{r}
-suppressPackageStartupMessages({
-  library("here")
-  library("tidyverse")
-  library("scales")
-  library("bayesplot")
-  library("distrEx")
-})
-
-theme_set(bayesplot::theme_default(base_size = 12))
-bayesplot::color_scheme_set("gray")
-set.seed(84735)
-
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  tidy = 'styler',
-  fig.width = 6,
-  fig.asp = 0.618 # 1 / phi
-)
-```
-
 <style type="text/css">
   body{
   font-size: 13pt;
@@ -44,184 +23,183 @@ code.r{
 }
 </style>
 
-# Funzione di verosimiglianza Gaussiana
-
-La funzione di verosmiglianza è la funzione di massa o di densità di probabilità dei dati $y$ vista come una funzione del parametro sconosciuto (o dei parametri sconosciuti) $\theta$. Nel tutorial precedente abbiamo visto come costruire la funzione di verosimiglianza nel caso di un modello Binomiale. Consideriamo qui il modello gaussiano:
-
-$$
-{\displaystyle f(x)={\frac {1}{\sigma {\sqrt {2\pi }}}}e^{-{\frac {1}{2}}\left({\frac {x-\mu }{\sigma }}\right)^{2}}}.
-$$
-
-Ci poniamo il problema di costruire la funzione di verosimiglianza per questa funzione di densità di probabilità. 
-
-## Una singola osservazione
-
-Consideriamo prima il caso in cui i dati corrispondono ad una singola osservazione $x$. La formula precedente dipende dai parametri $\mu$ e $\sigma$ e dai dati $x$. Per costruire la funzione di verosimiglianza, dobbiamo dunque inserire nella formula precedente un singolo valore $x$. In output abbiamo il risultato che si ottiene variando, nella funzione, i valori di due parametri: $\mu$ e $\sigma$. 
-
-Per semplicità, consideriamo il caso in cui si ipotizza $\sigma$ noto e uguale a 15. Poniamo $x = 114$.
 
 ```{r}
-x <- 114
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("bayesplot")
+  library("purrr")
+  library("ggformula")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
 ```
 
-Esamineremo qui l'andamento della funzione nell'intervallo di valori $\mu$ compreso tra 70 e 160:
+# Aggiornamento bayesiano -- versione 2
+
+Ripropongo qui il calcolo della distribuzione a posteriori per il caso di un campione di 23 successi in 30 prove Bernoulliane iid che è stato discusso nel demo14_01. L'unica novità è che svolgeremo ora i calcoli con $\mathsf{R}$ in maniera più semplice. Tutto ciò di cui abbiamo bisogno è l'istruzione che troviamo alla fine di questo tutorial. Ma la costruisco qui "passo passo".
+
+Inizio con il definire i dati.
 
 ```{r}
-mu <- seq(70, 160, length.out = 1e3)
+y <- 23
+n <- 30
 ```
 
-La formula della distribuzione Gaussiana è implementata in $\mathsf{R}$ nella funzione `dnorm()`. La funzione `dnorm()` ha tre argomenti:
-
-- il valore $x$ (o il vettore $x$),
-- la media, ovvero il parametro $\mu$,
-- la deviazione standard, ovvero il parametro $\sigma$.
-
-Come nel caso della Binomiale, anche ora, per calcolare la funzione di verosimiglianza, teniamo costante i dati -- nel caso presente, il singolo valore $x = 114$, e facciamo variare il valore dei parametri -- qui, solo $\mu$, dato che il parametro $\sigma$ è assunto noto, $\sigma = 15$. 
-
-Nella presente simulazione consideriamo 1000 possibile valori del parametro $\mu \in [70, 160]$. Applichiamo dunque 1000 volte la formula della densità Gaussiana, una volta per ciascuno dei 1000 possibili valori $\mu$, tenendo costanti gli altri valori nella formula, ovvero $x = 114$ e $\sigma = 15$. Otteniamo così 1000 punti -- ovvero, 1000 coppie di valori $\mu$ e $f(\mu)$. La curva che interpola tali punti è la funzione di verosimiglianza.
+Per creare la griglia dei valori theta, uso ora la funzione `expand.grid()`. Nel caso di 11 valori soltanto, per esempio, otteniamo il risultato seguente.
 
 ```{r}
-f_mu <- dnorm(x, mean = mu, sd = 15)
+coins_grid <- expand.grid(theta = seq(0, 1, length.out=11))
+coins_grid
 ```
 
-Si noti che la funzione di verosimiglianza ha la forma della distribuzione Gaussiana. Nel caso di una singola osservazione (ma solo in questo caso), ha anche un'area unitaria: 
+Creo una griglia di 1000 punti.
 
 ```{r}
-integrand <- function(mu) {
-  x = 114
-  sigma = 15
-  dnorm(x, mu, sigma)
-}
-integrate(integrand, lower = -10000, upper = 10000)
+coins_grid <- 
+  expand.grid(
+    theta = seq(0, 1, length.out=1000)
+  ) 
 ```
 
-La moda di tale funzione è 114:
+Per ciascuno di questi valori theta voglio calcolare la verosimiglianza. Per fare ciò devo prendere ciascun valore theta e passarlo alla funzione `dbinom()` nella quale tengo fissi i dati, ovvero `dbinom(x = y, size = n, theta)`, laddove `theta` è il valore che voglio passare alla funzione. Per fare questo, ovvero, per applicare una funzione (nel nostro caso, `dbinom()`) a ciascun elemento di un vettore, uso la funzione `purrr::map_dbl()` che fa esattamente quello che ho detto sopra, ovvero applica la funzione specificata a ciascun elemento di un vettore. La sintassi è indicata sotto. Ho usato `mutate()` per aggiungere la colonna `likelihood` al DataFrame `coins_grid`.
 
 ```{r}
-tibble(mu, f_mu) %>% 
-  ggplot(
-    aes(x = mu, y = f_mu)
-  ) +
-    geom_line() +
-    vline_at(114, color = "red", linetype="dashed") +
-      labs(
-      y = "Verosimiglianza",
-      x = c("Parametro \u03BC")
-    ) 
+coins_grid <- 
+  expand.grid(
+    theta = seq(0, 1, length.out=100)
+  ) %>%
+  mutate(
+    likelihood = map_dbl(theta, ~ dbinom(x = y, size = n, .x))
+  )
 ```
 
-
-## Un campione di osservazioni
-
-Consideriamo ora il caso di 30 osservazioni indipendenti iid, ciascuna delle quali può essere considerata come la realizzazione di una variabile casuale Gaussiana di media comune sconosciuta e di deviazione standard pari a 15.
+Guardiamo il risultato ottenuto:
 
 ```{r}
-n <- 30 
-true_sigma <- 15 
+coins_grid %>% 
+  head()
 ```
 
-Generiamo un campione di dati assumendo che il valore ignoto di $\mu$ sia pari a 100:
+Per esempio, il valore della variabile `likelihood` quando `theta` è uguale a 0.05050505 è ottenuto nel modo seguente.
 
 ```{r}
-set.seed(123)
-true_mu <- 100 
-x <- rnorm(n, true_mu, true_sigma)
-x
+dbinom(23, 30, 0.05050505)
 ```
 
-Supponiamo che questi siano i dati osservati.
+La stessa procedura è applicata a tutti i valori della variabile `theta`.
 
-Costruiamo ora la funzione di verosimiglianza. 
-
-Abbiamo visto in precedenza che, nel caso di due variabili casuali $X_1$ e $X_2$, è la probabilità congiunta è: 
-
-$$
-P(X_1, X_2) = P(X_1) P(X_2 \mid X_1).
-$$
-
-Se le due variabili casuali sono indipendenti, abbiamo semplicemente 
-
-$$
-P(X_1, X_2) = P(X_1) P(X_2).
-$$
-
-Possiamo generalizzare tale risultato al caso delle distribuzioni di densità di probabilità. In particolare, nel caso di $n$ v.c. iid, cascuna distribuita come $\mathcal{N}(\mu, \sigma)$, avremo che
-
-$$
-p(X_1, \dots, X_n ; \mu, \sigma) = \prod p(X_i; \mu, \sigma).
-$$
-
-Dato che fare il prodotto di 30 valori minori di 1 produce un numero molto piccolo, calcoliamo invece la *log-verosimiglianza*. Il logaritmo della funzione di densità congiunta è dato da una somma:
-
-$$
-\log p(X_1, \dots, X_n ; \mu, \sigma) = \log \Big( \prod p(X_i; \mu, \sigma)\Big) =  \sum \log p(X_i; \mu, \sigma).
-$$
-
-Nella funzione di densità congiunta, facciamo nuovamente variare il valore dei parametri (in questo caso, solo $\mu$)  e teniamo costante tutto il resto (ovvero, i dati e $\sigma$). Così facendo otteniamo la funzione di log-verosmiglianza che in $\mathsf{R}$ si può scrivere così:
+Aggiungo ora a una colonna che, per ciascun valore `theta` riporta l'ordinata della distribuzione a priori, che nel nostro caso è una Beta(2, 10).
 
 ```{r}
-log_likelihood <- function(x, mu, sigma = true_sigma) {
-  sum(dnorm(x, mu, sigma, log = TRUE))
-}
+coins_grid <- 
+  expand.grid(
+    theta = seq(0, 1, length.out=100)
+  ) %>%
+  mutate(
+    prior = dbeta(theta, 2, 10),
+    likelihood = map_dbl(theta, ~ dbinom(x = y, size = n, .x))
+  )
 ```
 
-Nel caso presente, i dati sono:
+I primi valori del DataFrame sono i seguenti.
 
 ```{r}
-x
+coins_grid %>% 
+  head()
 ```
 
-Nella simulazione, per generare la figura consideriamo valori $\mu \in [70, 130]$:
+Avendo discretizzato `theta`, la somma dei valori delle ordinate così ottenute non sarà 1.
 
 ```{r}
-nrep <- 1e5
-mu <- seq(70, 130, length.out = nrep)
+sum(coins_grid$prior)
 ```
 
-Per ciascuno di questi possibili valori del parametro $\mu$ calcoliamo il valore della funzione congiunta di verosimiglianza usando tutte le 30 osservazioni del campione. Salviamo i risultati nel vettore `ll`:
+Dunque normalizzo.
 
 ```{r}
-ll <- rep(NA, nrep)
-for (i in 1:nrep) {
-  ll[i] <- log_likelihood(x, mu[i], true_sigma)
-}
+coins_grid <- 
+  expand.grid(
+    theta = seq(0, 1, length.out=100)
+  ) %>%
+  mutate(
+    prior = dbeta(theta, 2, 10),
+    prior1 = prior / sum(prior),
+    likelihood = map_dbl(theta, ~ dbinom(x = y, size = n, .x))
+  )
 ```
 
-Possiamo ora generare un grafico della funzione di log-verosimiglianza:
+Verifico.
 
 ```{r}
-tibble(mu, ll) %>% 
-  ggplot(
-    aes(x = mu, y = ll)
-  ) +
-    geom_line() +
-    vline_at(mean(x), color = "red", linetype="dashed") +
-    labs(
-      y = "Log-verosimiglianza",
-      x = c("Parametro \u03BC")
-    ) 
+coins_grid$prior1 %>% 
+  sum()
 ```
 
-## Stima di massima verosimiglianza
-
-Troviamo ora la stima di massima verosimiglianza, ovvero il valore del paraemtro che massimizza la funzione di (log-) verosimiglianza:
-
-$$
-\hat{\mu} = \mbox{arg max}_{\mu} \, \ell (x \mid \mu).
-$$
+Ora è facile calcolare la distribuzione (discretizzata) a posteriori e normalizzarla.
 
 ```{r}
-mu[which.max(ll)]
+coins_grid <- 
+  expand.grid(
+    theta = seq(0, 1, length.out=100)
+  ) %>%
+  mutate(
+    prior = dbeta(theta, 2, 10),
+    prior1 = prior / sum(prior),
+    likelihood = map_dbl(theta, ~ dbinom(x = y, size = n, .x)),
+    posterior0 = prior * likelihood,
+    posterior = posterior0 / sum(posterior0)
+  )
 ```
-
-Sappiamo che la stima di massima verosimiglianza coincide con la media del campione. Verifichiamo:
 
 ```{r}
-mean(x)
+coins_grid %>% 
+  head()
 ```
 
-L'approssimazione deriva dal fatto che abbiamo utilizzato un numero finito di punti.
+Verifico.
 
+```{r}
+coins_grid$posterior %>% 
+  sum()
+```
+
+Per creare un grafico ho anche bisogno della verosimiglianza normalizzata (altrimenti le aree sottese alle varie curve sono troppo diverse). L'istruzione $\mathsf{R}$ di cui ho bisogno per svolgere tutti i calcoli dell'approssimazione basata su griglia della distribuzione a posteriori è la seguente.
+
+```{r}
+coins_grid <- 
+  expand.grid(
+    theta = seq(0, 1, length.out=100)
+  ) %>%
+  mutate(
+    prior = dbeta(theta, 2, 10),
+    prior1 = prior / sum(prior),
+    likelihood = map_dbl(theta, ~ dbinom(x = y, size = n, .x)),
+    likelihood1 = likelihood / sum(likelihood),
+    posterior0 = prior * likelihood,
+    posterior = posterior0 / sum(posterior0)
+  )
+```
+
+Un grafico della distribuzione a priori normalizzata, della verosimiglianza normalizzata e della distribuzione a posteriori normalizzata si ottiene nel modo seguente.
+
+```{r}
+gf_area(prior1 ~ theta, data = coins_grid, alpha = 0.3) %>%
+  gf_area(likelihood1 ~ theta, data = coins_grid, alpha = 0.3, fill = "green") %>%
+  gf_area(posterior ~ theta, data = coins_grid, alpha = 0.3, fill = "steelblue")
+```
+
+Abbiamo qui usato l'approssimazione numerica basata su griglia per trovare la distribuzione a posteriori del caso beta-binomiale. Sappiamo lo schema beta-binomiale ci offre una soluzione analitica. Si noti che l'approssimazione numerica basata su griglia può essere usata in qualsiasi caso, anche quando non conosciamo (e soprattutto quando non conosciamo) la soluzione analitica.
 
 ## Informazioni sulla sessione di lavoro
 
