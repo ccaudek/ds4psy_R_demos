@@ -1,0 +1,151 @@
+---
+title: "Data science per psicologi - demo 18.02"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("scales")
+  library("bayesplot")
+  library("rstan")
+  library("cmdstanr")
+  library("posterior")
+  library("loo")
+  library("rethinking")
+  library("brms")
+  library("dagitty")
+  library("ggdag")
+})
+
+rstan_options(auto_write = TRUE) # avoid recompilation of models
+options(mc.cores = parallel::detectCores()) # parallelize across all CPUs
+Sys.setenv(LOCAL_CPPFLAGS = "-march=native") # improve execution time
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  # tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Stima dei coefficienti e rumore
+
+Inseriamo i dati in una lista appropriata come input per Stan:
+
+```{r}
+data_list <- list(
+  N = 30,
+  y = c(rep(1, 23), rep(0, 7))
+)
+```
+
+
+```{r}
+modelString = "
+data {
+  int<lower=0> N;
+  int<lower=0, upper=1> y[N];
+}
+parameters {
+  real<lower=0, upper=1> theta;
+}
+model {
+  theta ~ beta(2, 10);
+  y ~ bernoulli(theta);
+}
+"
+writeLines(modelString, con = "code/oneprop_1.stan")
+```
+
+
+Leggiamo il file in cui abbiamo salvato il codice Stan
+
+```{r}
+file <- file.path("code", "oneprop_1.stan")
+```
+
+Compiliamo il modello
+
+```{r}
+mod <- cmdstan_model(file)
+```
+
+Eseguiamo il campionamento MCMC:
+
+```{r, message = FALSE, warning=FALSE, results='hide'}
+fit <- mod$sample(
+  data = data_list,
+  iter_sampling = 4000L,
+  iter_warmup = 2000L,
+  seed = 84735,
+  chains = 4L,
+  refresh = 0,
+  thin = 1
+)
+```
+
+Esaminiamo la soluzione trasformando l'oggetto `fit` nel formato `stanfit` per comodità:
+
+```{r}
+stanfit <- rstan::read_stan_csv(fit$output_files())
+posterior <- as.matrix(stanfit)
+mcmc_areas(posterior, pars = c("theta"))
+```
+
+```{r}
+fit$summary(c("theta"))
+```
+
+```{r}
+stanfit1 <- rstan::read_stan_csv(fit$output_files())
+```
+
+```{r}
+stanfit1 %>%
+  mcmc_trace(pars = c("theta"), size = 0.1)
+```
+
+```{r}
+ mcmc_hist(stanfit1, pars = "theta") +
+  yaxis_text(TRUE) +
+  ylab("count")
+```
+
+La distribuzione a posteriori deve essere:
+
+```{r}
+bayesrules::summarize_beta_binomial(
+  alpha = 2, beta = 10, y = 23, n = 30
+)
+```
+
+Sovrapponiamo una Beta(25, 17) all'approssimazione numerica della distribuzione a posteriori ottenuta da Stan:
+
+```{r}
+mcmc_dens(stanfit1, pars = "theta") +
+  yaxis_text(TRUE) +
+  ylab("density") +
+  stat_function(fun = dbeta, args = list(shape1 = 25, shape2=17))
+ 
+```
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

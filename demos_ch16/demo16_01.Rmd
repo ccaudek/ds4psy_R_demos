@@ -47,30 +47,94 @@ knitr::opts_chunk$set(
 
 # Lo schema beta-binomiale
 
-Abbiamo imparato che, nel caso di una distribuzione a priori $\mbox{Beta}(\alpha, \beta)$ e una verosimiglianza $\mbox{Bin}(n, y \mid \theta)$, allora la distribuzione a posteriori del parametro $\theta$ sarà una distribuzione $\mbox{Beta}(\alpha + y, \beta + n - y)$.
+Per una distribuzione a priori $\mbox{Beta}(\alpha, \beta)$ e una verosimiglianza $\mbox{Bin}(n, y \mid \theta)$, la distribuzione a posteriori del parametro $\theta$ è una distribuzione $\mbox{Beta}(\alpha + y, \beta + n - y)$.
 
-Consideriamo nuovamente i dati di Zetsche et al. (2019), ovvero 23 successi in 30 prove.
+## Un esempio concreto
 
-Nel tutorial che abbiamo considerato in precedenza, abbiamo usato una $\mbox{Beta}(\alpha = 23.4, \beta = 6.6)$ quale distribuzione a priori. Considerando soli 20 valori $\theta$, abbiamo ottenuto la seguente distribuzione a posteriori:
+Per fare un esempio, consideriamo i dati di Zetsche et al. (2019) nei quali abbiamo osservato 23 successi in 30 prove.
 
-```{r, echo=FALSE}
+Nel tutorial che abbiamo considerato in precedenza, abbiamo usato una $\mbox{Beta}(\alpha = 23.4, \beta = 6.6)$ quale distribuzione a priori.
+
+Per le proprietà delle distribuzioni coniugate, sappiamo che la distribuzione a posteriori per il parametro $\theta$ (probabilità di successo in una singola prova) sarà una $\mbox{Beta}(\alpha = 23.4 + 23, \beta = 6.6 + 30 - 23)$, ovvero una $\mbox{Beta}(\alpha = 46.4, \beta = 13.6)$. 
+
+### Le funzioni del pacchetto `bayesrules`
+
+Questo risultato si ottiene facilmente usando la funzione `bayesrules::summarize_beta_binomial()`:
+
+```{r}
+bayesrules:::summarize_beta_binomial(
+  alpha = 23.4, beta = 6.6, y = 23, n = 30
+)
+```
+
+Usando la funzione `bayesrules::plot_beta_binomial`, possiamo ottenere un grafico della distribuzion a priori, della verosimiglianza e della distribuzione a posteriori per il parametro $\theta$:
+
+```{r}
+ bayesrules::plot_beta_binomial(
+  alpha = 23.4, beta = 6.6, y = 23, n = 30
+)
+```
+
+Con questa scelta della distribuzione a priori, le tre funzioni sono molto simili tra loro.
+
+
+## Approssimazione numerica
+
+Svolgiamo i calcoli mediante il metodo dell'approssimazione numerica. Considerando solo 20 valori per il parametro $\theta$, otteniamo la  distribuzione a posteriori nel modo seguente. Iniziamo a definire le costanti che useremo nella simulazione.
+
+```{r}
 n <- 20
 theta <- seq(0, 1, length.out = n)
 alpha <- 23.4
 beta <- 6.6
-fx <- dbeta(theta, alpha, beta)
-prior <- fx / sum(fx)
-like <- dbinom(23, 30, theta)
-post_distr <- prior * like
-post <- post_distr / sum(post_distr)
+```
 
+Calcoliamo la distribuzione a priori per $\theta$ non normalizzata:
+
+```{r}
+fx <- dbeta(theta, alpha, beta)
+```
+
+Normalizziamo:
+
+```{r}
+prior <- fx / sum(fx)
+```
+
+Calcoliamo la verosimiglianza non normalizzata:
+
+```{r}
+like <- dbinom(23, 30, theta)
+```
+
+Normalizziamo:
+
+```{r}
+like_n <- like / sum(like)
+```
+
+Calcoliamo la distribuzione a posteriori $p(\theta \mid y)$ non normalizzata:
+
+```{r}
+post_distr <- prior * like
+```
+
+Normalizziamo
+
+```{r}
+post <- post_distr / sum(post_distr)
+```
+
+Creo ora un grafico della distribuzione a posteriori $p(\theta \mid y)$:
+
+```{r}
 tibble(theta, post) %>% 
   ggplot(aes(x = theta, y = post)) +
   geom_point(size = 3) +
   geom_linerange(aes(x = theta, ymax = post, ymin = 0)) 
 ```
 
-Alla soluzione ottenuta per via numerica (rappresetata nella figura precedente), sovrapponiamo la distribuzione Beta di parametri $\alpha = 23.4 + 23 = 46.4$ e $\beta = 6.6 + 30 - 23 = 13.6$ (indicata nella figura dalla spezzata -- in quanto l'abbiamo definita solo in corrispondenza di 20 punti):
+Alla soluzione ottenuta per via numerica (rappresentata nella figura precedente), sovrappongo ora la distribuzione Beta di parametri $\alpha = 23.4 + 23 = 46.4$ e $\beta = 6.6 + 30 - 23 = 13.6$. I valori della $\mbox{Beta}(46.4, 13.6)$ sono rappresentati da una spezzata dato che abbiamo solo 20 valori $\theta$.
 
 ```{r}
 beta_post <- dbeta(theta, 46.4, 13.6) / sum(dbeta(theta, 46.4, 13.6))
@@ -81,40 +145,29 @@ tibble(theta, post) %>%
   geom_line(aes(x = theta, y = beta_post))
 ```
 
-Si vede che l'approssimazione numerica riproduce perfettamente il risultato ottenuto per via analitica.
+Possiamo concludere dicendo che l'approssimazione numerica riproduce perfettamente il risultato ottenuto per via analitica. Ovviamente, usare solo 20 punti per $\theta$ ha un senso solo 'didattico', ovvero, per spiegare la procedura da seguire. Per qualunque scopo concreto si useranno più punti.
 
-## Funzioni di `bayesrules`
 
-Lo stesso risultato si ottiene con la funzione `summarize_beta_binomial()`:
+## Inferenza bayesiana
 
-```{r}
-bayesrules:::summarize_beta_binomial(
-  alpha = 23.4, beta = 6.6, y = 23, n = 30
-)
-```
+L'inferenza bayesiana procede mediante la verifica di ipotesi bayesiana e mediante il calcolo degli intervalli di credibilità.
 
-Un grafico della distribuzione a priori, della verosimiglianza e della distribuzione a posteriori si ottiene con:
+### Verifica di ipotesi bayesiana
 
-```{r}
- bayesrules::plot_beta_binomial(
-  alpha = 23.4, beta = 6.6, y = 23, n = 30
-)
-```
-
-Con questa scelta della distribuzione a priori, le tre funzioni sono molto simili tra loro.
-
-## Verifica di ipotesi bayesiana
-
-È facile trovare la risposta a domande del tipo: qual è la probabilità che $\theta$ assuma un valore maggiore di 0.90?
+Una volta ottenuta la distribuzione a posteriori per il parametro ignoto $\theta$, è facile rispondere a domande del tipo: qual è la probabilità che $\theta$ assuma un valore maggiore di 0.90? Nel caso presente, la risposta a questa domanda è:
 
 ```{r}
 1 - pbeta(0.9, 46.4, 13.6)
 ```
 
+In maniera equivalente, possiamo trovare la stessa risposta usando la funzione `beta_area()`:
+
 ```{r}
 ProbBayes::beta_area(lo = 0.9, hi = 1.0, shape_par = c(46.4, 13.6))
 ```
-## Intervalli di credibilità
+
+
+### Intervalli di credibilità
 
 Qual è l'intervallo della distribuzione a posteriori che include il 50% dell'area? Ovvero, qual è l'intervallo che ha la probabilità a posteriori del 50% di contenere il vero valore del parametro $\theta$?
 

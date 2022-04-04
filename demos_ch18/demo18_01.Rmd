@@ -74,7 +74,7 @@ proposal_distribution <- function(param) {
   }
   # res è dunque un numero a caso, compreso tra 0 e 1, estratto da una gaussiana
   # standardizzata -- il che significa che è più probabile ottenere valori 
-  # appena maggiori di 0 che valori appena minori di 1.
+  # nell'intorno di 0 che valori appena minori di 1 o appena maggiori di -1.
   res
 }
 ```
@@ -124,7 +124,7 @@ for (i in 1:nrep) {
 mean(sim)
 ```
 
-Accept the proposal with a probability equal to prob_move. As a consequence, the frequency of the values in the chain will be proportional to the density of the posterior distribution. 
+Si accetta il valore proposto di $\theta$ con una probabilità uguale a `prob_move`. Di conseguenza, la frequenza dei valori nella catena sarà proporzionale alla densità della distribuzione a posteriori.
 
 ```{r}
 set.seed(84735)
@@ -133,6 +133,7 @@ niter <- 1e5
 chain <- metropolis(startvalue, niter)
 ```
 
+Calcolo l'accettanza.
 
 ```{r}
 burnin <- niter / 2
@@ -140,13 +141,19 @@ acceptance <- 1 - mean(duplicated(chain[-(1:burnin)]))
 acceptance
 ```
 
+Calcolo la media dell'approssimazione numerica della distribuzione a posteriori.
+
 ```{r}
 mean(chain[-(1:burnin)])
 ```
 
+Calcolo la deviazione standard dell'approssimazione numerica della distribuzione a posteriori.
+
 ```{r}
 sd(chain[-(1:burnin)])
 ```
+
+Confronto i risultati ottenuti con l'algoritmo di Metropolis con quelli ottenuti per via analitica.
 
 
 ```{r}
@@ -154,6 +161,8 @@ bayesrules:::summarize_beta_binomial(
   alpha = 2, beta = 10, y = 23, n = 30
 )
 ```
+
+Creo un kernel density plot per la distribuzione a posteriori.
 
 
 ```{r}
