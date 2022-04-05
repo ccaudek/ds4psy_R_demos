@@ -1,0 +1,135 @@
+---
+title: "Data science per psicologi - demo 19.04"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("scales")
+  library("bayesplot")
+  library("bayesrules")
+  library("EnvStats")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+Supponiamo di avere 
+
+```{r}
+n = 20
+y = 7
+```
+
+Supponiamo che le nostre credenze a priori corrispondano ad una disrtribuzione a priori compatibile con 15 successi e 5 insuccessi:
+
+```{r}
+alpha <- 15
+beta <- 5
+plot_beta(alpha, beta, mean = TRUE, mode = FALSE)
+```
+
+Trovare la media della distribuzione a posteriori.
+
+
+```{r}
+summarize_beta_binomial(15, 5, y, n)
+```
+
+```{r}
+22 / (22 + 18)
+```
+
+
+```{r}
+plot_beta_binomial(
+  15, 5,
+  y, n,
+  prior = TRUE,
+  likelihood = TRUE,
+  posterior = TRUE
+)
+```
+
+Ovvero
+
+```{r}
+theta <- seq(0, 1, length.out = 1000)
+plot(theta, dbeta(theta, 15, 5), type = 'l')
+```
+
+Costruiamo la verosimiglianza:
+
+```{r}
+plot(theta, dbinom(y, n, theta), type = 'l')
+```
+
+
+# Triangular prior
+
+```{r}
+prior <- dtri(theta)
+plot(theta, prior, type = 'l')
+```
+
+```{r}
+like <- dbinom(y, n, theta)
+plot(theta, like, type = 'l')
+```
+
+```{r}
+post <- prior * like
+plot(theta, post, type = 'l')
+```
+```{r}
+post_n <- post / sum(post)
+sum(post_n)
+```
+
+```{r}
+plot(theta, post_n, type = 'l')
+```
+
+```{r}
+d <- tibble(
+  theta = theta,
+  post_n = post_n
+)
+```
+
+```{r}
+d[which.max(d$post_n), ]
+```
+
+```{r}
+plot(theta, post_n, type = 'l')
+abline(v = 0.3813)
+```
+
+
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

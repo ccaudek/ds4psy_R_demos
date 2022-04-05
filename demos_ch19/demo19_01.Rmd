@@ -1,5 +1,5 @@
 ---
-title: "Data science per psicologi - demo 18.01"
+title: "Data science per psicologi - demo 19.01"
 author: "Corrado Caudek"
 date: "`r format(Sys.Date())`"
 output:
