@@ -75,7 +75,21 @@ theta <- seq(0, 1, length.out = 1000)
 plot(theta, dbeta(theta, 15, 5), type = 'l')
 ```
 
-Costruiamo la verosimiglianza:
+Costruiamo la verosimiglianza.
+
+
+
+```{r}
+bin <- function(y, n, theta) {
+  factorial(n) / (factorial(y) * factorial(n - y)) * theta^y * (1 - theta)^(n - y)
+}
+```
+
+```{r}
+plot(theta, bin(y, n, theta), type = 'l')
+```
+
+
 
 ```{r}
 plot(theta, dbinom(y, n, theta), type = 'l')

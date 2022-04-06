@@ -42,7 +42,27 @@ knitr::opts_chunk$set(
 )
 ```
 
-# L'algoritmo di Metropolis
+# Campionamento MCMC mediante l'algoritmo di Metropolis
+
+Usiamo l'algoritmo di Metropolis per generare un campione casuale estratto dalla distribuzione a posteriori. Consideriamo qui il caso beta-binomiale di cui conosciamo la soluzione. Supponiamo che i dati corrispondano a 23 successi in 30 prove Bernoulliane indipendenti, tutte con probabilità di successo uguale a $\theta$ incognito. Supponiamo inoltre che le nostre credenze a priori su $\theta$ possano essere descritte da una $\mbox{Beta}(2, 10)$. 
+
+In tali circostanze sappiamo che la distribuzione a posteriori sarà una $\mbox{Beta}(2 + 23, 10 + 30 - 23)$.
+
+```{r}
+bayesrules:::summarize_beta_binomial(
+  alpha = 2, beta = 10, y = 23, n = 30
+)
+```
+
+Vogliamo ottenere questo risultato usando un campionamento MCMC mediante l'algoritmo di Metropolis.
+
+## Funzioni utilizzate
+
+L'algoritmo di Metropolis richiede l'uso delle seguenti funzioni.
+
+### Verosimiglianza
+
+La verosimiglianza del modello binomiale.
 
 ```{r}
 likelihood <- function(param, x = 23, N = 30) { 
@@ -50,17 +70,31 @@ likelihood <- function(param, x = 23, N = 30) {
 }
 ```
 
+### Distribuzione a priori
+
+La distribuzione a priori è una $\mbox{Beta}(2, 10)$. 
+
 ```{r}
 prior <- function(param, alpha = 2, beta = 10) { 
    dbeta(param, alpha, beta)
 }
 ```
 
+### Distribuzione a posteriori
+
+La distribuzione a posteriori è data dal prodotto della distribuzione a priori e della verosimiglianza.
+
 ```{r}
 posterior <- function(param) { 
    likelihood(param) * prior(param)
 }
 ```
+
+### Valore proposto
+
+L'algoritmo di Metropolis produce una sequenza di valori (chiamata 'catena di Markov') nella quale ciascun valore successivo della catena viene trovato utilizzando solamente le informazioni fornite dal valore precedente della catena. Ad ogni passo della catena, sulla base delle informazioni fornite dal valore corrente, selezioniamo un valore 'candidato'. In base ad una certa regola, decidiamo poi se accettare il valore candidato, e muovere la catena al nuovo valore, oppure se rifiutarlo, ripetendo, nel passo successivo della catena, il valore corrente. Ci fermiamo dopo una serie predefinita di passi.
+
+La funzione seguente produce il valore 'candidato'.
 
 ```{r}
 proposal_distribution <- function(param) {
@@ -73,16 +107,26 @@ proposal_distribution <- function(param) {
     res <- rnorm(1, mean = param, sd = 0.9)
   }
   # res è dunque un numero a caso, compreso tra 0 e 1, estratto da una gaussiana
-  # standardizzata -- il che significa che è più probabile ottenere valori 
-  # nell'intorno di 0 che valori appena minori di 1 o appena maggiori di -1.
+  # con media uguale al valore param e deviazione standard 0.9 -- il che 
+  # significa che ritornerà valori molto simili a param (un po' più piccoli o
+  # un po' più grandi)
   res
 }
 ```
 
+## L'algoritmo di Metropopolis
+
+Ricordiamo che, nel caso particolare di questo esempio, la distribuzione a posteriori avrà un supporto nell'intervallo [0, 1]. Il primo punto della catena sarà dunque un valore a caso tra 0 e 1.
+
 ```{r}
-# Il primo punto della catena è un valore a caso tra 0 e 1.
 startvalue <- runif(1, 0, 1)
-# La catena viene generata nel modo seguente.
+```
+
+La catena di Markov viene generata utilizzando l'algoritmo di Metropolis che può essere impliementato nella seguente funzione.
+
+La funzione ha come argomenti il valore iniziale e il numero di passi della catena.
+
+```{r}
 metropolis <- function(startvalue, iterations) {
   # Creo un contenitore vuoto dove salvare i risultati.
   chain <- vector(length = iterations + 1)
@@ -90,7 +134,7 @@ metropolis <- function(startvalue, iterations) {
   chain[1] <- startvalue
   # Ripeto le istruzioni seguenti un numero di volte pari a iterations.
   for (i in 1:iterations) {
-    # Ottengo un valore molto simile al valore corrente della catena.
+    # Ottengo un valore a caso molto simile al valore corrente della catena.
     proposal <- proposal_distribution(chain[i])
     # Calcolo il rapporto tra la densità a posteriori del valore proposto e
     # la densità a posteriori del valore corrente.
@@ -108,6 +152,7 @@ metropolis <- function(startvalue, iterations) {
       chain[i + 1] <- ifelse(r < prob_move, proposal, chain[i])
     }
   }
+  # Ritorno i valori della catena.
   chain
 }
 ```
@@ -126,12 +171,17 @@ mean(sim)
 
 Si accetta il valore proposto di $\theta$ con una probabilità uguale a `prob_move`. Di conseguenza, la frequenza dei valori nella catena sarà proporzionale alla densità della distribuzione a posteriori.
 
+
+## Implemento l'algoritmo di Metropolis
+
 ```{r}
 set.seed(84735)
 startvalue <- runif(1, 0, 1)
 niter <- 1e5
 chain <- metropolis(startvalue, niter)
 ```
+
+### Accettanza
 
 Calcolo l'accettanza.
 
@@ -140,6 +190,8 @@ burnin <- niter / 2
 acceptance <- 1 - mean(duplicated(chain[-(1:burnin)])) 
 acceptance
 ```
+
+### Descrizione dell'approssimazione alla distribuzione a posteriori
 
 Calcolo la media dell'approssimazione numerica della distribuzione a posteriori.
 
