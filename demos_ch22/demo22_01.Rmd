@@ -1,0 +1,294 @@
+---
+title: "Data science per psicologi - demo 22.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("bayesplot")
+  library("rethinking")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# La predizione bayesiana
+
+```{r}
+tibble(n      = 2,
+       `p(w)` = .7,
+       w      = 0:2) %>% 
+  mutate(density = dbinom(w, size = n, prob = `p(w)`))
+```
+
+```{r}
+set.seed(3)
+
+rbinom(1, size = 2, prob = .7)
+```
+
+```{r}
+set.seed(3)
+
+rbinom(10, size = 2, prob = .7)
+```
+
+
+
+```{r}
+# how many would you like?
+n_draws <- 1e5
+
+set.seed(3)
+
+d <- tibble(draws = rbinom(n_draws, size = 2, prob = .7))
+
+d %>% 
+  count(draws) %>% 
+  mutate(proportion = n / nrow(d))
+```
+
+```{r}
+set.seed(3)
+d <- tibble(draws = rbinom(n_draws, size = 9, prob = .7))
+
+# the histogram
+d %>% 
+  ggplot(aes(x = draws)) +
+  geom_histogram(binwidth = 1, center = 0,
+                 color = "grey92", size = 1/10) +
+  scale_x_continuous("dummy water count",
+                     breaks = seq(from = 0, to = 9, by = 2)) +
+  ylab("frequency") +
+  coord_cartesian(xlim = c(0, 9)) +
+  theme(panel.grid = element_blank())
+```
+
+
+```{r}
+n_draws <- 1e5
+
+simulate_binom <- function(n, probability) {
+  set.seed(3)
+  rbinom(n_draws, size = n, prob = probability) 
+}
+
+d <-
+  crossing(n           = c(3, 6, 9),
+           probability = c(.3, .6, .9)) %>% 
+  mutate(draws = map2(n, probability, simulate_binom)) %>% 
+  ungroup() %>% 
+  mutate(n           = str_c("n = ", n),
+         probability = str_c("p = ", probability)) %>% 
+  unnest(draws)
+
+head(d)
+```
+
+```{r}
+d %>% 
+  ggplot(aes(x = draws)) +
+  geom_histogram(binwidth = 1, center = 0,
+                 color = "grey92", size = 1/10) +
+  scale_x_continuous("dummy water count",
+                     breaks = seq(from = 0, to = 9, by = 2)) +
+  ylab("frequency") +
+  coord_cartesian(xlim = c(0, 9)) +
+  theme(panel.grid = element_blank()) +
+  facet_grid(n ~ probability)
+```
+
+```{r}
+# how many grid points would you like?
+n <- 1001
+n_success <- 6
+n_trials  <- 9
+
+(
+  d <-
+  tibble(p_grid = seq(from = 0, to = 1, length.out = n),
+         # note we're still using a flat uniform prior
+         prior  = 1) %>% 
+  mutate(likelihood = dbinom(n_success, size = n_trials, prob = p_grid)) %>% 
+  mutate(posterior = (likelihood * prior) / sum(likelihood * prior))
+)
+```
+
+```{r}
+d %>% 
+  ggplot(aes(x = p_grid, y = posterior)) +
+  geom_area(color = "grey67", fill = "grey67") +
+  geom_segment(data = . %>% 
+                 filter(p_grid %in% c(seq(from = .1, to = .9, by = .1), 3 / 10)),
+               aes(xend = p_grid, yend = 0, size = posterior),
+               color = "grey33", show.legend = F) +
+  geom_point(data = . %>%
+               filter(p_grid %in% c(seq(from = .1, to = .9, by = .1), 3 / 10))) +
+  annotate(geom = "text", 
+           x = .08, y = .0025,
+           label = "Posterior probability") +
+  scale_size_continuous(range = c(0, 1)) +
+  scale_x_continuous("probability of water", breaks = c(0:10) / 10) +
+  scale_y_continuous(NULL, breaks = NULL) +
+  theme(panel.grid = element_blank())
+```
+
+```{r}
+n_draws <- 1e5
+
+simulate_binom <- function(probability) {
+  set.seed(3)
+  rbinom(n_draws, size = 9, prob = probability) 
+}
+
+d_small <-
+  tibble(probability = seq(from = .1, to = .9, by = .1)) %>% 
+  mutate(draws = purrr::map(probability, simulate_binom)) %>% 
+  unnest(draws) %>% 
+  mutate(label = str_c("p = ", probability))
+
+head(d_small)
+```
+
+```{r}
+d_small %>%
+  ggplot(aes(x = draws)) +
+  geom_histogram(binwidth = 1, center = 0,
+                 color = "grey92", size = 1/10) +
+  scale_x_continuous(NULL, breaks = seq(from = 0, to = 9, by = 3)) +
+  scale_y_continuous(NULL, breaks = NULL) +
+  labs(subtitle = "Sampling distributions") +
+  coord_cartesian(xlim = c(0, 9)) +
+  theme(panel.grid = element_blank()) +
+  facet_wrap(~ label, ncol = 9) 
+```
+```{r}
+# how many samples would you like?
+n_samples <- 1e4
+
+# make it reproducible
+set.seed(3)
+
+samples <-
+  d %>% 
+  slice_sample(n = n_samples, weight_by = posterior, replace = T) %>% 
+  mutate(w = purrr::map_dbl(p_grid, rbinom, n = 1, size = 9))
+
+glimpse(samples)
+```
+
+```{r}
+samples %>% 
+  ggplot(aes(x = w)) +
+  geom_histogram(binwidth = 1, center = 0,
+                 color = "grey92", size = 1/10) +
+  scale_x_continuous("number of water samples",
+                     breaks = seq(from = 0, to = 9, by = 3)) +
+  scale_y_continuous(NULL, breaks = NULL) +
+  ggtitle("Posterior predictive distribution") +
+  coord_cartesian(xlim = c(0, 9),
+                  ylim = c(0, 3000)) +
+  theme(panel.grid = element_blank())
+```
+
+
+# Posterior predictive distribution
+
+
+Rethinking p. 65
+
+```{r}
+n <- 11
+n_success <- 6
+n_trials  <- 9
+p_grid <- seq(0, 1, length.out = 11)
+
+(
+  d <-
+    tibble(p_grid = p_grid,
+           prior  = 1) %>% 
+    mutate(likelihood = dbinom(n_success, size = n_trials, prob = p_grid)) %>% 
+    mutate(posterior = (likelihood * prior) / sum(likelihood * prior))
+)
+
+plot(p_grid, d$posterior)
+
+sd0 <- dbinom(0:9, 9, 0.0)
+sd1 <- dbinom(0:9, 9, 0.1)
+sd2 <- dbinom(0:9, 9, 0.2)
+sd3 <- dbinom(0:9, 9, 0.3)
+sd4 <- dbinom(0:9, 9, 0.4)
+sd5 <- dbinom(0:9, 9, 0.5)
+sd6 <- dbinom(0:9, 9, 0.6)
+sd7 <- dbinom(0:9, 9, 0.7)
+sd8 <- dbinom(0:9, 9, 0.8)
+sd9 <- dbinom(0:9, 9, 0.9)
+sd10 <- dbinom(0:9, 9, 1.0)
+
+
+ppd <- 
+  d$posterior[1] * sd0 +
+  d$posterior[2] * sd1 +
+  d$posterior[3] * sd2 +
+  d$posterior[4] * sd3 +
+  d$posterior[5] * sd4 +
+  d$posterior[6] * sd5 +
+  d$posterior[7] * sd6 +
+  d$posterior[8] * sd7 +
+  d$posterior[9] * sd8 +
+  d$posterior[10] * sd9 +
+  d$posterior[11] * sd10 
+
+
+plot(0:9, ppd)
+```
+
+Beta(1 + 6, 1 + 9 - 6) = Beta(7, 4)
+
+
+```{r}
+nrep <- 1e6
+sample_y <- rep(NA, nrep)
+for (i in 1:nrep) {
+  p <- rbeta(1, 7, 4)
+sample_y[i] <- rbinom(1, size = 9, prob = p)
+}
+```
+
+```{r}
+table(sample_y) / nrep
+```
+
+```{r}
+tibble(
+  sim = round(table(sample_y) / nrep, 4),
+  ppd = round(ppd, 4)
+)
+```
+
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

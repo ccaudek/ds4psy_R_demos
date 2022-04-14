@@ -9,20 +9,27 @@ output:
     code_download: true
 ---
 
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
 ```{r}
 suppressPackageStartupMessages({
   library("here")
   library("tidyverse")
-  library("scales")
   library("bayesplot")
   library("rstan")
   library("cmdstanr")
-  library("posterior")
-  library("loo")
-  library("rethinking")
-  library("brms")
-  library("dagitty")
-  library("ggdag")
 })
 
 rstan_options(auto_write = TRUE) # avoid recompilation of models
@@ -41,54 +48,78 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Stima dei coefficienti e rumore
+# Distribuzione a priori incompatible con il caso beta-binomiale
 
-Inseriamo i dati in una lista appropriata come input per Stan:
+Supponiamo di avere osservato 17 successi in 30 prove Bernoulliane.
+
+```{r}
+n = 30
+y = 17
+```
+
+Supponiamo di imporre su $\theta$ una distribuzione a priori corrispondente alla seguente gaussiana troncata :
+
+```{r}
+ngrid <- 100
+theta_grid <- seq(0, 1, length.out = ngrid) 
+prior <- dnorm(theta_grid, mean = 0.5, sd = 0.17)
+df <- data.frame(
+  theta_grid = theta_grid, prior = prior
+)
+
+df$prior <- ifelse(
+  df$theta_grid <= 0.5, 0, df$prior
+)
+
+plot(df$theta_grid, df$prior, type = 'l')
+```
+
+Ovviamente non è possibile definire la distribuzione a posteriori per via analitica, come abbiamo fatto nel caso beta-binomiale. Procederemo dunque in due modi.  Inizieremo prima a trovare un'approssimazione numerica alla distribuzione a posteriori con Stan.  Verificheremo poi il risultato ottenuto usando il metodo basato su griglia.
+
+## Stima della distribuzione a posteriori con Stan
+
+I dati sono i seguenti.
 
 ```{r}
 data_list <- list(
   N = 30,
-  y = c(rep(1, 23), rep(0, 7))
+  y = c(rep(1, 17), rep(0, 13))
 )
+data_list
 ```
 
+Il modello è identico a quello usato in precedenza, tranne che per la definizione della distribuzione a priori.
 
 ```{r}
-modelString = "
+model_string <- "
 data {
   int<lower=0> N;
-  int<lower=0, upper=1> y[N];
+  array[N] int<lower=0, upper=1> y;
 }
 parameters {
-  real<lower=0, upper=1> theta;
+  real<lower=0.5, upper=1> theta;
 }
 model {
-  theta ~ beta(2, 10);
+  theta ~ normal(0.5, 0.17);
   y ~ bernoulli(theta);
 }
 "
-writeLines(modelString, con = "code/oneprop_1.stan")
 ```
 
-
-Leggiamo il file in cui abbiamo salvato il codice Stan
-
-```{r}
-file <- file.path("code", "oneprop_1.stan")
-```
-
-Compiliamo il modello
+Compiliamo il modello.
 
 ```{r}
+writeLines(model_string, con = "code/oneprop_2.stan")
+file <- file.path("code", "oneprop_2.stan")
 mod <- cmdstan_model(file)
 ```
 
-Eseguiamo il campionamento MCMC:
+Eseguiamo il campionamento MCMC.
 
-```{r, message = FALSE, warning=FALSE, results='hide'}
+```{r}
 fit <- mod$sample(
   data = data_list,
-  iter_sampling = 4000L,
+  iter_sampling = 100000L,
   iter_warmup = 2000L,
   seed = 84735,
   chains = 4L,
@@ -97,50 +128,152 @@ fit <- mod$sample(
 )
 ```
 
-Esaminiamo la soluzione trasformando l'oggetto `fit` nel formato `stanfit` per comodità:
+Rappresentiamo graficamente la distribuzione a posteriori.
 
 ```{r}
-stanfit <- rstan::read_stan_csv(fit$output_files())
-posterior <- as.matrix(stanfit)
+fit_stanfit <- rstan::read_stan_csv(fit$output_files())
+posterior <- as.matrix(fit_stanfit)
 mcmc_areas(posterior, pars = c("theta"))
 ```
 
-```{r}
-fit$summary(c("theta"))
-```
+## Metodo basato su griglia
+
+Generiamo la distribuzione a priori (ripeto qui il codice usato sopra).
 
 ```{r}
-stanfit1 <- rstan::read_stan_csv(fit$output_files())
-```
-
-```{r}
-stanfit1 %>%
-  mcmc_trace(pars = c("theta"), size = 0.1)
-```
-
-```{r}
- mcmc_hist(stanfit1, pars = "theta") +
-  yaxis_text(TRUE) +
-  ylab("count")
-```
-
-La distribuzione a posteriori deve essere:
-
-```{r}
-bayesrules::summarize_beta_binomial(
-  alpha = 2, beta = 10, y = 23, n = 30
+ngrid <- 100
+theta_grid <- seq(0, 1, length.out = ngrid) 
+prior <- dnorm(theta_grid, mean = 0.5, sd = 0.17)
+df <- data.frame(
+  theta_grid = theta_grid, prior = prior
 )
+
+df$prior <- ifelse(
+  df$theta_grid <= 0.5, 0, df$prior
+)
+
+plot(df$theta_grid, df$prior, type = 'l')
 ```
 
-Sovrapponiamo una Beta(25, 17) all'approssimazione numerica della distribuzione a posteriori ottenuta da Stan:
+Creo la verosimiglianza.
 
 ```{r}
-mcmc_dens(stanfit1, pars = "theta") +
-  yaxis_text(TRUE) +
-  ylab("density") +
-  stat_function(fun = dbeta, args = list(shape1 = 25, shape2=17))
- 
+df$like <- dbinom(17, 30, theta_grid)
+plot(df$theta_grid, df$like, type = 'l')
 ```
+
+Creo la distribuzione a posteriori.
+
+```{r}
+df$post_u <- df$prior * df$like 
+df$post <- df$post_u / sum(df$post_u)
+plot(df$theta_grid, df$post, type = 'l')
+```
+
+Il risultato ottenuto rispecchia quello trovato con Stan.
+
+
+<!-- Supponiamo che le nostre credenze a priori corrispondano ad una distribuzione a priori compatibile con 15 successi e 5 insuccessi: -->
+
+<!-- ```{r} -->
+<!-- alpha <- 15 -->
+<!-- beta <- 5 -->
+<!-- plot_beta(alpha, beta, mean = TRUE, mode = FALSE) -->
+<!-- ``` -->
+
+<!-- Trovare la media della distribuzione a posteriori. -->
+
+
+<!-- ```{r} -->
+<!-- summarize_beta_binomial(15, 5, y, n) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- 22 / (22 + 18) -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- plot_beta_binomial( -->
+<!--   15, 5, -->
+<!--   y, n, -->
+<!--   prior = TRUE, -->
+<!--   likelihood = TRUE, -->
+<!--   posterior = TRUE -->
+<!-- ) -->
+<!-- ``` -->
+
+<!-- Ovvero -->
+
+<!-- ```{r} -->
+<!-- theta <- seq(0, 1, length.out = 1000) -->
+<!-- plot(theta, dbeta(theta, 15, 5), type = 'l') -->
+<!-- ``` -->
+
+<!-- Costruiamo la verosimiglianza. -->
+
+
+
+<!-- ```{r} -->
+<!-- bin <- function(y, n, theta) { -->
+<!--   factorial(n) / (factorial(y) * factorial(n - y)) * theta^y * (1 - theta)^(n - y) -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot(theta, bin(y, n, theta), type = 'l') -->
+<!-- ``` -->
+
+
+
+<!-- ```{r} -->
+<!-- plot(theta, dbinom(y, n, theta), type = 'l') -->
+<!-- ``` -->
+
+
+<!-- # Triangular prior -->
+
+<!-- ```{r} -->
+<!-- prior <- dtri(theta) -->
+<!-- plot(theta, prior, type = 'l') -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- like <- dbinom(y, n, theta) -->
+<!-- plot(theta, like, type = 'l') -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- post <- prior * like -->
+<!-- plot(theta, post, type = 'l') -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- post_n <- post / sum(post) -->
+<!-- sum(post_n) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot(theta, post_n, type = 'l') -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- d <- tibble( -->
+<!--   theta = theta, -->
+<!--   post_n = post_n -->
+<!-- ) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- d[which.max(d$post_n), ] -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot(theta, post_n, type = 'l') -->
+<!-- abline(v = 0.3813) -->
+<!-- ``` -->
+
+
+
 
 ## Informazioni sulla sessione di lavoro
 

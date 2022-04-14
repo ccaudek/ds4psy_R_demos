@@ -4,10 +4,10 @@ data {
   array[N] int<lower=0, upper=1> y;
 }
 parameters {
-  real<lower=0, upper=1> theta;
+  real<lower=0.5, upper=1> theta;
 }
 model {
-  theta ~ beta(2, 10);
+  theta ~ normal(0.5, 0.17);
   y ~ bernoulli(theta);
 }
 

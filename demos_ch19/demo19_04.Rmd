@@ -9,15 +9,39 @@ output:
     code_download: true
 ---
 
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
 ```{r}
 suppressPackageStartupMessages({
   library("here")
   library("tidyverse")
   library("scales")
   library("bayesplot")
-  library("bayesrules")
-  library("EnvStats")
+  library("rstan")
+  library("cmdstanr")
+  library("posterior")
+  library("loo")
+  library("rethinking")
+  library("brms")
+  library("dagitty")
+  library("ggdag")
 })
+
+rstan_options(auto_write = TRUE) # avoid recompilation of models
+options(mc.cores = parallel::detectCores()) # parallelize across all CPUs
+Sys.setenv(LOCAL_CPPFLAGS = "-march=native") # improve execution time
 
 theme_set(bayesplot::theme_default(base_size = 12))
 bayesplot::color_scheme_set("gray")
@@ -25,120 +49,158 @@ set.seed(84735)
 
 knitr::opts_chunk$set(
   collapse = TRUE,
-  tidy = 'styler',
+  # tidy = 'styler',
   fig.width = 6,
   fig.asp = 0.618 # 1 / phi
 )
 ```
 
-Supponiamo di avere 
+# Stima dei coefficienti e rumore
+
+In questo tutorial viene esaminato un aspetto discusso da Richard McElreath nella sua lecture [Statistical Rethinking 2022 Lecture 17](https://www.youtube.com/watch?v=lTFAB6QmwHM&list=PLDcUM9US4XdMROZ57-OIRtIK0aOynbgZN&index=18). Con una semplice simulazione, McElreath mostra come la presenza di rumore non produce sempre una sottostima dei "veri" effetti causali. L'idea diffusa è che le stime delle associazioni tra variabili che otteniamo nelle analisi dei dati rappresentano sempre, a causa del rumore intrinseco nelle misurazioni, delle sottostime dei veri effetti causali che sono presenti nel mondo empirico. Una tale sottostima è chiamata *attenuazione*. Ma questa idea è falsa. Con questa semplice simulazione, McElreath mostra come, in generale, la presenza di rumore di misurazione non comporta necessariamente una sottostima degli effetti causali che legano le variabili.
+
+McElreath ipotizza la seguente struttura causale nella quale $x$ ha un effetto su $y$. Come sempre avviene in pratica, il ricercatore non ha un accesso diretto a $x$ ma può misurare solo un qualche proxy di $x$, qui chiamato $x_{star}$. La variabile misurata, necessariamente, risulta corrotta dal rumore $e$. McElreath ipotizza, come avviene spesso in pratica, che l'entità del rumore che influenza $x_{star}$ dipenda da $y$. La situazione è rappresentata dal seguente diagramma:
 
 ```{r}
-n = 20
-y = 7
+dag <- dagitty("dag {
+  x -> x_star
+  x -> y
+  e -> x_star
+  y -> e
+}")
+
+coordinates(dag) <- list(
+  x = c(e = 1, x = 2, x_star = 1, y = 3),
+  y = c(e = 1, x = 3, x_star = 2, y = 3)
+)
+plot(dag)
 ```
 
-Supponiamo che le nostre credenze a priori corrispondano ad una disrtribuzione a priori compatibile con 15 successi e 5 insuccessi:
+Simuliamo ora un campione di dati che soddisfa i vincoli di una tale struttura causale:
 
 ```{r}
-alpha <- 15
-beta <- 5
-plot_beta(alpha, beta, mean = TRUE, mode = FALSE)
+n <- 500
+x <- rnorm(n)
+y <- rnorm(n, 0.0 * x)
+x_star <- rnorm(n, 0.7*x + 0.3*y)
 ```
 
-Trovare la media della distribuzione a posteriori.
+Si noti che, nella struttura causale ipotizzata, i dati sono stati generati assumendo che $x$ abbia un effetto nullo sulla $y$.
 
-
-```{r}
-summarize_beta_binomial(15, 5, y, n)
-```
+Inseriamo i dati in una lista appropriata come input per Stan:
 
 ```{r}
-22 / (22 + 18)
-```
-
-
-```{r}
-plot_beta_binomial(
-  15, 5,
-  y, n,
-  prior = TRUE,
-  likelihood = TRUE,
-  posterior = TRUE
+data_list <- list(
+  N = length(x),
+  x = x_star,
+  y = y
 )
 ```
 
-Ovvero
+Utilizziamo un semplice modello di regressione per esaminare la relazione tra $x$ e $y$ in questi dati.
 
-```{r}
-theta <- seq(0, 1, length.out = 1000)
-plot(theta, dbeta(theta, 15, 5), type = 'l')
-```
-
-Costruiamo la verosimiglianza.
-
-
-
-```{r}
-bin <- function(y, n, theta) {
-  factorial(n) / (factorial(y) * factorial(n - y)) * theta^y * (1 - theta)^(n - y)
+```{r stan}
+modelString = "
+data {
+  int<lower=0> N;
+  vector[N] x;
+  vector[N] y;
 }
+parameters {
+  real alpha;
+  real beta;
+  real<lower=0> sigma;
+}
+model {
+  alpha ~ normal(0, 1);
+  beta ~ normal(0, 1);
+  sigma ~ exponential(1);
+  y ~ normal(alpha + beta * x, sigma);
+}
+"
+writeLines(modelString, con = "code/noise_1.stan")
 ```
 
+Leggiamo il file in cui abbiamo salvato il codice Stan
+
 ```{r}
-plot(theta, bin(y, n, theta), type = 'l')
+file <- file.path("code", "noise_1.stan")
 ```
 
-
+Compiliamo il modello
 
 ```{r}
-plot(theta, dbinom(y, n, theta), type = 'l')
+mod <- cmdstan_model(file)
 ```
 
+Eseguiamo il campionamento MCMC:
 
-# Triangular prior
-
-```{r}
-prior <- dtri(theta)
-plot(theta, prior, type = 'l')
-```
-
-```{r}
-like <- dbinom(y, n, theta)
-plot(theta, like, type = 'l')
-```
-
-```{r}
-post <- prior * like
-plot(theta, post, type = 'l')
-```
-```{r}
-post_n <- post / sum(post)
-sum(post_n)
-```
-
-```{r}
-plot(theta, post_n, type = 'l')
-```
-
-```{r}
-d <- tibble(
-  theta = theta,
-  post_n = post_n
+```{r, message = FALSE, warning=FALSE, results='hide'}
+fit <- mod$sample(
+  data = data_list,
+  iter_sampling = 4000L,
+  iter_warmup = 2000L,
+  seed = 84735,
+  chains = 4L,
+  refresh = 0,
+  thin = 1
 )
 ```
 
-```{r}
-d[which.max(d$post_n), ]
-```
+Esaminiamo la soluzione trasformando l'oggetto `fit` nel formato `stanfit` per comodità:
 
 ```{r}
-plot(theta, post_n, type = 'l')
-abline(v = 0.3813)
+stanfit <- rstan::read_stan_csv(fit$output_files())
+posterior <- as.matrix(stanfit)
+mcmc_areas(posterior, pars = c("alpha", "beta"))
 ```
 
+Ricordiamo che abbiamo generato i dati in modo tale che $x$ abbia un effetto causale nullo sulla $y$. A causa del rumore, però, i risultati della regressione suggeriscono un chiaro effetto di $x$ su $y$: la moda a posteriori del parametro $\beta$ è pari a circa 0.17.
 
+Esaminiamo ora la situazione opposta, ovvero quella nella quale vi è un effetto causale di $x$ sulla $y$. Simuliamo i dati seguendo le indicazioni di McElreath:
 
+```{r}
+n <- 500
+x <- rnorm(n)
+y <- rnorm(n, 0.8 * x)
+x_star <- rnorm(n, 0.7*x + 0.3*y)
+```
+
+Inseriamo i dati in una lista:
+
+```{r}
+data2_list <- list(
+  N = length(x),
+  x = x_star,
+  y = y
+)
+```
+
+Eseguiamo il campionamento MCMC:
+
+```{r, message = FALSE, warning=FALSE, results='hide'}
+fit2 <- mod$sample(
+  data = data2_list,
+  iter_sampling = 4000L,
+  iter_warmup = 2000L,
+  seed = 84735,
+  chains = 4L,
+  refresh = 0,
+  thin = 1
+)
+```
+
+Esaminiamo la soluzione ottenuta:
+
+```{r}
+stanfit2 <- rstan::read_stan_csv(fit2$output_files())
+posterior2 <- as.matrix(stanfit2)
+mcmc_areas(posterior2, pars = c("alpha", "beta"))
+```
+
+In questo secondo caso, il vero effetto causale è $\beta = 0.8$ ma, a causa del rumore di misurazione, abbiamo stimato $\hat{\beta} \approx 0.5$.
+
+In conclusione, la presenza del rumore di misurazione può avere effetti opposti: può fare emergere un'associazione causale che, in realtà, non esiste, oppure può sottostimare un'associazione causale effettiva. Il risultato che si osserva dipende dalla reale struttura causale che lega le variabili.
 
 ## Informazioni sulla sessione di lavoro
 

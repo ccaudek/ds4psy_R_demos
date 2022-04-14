@@ -1,0 +1,188 @@
+---
+title: "Data science per psicologi - demo 21.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("bayesplot")
+  library("rstan")
+  library("cmdstanr")
+  library("bayesrules")
+})
+
+rstan_options(auto_write = TRUE) # avoid recompilation of models
+options(mc.cores = parallel::detectCores()) # parallelize across all CPUs
+Sys.setenv(LOCAL_CPPFLAGS = "-march=native") # improve execution time
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Sintesi della distribuzione a posteriori
+
+## Esperimento di Milgram
+
+Nell'esperimento di Milgram (1963), 26 partecipanti su 40 hanno inflitto delle scosse elettriche della massima intensità ai loro compagni -- non sapevano in realtà che le scosse fossero solo apparenti, non reali. 
+
+Per analizzare questi dati, nel testo *Bayes rules!* si impone una Beta(1, 10) quale distribuzione a priori su $\theta$ (probabilità ignota di infliggere una scossa). Questa scelta della distribuzione a priori riporta il problema all'interno dello schema beta-binomiale. In tali circostanze è dunque facile trovare la distribuzione a posteriori.
+
+```{r}
+summarize_beta_binomial(alpha = 1, beta = 10, y = 26, n = 40)
+```
+
+Con una distribuzione a priori Beta(1, 10), la media della distribuzione a posteriori è uguale a 0.529.
+
+Per fare un esempio in cui non è possibile usare lo schema beta-binomiale, supponiamo che la distribuzione a priori per $\theta$ sia la seguente.
+
+```{r}
+ngrid <- 100
+theta_grid <- seq(0, 1, length.out = ngrid) 
+prior <- dnorm(theta_grid, mean = 0, sd = 0.12)
+df <- data.frame(
+  theta_grid = theta_grid, prior = prior
+)
+
+# df$prior <- ifelse(
+#   df$theta_grid <= 0.5, 0, df$prior
+# )
+
+plot(df$theta_grid, df$prior, type = 'l')
+```
+
+Così facendo, le credenze a priori descritte dalla distribuzione a priori precedente sono piuttosto simili a quelle descritte da una Beta(1, 10), anche se non identiche.
+
+```{r}
+plot_beta_binomial(alpha = 1, beta = 10, y = 26, n = 40)
+```
+
+Svolgiamo dunque l'analisi con Stan per poi calcolare la moda e l'intervallo di credibilità.
+
+I dati sono i seguenti.
+
+```{r}
+data_list <- list(
+  N = 40,
+  y = c(rep(1, 26), rep(0, 14))
+)
+data_list
+```
+
+Specifico il modello.
+
+```{r}
+model_string <- "
+data {
+  int<lower=0> N;
+  array[N] int<lower=0, upper=1> y;
+}
+parameters {
+  real<lower=0, upper=1> theta;
+}
+model {
+  theta ~ normal(0, 0.12);
+  y ~ bernoulli(theta);
+}
+"
+```
+
+Compiliamo il modello.
+
+```{r}
+writeLines(model_string, con = "code/oneprop_3.stan")
+file <- file.path("code", "oneprop_3.stan")
+mod <- cmdstan_model(file)
+```
+
+Eseguiamo il campionamento MCMC.
+
+```{r}
+fit <- mod$sample(
+  data = data_list,
+  iter_sampling = 10000L,
+  iter_warmup = 2000L,
+  seed = 84735,
+  chains = 4L,
+  refresh = 0,
+  thin = 1
+)
+```
+
+Rappresentiamo graficamente la distribuzione a posteriori.
+
+```{r}
+fit_stanfit <- rstan::read_stan_csv(fit$output_files())
+posterior <- as.matrix(fit_stanfit)
+mcmc_areas(posterior, pars = c("theta"))
+```
+
+La mediana è  0.458, solo un po' più piccola di quella trovata con lo schema beta-binomiale che usa una distribuzione a priori Beta(1, 10).
+
+```{r}
+fit$summary(c("theta"))
+```
+
+Calcoliamo ora l'intervallo di credibilità al 89%. La scelta dell'89% è del tutto arbitraria.
+
+```{r}
+out <- rstantools::posterior_interval(
+  as.matrix(fit_stanfit),
+  prob = 0.89
+)
+out
+```
+
+Possiamo interpretare l'intervallo di credibilità dicendo che, a posteriori, possiamo quantificare la nostra incertezza rispetto al valore ignoto del parametro $\theta$ dicendo che siamo sicuri all'89% che il vero valore di tale parametro sia contenuto nell'intervallo [0.356, 0.560]. Ma potremmo anche esprimere la stessa incertezza scegliendo un diverso livello di probabilità. Per esempio
+
+```{r}
+out <- rstantools::posterior_interval(
+  as.matrix(fit_stanfit),
+  prob = 0.75
+)
+out
+```
+
+Per esempio, possiamo dire che siamo sicuri al 75% che il vero valore di tale parametro sia contenuto nell'intervallo [0.385, 0.531].
+
+## Considerazioni conclusive {-}
+
+A parte gli esercizi didattici qui forniti, la scelta della distribuzione a priori deve in qualche modo essere motivata. Se non disponiamo di informazioni che vogliamo racchiudere nella distribuzione a priori, la scelta migliore è quella di usare una distribuzione a priori *debolmente informativa*.  Nel caso dell'esempio presente, io userei una Beta(2, 2).
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+

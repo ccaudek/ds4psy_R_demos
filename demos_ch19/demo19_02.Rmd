@@ -9,20 +9,27 @@ output:
     code_download: true
 ---
 
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
 ```{r}
 suppressPackageStartupMessages({
   library("here")
   library("tidyverse")
-  library("scales")
   library("bayesplot")
   library("rstan")
   library("cmdstanr")
-  library("posterior")
-  library("loo")
-  library("rethinking")
-  library("brms")
-  library("dagitty")
-  library("ggdag")
 })
 
 rstan_options(auto_write = TRUE) # avoid recompilation of models
@@ -41,85 +48,172 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Stima dei coefficienti e rumore
+# Modello beta-binomiale in Stan
 
-In questo tutorial viene esaminato un aspetto discusso da Richard McElreath nella sua lecture [Statistical Rethinking 2022 Lecture 17](https://www.youtube.com/watch?v=lTFAB6QmwHM&list=PLDcUM9US4XdMROZ57-OIRtIK0aOynbgZN&index=18). Con una semplice simulazione, McElreath mostra come la presenza di rumore non produce sempre una sottostima dei "veri" effetti causali. L'idea diffusa è che le stime delle associazioni tra variabili che otteniamo nelle analisi dei dati rappresentano sempre, a causa del rumore intrinseco nelle misurazioni, delle sottostime dei veri effetti causali che sono presenti nel mondo empirico. Una tale sottostima è chiamata *attenuazione*. Ma questa idea è falsa. Con questa semplice simulazione, McElreath mostra come, in generale, la presenza di rumore di misurazione non comporta necessariamente una sottostima degli effetti causali che legano le variabili.
+In questo demo ci poniamo il problema di implementare il modello beta-binomiale usando Stan.
 
-McElreath ipotizza la seguente struttura causale nella quale $x$ ha un effetto su $y$. Come sempre avviene in pratica, il ricercatore non ha un accesso diretto a $x$ ma può misurare solo un qualche proxy di $x$, qui chiamato $x_{star}$. La variabile misurata, necessariamente, risulta corrotta dal rumore $e$. McElreath ipotizza, come avviene spesso in pratica, che l'entità del rumore che influenza $x_{star}$ dipenda da $y$. La situazione è rappresentata dal seguente diagramma:
+Riprendiamo l'esempio che abbiamo discusso in precedenza, ovvero quello in cui la verosimiglianza è binomiale e la distribuzione a priori è una Beta. I dati corrispondono a 23 "successi" in 30 prove. 
 
-```{r}
-dag <- dagitty("dag {
-  x -> x_star
-  x -> y
-  e -> x_star
-  y -> e
-}")
-
-coordinates(dag) <- list(
-  x = c(e = 1, x = 2, x_star = 1, y = 3),
-  y = c(e = 1, x = 3, x_star = 2, y = 3)
-)
-plot(dag)
-```
-
-Simuliamo ora un campione di dati che soddisfa i vincoli di una tale struttura causale:
+La distribuzione a priori è una Beta(2, 10).
 
 ```{r}
-n <- 500
-x <- rnorm(n)
-y <- rnorm(n, 0.0 * x)
-x_star <- rnorm(n, 0.7*x + 0.3*y)
+bayesrules::plot_beta(alpha = 2, beta = 10, mean = TRUE, mode = TRUE)
 ```
 
-Si noti che, nella struttura causale ipotizzata, i dati sono stati generati assumendo che $x$ abbia un effetto nullo sulla $y$.
+## I dati
 
-Inseriamo i dati in una lista appropriata come input per Stan:
+Inseriamo i dati in una lista così come richiesto da Stan:
 
 ```{r}
 data_list <- list(
-  N = length(x),
-  x = x_star,
-  y = y
+  N = 30,
+  y = c(rep(1, 23), rep(0, 7))
 )
 ```
 
-Utilizziamo un semplice modello di regressione per esaminare la relazione tra $x$ e $y$ in questi dati.
+Si noti che qui stiamo usando una codifica dei dati (il "tipo" dei dati) che non abbiamo usato finora. Finora ci siamo occupati di vettori, ovvero sequenze di elementi tutti dello stesso tipo (per es., numeri, o stringhe, ma non entrambi), oppure `data.frame`, ovvero una organizzazione tabulare (in righe e colonne) dei dati nella quale le colonne (le "variabili") possono corrispondere a tipi diveri: una colonna può essere numerica, un'altra colonna può contenere valori alfanumerici (stringhe). L'unico vincolo in un DataFrame è che tutte le colonne devono contenere lo stesso numero di elementi.
 
-```{r stan}
-modelString = "
-data {
-  int<lower=0> N;
-  vector[N] x;
-  vector[N] y;
-}
-parameters {
-  real alpha;
-  real beta;
-  real<lower=0> sigma;
-}
-model {
-  alpha ~ normal(0, 1);
-  beta ~ normal(0, 1);
-  sigma ~ exponential(1);
-  y ~ normal(alpha + beta * x, sigma);
-}
-"
-writeLines(modelString, con = "code/noise_1.stan")
-```
+Un ulteriore tipo di dato supportato da R è il tipo `list`. Una lista è una sequenza di elementi che, a differenza di vettori, matrici ed array, possono avere tutti tipo diverso. Ad esempio, il primo elemento di una lista può essere un numero, il secondo elemento della lista può essere un vettore, il terzo elemento della lista può essere un DataFrame: ciascun elemento della lista può avere tipo diverso e può anche essere costituito da un diverso numero di elementi.
 
-Leggiamo il file in cui abbiamo salvato il codice Stan
+Una lista si crea con il costruttore `list()` i cui argomenti di `list()` sono gli elementi della lista. 
+
+Nel caso presente, il primo elemento della lista è uno scalare chiamato `N`; il secondo elemento della lista è un vettore di 30 elementi, chiamato `y`.  Alla lista che abbiamo creato abbiamo assegnato il nome di `data_list`.
 
 ```{r}
-file <- file.path("code", "noise_1.stan")
+data_list
 ```
 
-Compiliamo il modello
+Per estrarre da una lista l'elemento i-esimo usiamo la sintassi `[[i]]`. Per esempio, il primo elemento di `data_list` è
+
+```{r}
+data_list[[1]]
+```
+
+Il secondo elemento di `data_list` è
+
+```{r}
+data_list[[2]]
+```
+
+In alternativa, possiamo anche usare il nome dell'elemento della lista
+
+```{r}
+data_list$y
+```
+
+Questa sintassi ci fa capire che il tipo `data.frame` è una lista.
+
+
+## Definizione del modello in Stan
+
+Stan è un linguaggio probabilistico che consente di generare campioni casuali da una distribuzione a posteriori. La specificazione del modello in Stan, per il caso presente, è fornita qui sotto. Si noti l'organizzazione in "blocchi". Ogni blocco ha un nome (i blocchi possibili sono `data`, `parameters`, `model` e altri) seguito da una parentesi graffa.
+
+```{r}
+model_string <- "
+data {
+  int<lower=0> N;
+  array[N] int<lower=0, upper=1> y;
+}
+parameters {
+  real<lower=0, upper=1> theta;
+}
+model {
+  theta ~ beta(2, 10);
+  y ~ bernoulli(theta);
+}
+"
+```
+
+### Blocco `data`
+
+Il primo blocco (`data`) definisce il tipo di dati che verranno usati nel modello. I nomi dei dati qui elencati, ovvero `N` e `y` devono corrispondere ai nomi utilizzati nella lista di dati che verrà utilizzata in input. Infatti, in `data_list` ci sono due elementi (l'ordine è irrilevante): un elemento chiamato `N` e un elemento chiamato `y`. 
+
+Nel blocco `data` è anche necessario chiarire il tipo dei dati.  
+
+L'espressione `int<lower=0> N;` significa che l'oggetto `N` è di tipo `int`, ovvero che è un numero naturale (0, 1, 2, ...) il cui valore minimo `<lower>` è uguale a 0 -- non ha ovviamente senso una numerosità campionaria minore di 0.
+
+Il codice funzionerà anche se non specifichiamo `<lower=0>`, ma quando abbiamo informazioni sui vincoli che devono essere soddisfatti dai dati è meglio renderli espliciti perché, in questo modo, se i vincoli vengono violati (es., specifichiamo una numerosità campionaria minore di 0), l'esecuzione del codice verrà immediatamente interrotta e il messaggio d'errore ci dirà che i dati in input non soddisfano i vincoli richiesti.
+
+L'istruzione `array[N] int<lower=0, upper=1> y;` indica che `y` (la sequenza di prove Bernoulliane dell'esperimento) è un vettore. Infatti `array[N]` significa che `y` è un array (vettore) costituito da `N` elementi, laddove `N` è specificato dall'istruzione precedente.
+
+Anche qui specifichiamo il vincolo che i dati `y` devono soddisfare: gli elementi di `y` non possono assumere valori minori di 0 o maggiori di 1 -- infatti, ciascun elemento può solo assumere i valori 0 oppure 1.
+
+Si noti che ogni riga del blocco `data` (e di qualsiasi blocco) termina con un `;`. Questo è un aspetto necessario della sintassi di Stan; se violiamo questo requisito, il codice ci fornirà un errore.
+
+Il blocco `data` si conclude quando viene chiusa la parantesi graffa. Dopo la parentesi graffa non è necessario il punto e virgola.
+
+### Blocco `parameters`
+
+Il blocco `parameters` deve elencare i parametri che vogliamo stimare. Il linguaggio probabilistico Stan (e tutti gli altri linguaggi probabilistici) consente di generare un campione casuale tratto dalla distribuzione a posteriori dei parametri indicati. 
+
+Nel caso del modello beta-binomiale che stiamo discutendo, l'unico parametro ignoto è $\theta$, ovvero la probabilità di successo in una singola prova Bernoulliana.
+
+L'istruzione `real<lower=0, upper=1> theta;` specifica che il parametro di interesse è chiamato `theta`. Ci dice inoltre che `theta` è un numero reale compreso nell'intervallo [0, 1]. Ciò significa che `theta` può assumere un valore qualsiasi nell'intervallo indicato.
+
+### Blocco `model`
+
+Il blocco `model` contiene due righe. La prima riga definisce la distribuzione a priori che vogliamo assegnare al parametro `theta`. L'istruzione `theta ~ beta(2, 10);` ci diche che la distribuzione a priori che abbiamo imposto su `theta` è una Beta(2, 10). In Stan, per fare riferimento alla distribuzione Beta usiamo la funzione `beta()` la quale prende due parametri: alpha (nel nostro caso, 2) e beta (nel nostro caso, 10). Quindi, l'istruzione `theta ~ beta(2, 10);` corrisponde alla specificazione della distribuzione a priori per $\theta$ che, in precedenza, abbiamo indicato con 
+
+$$
+\theta \sim \mbox{Beta}(2, 10).
+$$
+
+La riga successiva specifica la verosimiglianza, ovvero $p(y \mid \theta)$. Nel caso presente, la verosimiglianza è Binomiale, ovvero 
+
+$$
+{\displaystyle f(y,n,p)=\Pr(y;n,p)=\Pr(X=y)={\binom {n}{y}}\theta^{y}(1-\theta)^{n-y}},
+$$
+
+espressa in funzione di $\theta$, ovvero
+
+$$
+y \sim \mbox{Binom}(n, \theta).
+$$
+
+In linguaggio Stan, scriviamo la verosimiglianza come `y ~ bernoulli(theta)`, il che significa che ciascun elemento del vettore `y` è una variabile casuale Bernoulliana con probabilità (ignota) di successo `theta`. Ciò significa dire che il numero dei successi in $n$ prove è una variabile casuale Binomiale. Sono possibili specificazioni diverse (ma equivalenti) della verosimiglianza, ma questa è la più semplice.
+
+## Salvare il modello Stan in un file
+
+Tutto il modello Stan è racchiuso tra virgolette doppie, il che significa che sarà rappresentato come una serie di stringhe. A tale modello abbiamo assegnato il nome di `model_string`.
+
+Con la funzione `writeLines()` salviamo il modello (che è un file di testo) in un file chiamato `oneprop_1.stan`. Il primo argomento di `writeLines()` specifica l'oggetto $\mathsf{R}$ che contiene le istruzioni Stan. Il secondo argomento specifica il nome del file che vogliamo creare. Si noti che il nome del file deve avere l'estensione `.stan`. Per l'esempio presente, ho creato una cartella chiamata `code`; il secondo argomento di `writeLines()` specifica che il file `.stan` deve essere salvato in quella cartella.
+
+```{r}
+writeLines(model_string, con = "code/oneprop_1.stan")
+```
+
+Per potere eseguire il campionamento MCMC è necessario leggere il file che abbiamo creato e nel quale abbiamo salvato il codice Stan. Con la funzione `file.path()` specifichiamo la posizione dove è stato salvato il file che abbiamo creato.
+
+```{r}
+file <- file.path("code", "oneprop_1.stan")
+```
+
+L'oggetto `file` non è nient'altro che l'indirizzo del file di interesse in relazione alla working directory.
+
+```{r}
+file
+```
+
+## Compilare il modello
+
+La funzione `cmdstan_model()` esegue due operazioni:
+
+- traduce il programma scritto in linguaggio Stan in linguaggio C++,
+- il compilatore C++ compila la sorgente C++ che è stata creata e la collega alle librerie Stan.
+
+Viene così creato un programma eseguibile che consente di eseguire il campionamento MCMC. Salvo l'eseguibile così creato assegnandoli il nome `mod`.
 
 ```{r}
 mod <- cmdstan_model(file)
 ```
 
-Eseguiamo il campionamento MCMC:
+## Eseguire il campionamento MCMC
+
+Possiamo ora eseguire il campionamento MCMC usando `mod$sample()`. Specifichiamo l'argomento `data = data_list` così da fornire in input la lista che contiene i nostri dati. L'argomento `iter_sampling` specifica 4000 iterazioni, ovvero richiede che la catena di Markov sia costituita da 4000 passi. L'argomento `iter_warmup` specifica che i primi 2000 valori della catena saranno esclusi. L'argomento `seed` specifica il seed, per la riproducibilità dei risultati. L'argomento `chanins` specifica il numero di catene di Markov che verranno costruite in parallelo, partendo da posizioni iniziali diverse e scelte in maniera casuale. L'argomento `refresh = 0` richiede che non venga stampato un messaggio che mostra la proporzione di avanzamento della costruzione della catena di Markov. L'argomento `thin = 1` specifica che verranno salvati tutti i punti della catena di Markov.
+
+Ricordo che una catena di Markov è una sequenza di valori che vengono generati in un modo simile a quello che abbiamo descritto quando abbiamo presentato l'algoritmo di Metropolis. Per generare questa sequenza di valori, Stan non usa l'algoritmo di Metropolis, ma una sua variante. La differenza fondamentale tra l'algoritmo di Metropolis e l'algoritmo usato da Stan (che si chiama campionamento hamiltoniano, *Hamiltonian sampling*) è che l'algoritmo usato da Stan è più efficiente dell'algoritmo di Metropolis, ovvero converge alla vera distribuzione a posteriori dei parametri "più velocemente", ovvero con un numero minore di passi. A parte questa differenza, i risultati che si ottengono con i due algoritmi sono equivalenti.
+
+Nella seguente istruzione salviamo l'output di `mod$sample()` in un oggetto chiamato `fit`.
 
 ```{r, message = FALSE, warning=FALSE, results='hide'}
 fit <- mod$sample(
@@ -133,60 +227,109 @@ fit <- mod$sample(
 )
 ```
 
-Esaminiamo la soluzione trasformando l'oggetto `fit` nel formato `stanfit` per comodità:
+Si notino i messaggi che vengono forniti alla conclusione del campionamento MCMC. In particolare, `All 4 chains finished successfully.` ci dice che il campionamento è andato a buon fine, nel senso che non ci sono stati problemi di convergenza. Se non otteniamo questo messaggio questo vuol dire che non c'è stata convergenza, ovvero che i valori che sono stati generati *non* costituiscono un campione casuale della distribuzione a posteriori target. Di conseguenza, se non otteniamo il messaggio precedente, non è possibile interpretare i risulati ottenuti.
+
+## Esaminare i risultati
+
+L'oggetto `fit` contiene molteplici informazioni. Per manipolarlo più facilmente lo trasformiamo nel formato `stanfit`. Ciò ci consentirà di usare varie "utility functions" per estrarre dall'oggetto `stanfit` le informazioni di nostro interesse. La funzione che possiamo usare a questo fine è `rstan::read_stan_csv()`.
 
 ```{r}
-stanfit <- rstan::read_stan_csv(fit$output_files())
-posterior <- as.matrix(stanfit)
-mcmc_areas(posterior, pars = c("alpha", "beta"))
+fit_stanfit <- rstan::read_stan_csv(fit$output_files())
 ```
 
-Ricordiamo che abbiamo generato i dati in modo tale che $x$ abbia un effetto causale nullo sulla $y$. A causa del rumore, però, i risultati della regressione suggeriscono un chiaro effetto di $x$ su $y$: la moda a posteriori del parametro $\beta$ è pari a circa 0.17.
-
-Esaminiamo ora la situazione opposta, ovvero quella nella quale vi è un effetto causale di $x$ sulla $y$. Simuliamo i dati seguendo le indicazioni di McElreath:
+L'oggetto `fit_stanfit` è una lista che contiene 4 elementi
 
 ```{r}
-n <- 500
-x <- rnorm(n)
-y <- rnorm(n, 0.8 * x)
-x_star <- rnorm(n, 0.7*x + 0.3*y)
+length(fit_stanfit@sim$samples)
 ```
 
-Inseriamo i dati in una lista:
+I quattro elementi corrispondono alle 4 catene di 4000 osservazioni ciascuna, le quali contengono valori casuali estratti dalla distribuzione a posteriori di $\theta$. Per esempio, i valori iniziali della prima catena di Markov sono i seguenti.
 
 ```{r}
-data2_list <- list(
-  N = length(x),
-  x = x_star,
-  y = y
+head(fit_stanfit@sim$samples[[1]])
+```
+
+Estraggo le stime di $\theta$.
+
+```{r}
+chain_1 <- fit_stanfit@sim$samples[[1]]$theta
+```
+
+Creo una rappresentazione grafica della catena nei primi 100 passi.
+
+```{r}
+plot(1:100, chain_1[1:100], type = 'l')
+```
+
+L'oggetto `chain_1` è composto da 4000 elementi.
+
+```{r}
+length(chain_1)
+```
+
+Un istogramma degli ultimi 2000 elementi (escludendo il warm-up) si ottiene nel modo seguente.
+
+```{r}
+hist(chain_1[2001:4000])
+```
+
+Lo stesso si può dire delle altre 3 catene che sono state create.
+
+Se combiniamo i valori delle 4 catene, escludendo il warm-up, possiamo creare un grafico che riporta la stima della distribuzione a posteriori nel modo seguente:
+
+```{r}
+posterior <- as.matrix(fit_stanfit)
+mcmc_areas(posterior, pars = c("theta"))
+```
+
+Di default, gli estremi dell'intervallo che contiene la curva corrispondono al 100% dell'area. L'area centrale evidenziata corrisponde al 50% dell'area. 
+Il segmento verticale evidenziato corrisponde alla mediana.
+
+Se vogliamo evidenziare il 90% dell'area centrale sottesa alla curva, usiamo l'argomento `prob = 0.9`.
+
+```{r}
+mcmc_areas(posterior, pars = c("theta"), prob = 0.9)
+```
+Il valore numerico esatto di questo intervallo si ottiene nel modo seguente.
+
+```{r}
+fit$summary(c("theta"))
+```
+
+L'esame del "mixing" delle catene è fornito dal seguente grafico.
+
+```{r}
+fit_stanfit %>%
+  mcmc_trace(pars = c("theta"))
+```
+
+Un istogramma si ottiene nel modo seguente
+
+```{r}
+ mcmc_hist(fit_stanfit, pars = "theta") +
+  yaxis_text(TRUE) +
+  ylab("count")
+```
+
+Sappiamo che, nel caso beta-binomiale, la distribuzione a posteriori deve essere una Beta(25, 17).
+
+```{r}
+bayesrules::summarize_beta_binomial(
+  alpha = 2, beta = 10, y = 23, n = 30
 )
 ```
 
-Eseguiamo il campionamento MCMC:
-
-```{r, message = FALSE, warning=FALSE, results='hide'}
-fit2 <- mod$sample(
-  data = data2_list,
-  iter_sampling = 4000L,
-  iter_warmup = 2000L,
-  seed = 84735,
-  chains = 4L,
-  refresh = 0,
-  thin = 1
-)
-```
-
-Esaminiamo la soluzione ottenuta:
+Per verificare il risultato ottenuto, sovrapponiamo la curva corrispondente ad una Beta(25, 17) all'approssimazione numerica della distribuzione a posteriori ottenuta da Stan:
 
 ```{r}
-stanfit2 <- rstan::read_stan_csv(fit2$output_files())
-posterior2 <- as.matrix(stanfit2)
-mcmc_areas(posterior2, pars = c("alpha", "beta"))
+mcmc_dens(fit_stanfit, pars = "theta") +
+  yaxis_text(TRUE) +
+  ylab("density") +
+  stat_function(fun = dbeta, args = list(shape1 = 25, shape2=17))
 ```
 
-In questo secondo caso, il vero effetto causale è $\beta = 0.8$ ma, a causa del rumore di misurazione, abbiamo stimato $\hat{\beta} \approx 0.5$.
+L'approssimazione numerica della distribuzione a posteriori di $\theta$ fornita da Stan è dunque eccellente.
 
-In conclusione, la presenza del rumore di misurazione può avere effetti opposti: può fare emergere un'associazione causale che, in realtà, non esiste, oppure può sottostimare un'associazione causale effettiva. Il risultato che si osserva dipende dalla reale struttura causale che lega le variabili.
 
 ## Informazioni sulla sessione di lavoro
 
