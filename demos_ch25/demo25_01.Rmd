@@ -1,0 +1,233 @@
+---
+title: "Data science per psicologi - demo 25.01"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("bayesplot")
+  library("rstan")
+  library("cmdstanr")
+  library("posterior")
+})
+
+rstan_options(auto_write = TRUE) # avoid recompilation of models
+options(mc.cores = parallel::detectCores()) # parallelize across all CPUs
+Sys.setenv(LOCAL_CPPFLAGS = "-march=native") # improve execution time
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Modello di regressione in Stan
+
+In questo demo ci poniamo il problema di implementare il modello di regressione semplice usando Stan.
+
+Useremo i dati contenuti nel pacchetto `sur`. 
+
+```{r}
+library("sur")
+data(Brainsz)
+glimpse(Brainsz)
+```
+
+Riporto qui sotto la descrizione del set di dati.
+
+> The data are based on a study by Willerman et al. (1991) of the relationships between brain size, gender, and intelligence. The research participants consisted of 40 right-handed introductory psychology students with no history of alcoholism, unconsciousness, brain damage, epilepsy, or heart disease who were selected from a larger pool of introductory psychology students with total Scholastic Aptitude Test Scores higher than 1350 or lower than 940. The students in the study took four subtests (Vocabulary, Similarities, Block Design, and Picture Completion) of the Wechsler (1981) Adult Intelligence Scale-Revised. Among the students with Wechsler full-scale IQ’s less than 103, 10 males and 10 females were randomly selected. Similarly, among the students with Wechsler full-scale IQ’s greater than 130, 10 males and 10 females were randomly selected, yielding a randomized blocks design. MRI scans were performed at the same facility for all 40 research participants to measure brain size. The scans consisted of 18 horizontal MRI images. The computer counted all pixels with non-zero gray scale in each of the 18 images, and the total count served as an index for brain size. The dataset and description are adapted from the Data and Story Library (DASL) website.
+
+Mi concentrerò sulla relazione tra FSIQ e grandezza del cervello.
+
+```{r}
+Brainsz %>% 
+  ggplot(aes(x = MRI, y = FSIQ, color = GENDER)) +
+  geom_point()
+```
+
+I dati rappresentati nel diagramma a dispersione suggeriscono che, in questo piccolo campione, sembra esserci un'associazione positiva tra MRI e FSIQ per i maschi, ma non per le femmine.
+
+Per fare un esercizio, ci concentriamo sui maschi.
+
+```{r}
+males <- Brainsz %>% 
+  dplyr::filter(GENDER == "Male")
+```
+
+```{r}
+males %>% 
+  ggplot(aes(x = MRI, y = FSIQ)) +
+  geom_point()
+```
+
+Per semplificare l'analisi, standardizzo i dati.
+
+```{r}
+males$fsiq <- scale(males$FSIQ) %>% 
+  as.numeric()
+
+males$mri <- scale(males$MRI) %>% 
+  as.numeric()
+```
+
+Esamino il diagramma a dispersione per le due variabili standardizzate.
+
+```{r}
+males %>% 
+  ggplot(aes(x = mri, y = fsiq)) +
+  geom_point()
+```
+
+
+### I dati in Stan
+
+Inserisco i dati in una lista così come richiesto da Stan:
+
+```{r}
+data_list <- list(
+  N = length(males$fsiq),
+  x = males$mri,
+  y = males$fsiq
+)
+
+data_list
+```
+
+Definizione il modello in linguaggio Stan.
+
+```{r}
+model_string <- "
+  data {
+    int<lower=0> N;     // number of data points
+    vector[N] x;    // covariate / predictor
+    vector[N] y;    // target
+  }
+  parameters {
+    real alpha;          // intercept
+    real beta;           // slope
+    real<lower=0> sigma; // standard deviation is constrained to be positive
+  }
+  transformed parameters {
+    // deterministic transformation of parameters and data
+    vector[N] mu = alpha + beta*x;      // linear model
+  }
+  model {
+    alpha ~ normal(0, 2.5);    // prior
+    beta ~ normal(0, 2.5);     // prior
+    sigma ~ normal(0, 10);      // as sigma is constrained to be positive,
+                               // this is same as half-normal prior
+    y ~ normal(mu, sigma);     // likelihood
+  }
+"
+```
+
+Salvo il modello Stan in un file.
+
+```{r}
+writeLines(model_string, con = "code/lmod_1.stan")
+file <- file.path("code", "lmod_1.stan")
+```
+
+Compilo il modello.
+
+```{r}
+mod <- cmdstan_model(file)
+```
+
+Eseguo il campionamento MCMC.
+
+```{r, message = FALSE, warning=FALSE, results='hide'}
+fit <- mod$sample(
+  data = data_list,
+  iter_sampling = 4000L,
+  iter_warmup = 2000L,
+  seed = 84735,
+  chains = 4L,
+  refresh = 0,
+  thin = 1
+)
+```
+
+Esamino i risultati del campionamento MCMC.
+
+```{r}
+post <- fit$draws()
+```
+
+```{r}
+# estraggo solo le stime a posteriori dei parametri di interesse
+post_parms <- subset_draws(post, c("alpha", "beta", "sigma"))
+posterior::summarise_draws(post_parms)
+```
+
+Trovo l'intervallo di credibilità al 95%.
+
+```{r}
+posterior::summarise_draws(
+  post_parms, 
+  ~quantile(.x, probs = c(0.025, 0.975))
+  )
+```
+
+I risultati ottenuti sono molto simili a quelli trovati con l'approccio frequentista.
+
+```{r}
+fm <- lm(fsiq ~ mri, males)
+summary(fm)
+```
+
+Esamino il "mixing" delle catene.
+
+```{r}
+bayesplot::mcmc_trace(post, pars = c("alpha", "beta", "sigma"))
+```
+
+
+Creo un grafico della distribuzione a posteriori dei tre parametri. 
+
+```{r}
+bayesplot::mcmc_areas(post, pars = c("alpha", "beta", "sigma"), prob = 0.95)
+```
+
+## Conclusioni {-}
+
+Dato che abbiamo standardizzato i dati, il parametro $\alpha$ deve essere 0.
+
+L'intervallo di credibilità al 95% per $\beta$ non inckllude lo 0. Interpretiamo questo risultato dicendo che, con un livello di certezza soggettiva del 95%, possiamo concludere che vi sono evidenze che, nei maschi, la grandezza del cervello, così come indicizzata dagli scan MRI, è positivamente associata al FSIQ. In particolare, un aumento di una deviazione standard nella grandezza del cervello, così com'è stata misurata nel presente studio, corrisponde ad un amento medio nel FSIQ di 0.498 deviazioni standard, 95% CI [0.05,	0.94]. 
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
