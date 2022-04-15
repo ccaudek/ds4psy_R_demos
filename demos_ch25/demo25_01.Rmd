@@ -146,6 +146,13 @@ model_string <- "
                                // this is same as half-normal prior
     y ~ normal(mu, sigma);     // likelihood
   }
+  generated quantities {
+  vector[N] y_rep;
+    for(i in 1:N){
+      y_rep[i] = normal_rng(alpha + beta * x[i], sigma);
+    }
+  }
+
 "
 ```
 
@@ -176,14 +183,67 @@ fit <- mod$sample(
 )
 ```
 
+## Diagnostiche
+
+Le seguenti diagnostiche sono spiegate nel *CmdStan User's Guide*.
+
+```{r}
+fit$cmdstan_diagnose()
+```
+
+
+## Posterior predictive checks
+
+Esaminiamo i posterior predictive checks.
+
+```{r}
+y_rep <- fit$draws("y_rep", format = "matrix")
+ppc_dens_overlay(y = data_list$y, yrep = y_rep[1:100, ])
+```
+
+I dati di partenza hanno una forma bimodale, per cui il fit del modello non è perfetto. 
+
+```{r}
+plot(density(data_list$y))
+```
+
+Le curve in grigio sono generate usando i valori predetti
+
+$$
+\hat{y} = a + b x,
+$$
+laddove $a$ e $b$ sono valori presi a caso dalla distribuzione a posteriori dei parametri. Considerando il campione di partenza, si può dire che il fit sia ragionevole.
+
+Possiamo anche esaminare la distribuzione predittiva a posteriori di varie statistiche campionarie.
+
+```{r}
+ppc_stat(y = data_list$y, yrep = y_rep[1:100, ], stat = "mean")
+```
+
+```{r}
+ppc_stat(y = data_list$y, yrep = y_rep[1:100, ], stat = "sd")
+```
+
+
+```{r}
+ppc_stat(y = data_list$y, yrep = y_rep[1:100, ], stat = "min")
+```
+
+```{r}
+ppc_stat(y = data_list$y, yrep = y_rep[1:100, ], stat = "max")
+```
+
+## Stime a posteriori
+
 Esamino i risultati del campionamento MCMC.
 
 ```{r}
 post <- fit$draws()
 ```
 
+Estraggo solo le stime a posteriori dei parametri di interesse.
+
 ```{r}
-# estraggo solo le stime a posteriori dei parametri di interesse
 post_parms <- subset_draws(post, c("alpha", "beta", "sigma"))
 posterior::summarise_draws(post_parms)
 ```
@@ -195,6 +255,13 @@ posterior::summarise_draws(
   post_parms, 
   ~quantile(.x, probs = c(0.025, 0.975))
   )
+```
+
+Calcolo la probabilità di $\beta > 0$.
+
+```{r}
+draws_lin <- as_draws_df(fit$draws())
+mean(draws_lin[, "beta"] > 0) 
 ```
 
 I risultati ottenuti sono molto simili a quelli trovati con l'approccio frequentista.
@@ -210,18 +277,39 @@ Esamino il "mixing" delle catene.
 bayesplot::mcmc_trace(post, pars = c("alpha", "beta", "sigma"))
 ```
 
-
 Creo un grafico della distribuzione a posteriori dei tre parametri. 
 
 ```{r}
 bayesplot::mcmc_areas(post, pars = c("alpha", "beta", "sigma"), prob = 0.95)
 ```
 
+Una rappresentazione della retta di regressione con l'intervallo di credibilità al 90% è la seguente.
+
+```{r}
+mu <- draws_lin %>%
+  as_draws_df() %>%
+  as_tibble() %>%
+  select(starts_with("mu")) %>%
+  apply(2, quantile, c(0.05, 0.5, 0.95)) %>%
+  t() %>% 
+  data.frame(x = data_list$x, .)  %>% 
+  gather(pct, y, -x)
+
+ggplot() +
+  geom_point(aes(x, y), data = data.frame(data_list), size = 1) +
+  geom_line(aes(x, y, linetype = pct), data = mu, color = 'red') +
+  scale_linetype_manual(values = c(2,1,2)) +
+  labs(y = 'FSIQ', x= "MRI") +
+  guides(linetype = "none")
+```
+
+
 ## Conclusioni {-}
 
 Dato che abbiamo standardizzato i dati, il parametro $\alpha$ deve essere 0.
 
 L'intervallo di credibilità al 95% per $\beta$ non inckllude lo 0. Interpretiamo questo risultato dicendo che, con un livello di certezza soggettiva del 95%, possiamo concludere che vi sono evidenze che, nei maschi, la grandezza del cervello, così come indicizzata dagli scan MRI, è positivamente associata al FSIQ. In particolare, un aumento di una deviazione standard nella grandezza del cervello, così com'è stata misurata nel presente studio, corrisponde ad un amento medio nel FSIQ di 0.498 deviazioni standard, 95% CI [0.05,	0.94]. 
+
 
 
 ## Informazioni sulla sessione di lavoro
