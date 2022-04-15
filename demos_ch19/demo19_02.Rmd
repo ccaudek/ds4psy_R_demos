@@ -30,6 +30,7 @@ suppressPackageStartupMessages({
   library("bayesplot")
   library("rstan")
   library("cmdstanr")
+  library("posterior")
 })
 
 rstan_options(auto_write = TRUE) # avoid recompilation of models
@@ -42,7 +43,7 @@ set.seed(84735)
 
 knitr::opts_chunk$set(
   collapse = TRUE,
-  # tidy = 'styler',
+  tidy = 'styler',
   fig.width = 6,
   fig.asp = 0.618 # 1 / phi
 )
@@ -227,88 +228,62 @@ fit <- mod$sample(
 )
 ```
 
-Si notino i messaggi che vengono forniti alla conclusione del campionamento MCMC. In particolare, `All 4 chains finished successfully.` ci dice che il campionamento è andato a buon fine, nel senso che non ci sono stati problemi di convergenza. Se non otteniamo questo messaggio questo vuol dire che non c'è stata convergenza, ovvero che i valori che sono stati generati *non* costituiscono un campione casuale della distribuzione a posteriori target. Di conseguenza, se non otteniamo il messaggio precedente, non è possibile interpretare i risulati ottenuti.
+Si notino i messaggi che vengono forniti alla conclusione del campionamento MCMC. In particolare, `All 4 chains finished successfully.` ci dice che il campionamento è andato a buon fine, nel senso che non ci sono stati problemi di convergenza. Se non otteniamo questo messaggio questo vuol dire che non c'è stata convergenza, ovvero che i valori che sono stati generati *non* costituiscono un campione casuale della distribuzione a posteriori target. Di conseguenza, se non otteniamo il messaggio precedente, non è possibile interpretare i risultati ottenuti.
 
-## Esaminare i risultati
+## Risultati del campionamento MCMC
 
-L'oggetto `fit` contiene molteplici informazioni. Per manipolarlo più facilmente lo trasformiamo nel formato `stanfit`. Ciò ci consentirà di usare varie "utility functions" per estrarre dall'oggetto `stanfit` le informazioni di nostro interesse. La funzione che possiamo usare a questo fine è `rstan::read_stan_csv()`.
+I risultati del campionamento MCMC possono essere estratti usando il metodo `draws` che ritorna un array, ovvero, una matrice multi-dimensionale. In generale, abbiamo molteplici matrici, una per ciascun parametro. Nel caso presente, c'è una sola matrice essendoci un solo parametro. Vengono visualizzate le prime cinque righe delle quattro catene.
 
 ```{r}
-fit_stanfit <- rstan::read_stan_csv(fit$output_files())
+(post <- fit$draws())
 ```
 
-L'oggetto `fit_stanfit` è una lista che contiene 4 elementi
+L'oggetto `post` è di classe `draws_array`.
 
 ```{r}
-length(fit_stanfit@sim$samples)
+class(post)
 ```
 
-I quattro elementi corrispondono alle 4 catene di 4000 osservazioni ciascuna, le quali contengono valori casuali estratti dalla distribuzione a posteriori di $\theta$. Per esempio, i valori iniziali della prima catena di Markov sono i seguenti.
+## Indici sintetici della distribuzione a posteriori
+
+Indici sintetici della distribuzione a posteriori possono essere calcolati usando le funzioni del pacchetto `posterior`. Ad esempio
 
 ```{r}
-head(fit_stanfit@sim$samples[[1]])
+posterior::summarise_draws(post)
 ```
 
-Estraggo le stime di $\theta$.
+L'intervallo di credibilità può essere ottenuto nel modo seguente. Ad esempio, per una probabilità del 95% abbiamo:
 
 ```{r}
-chain_1 <- fit_stanfit@sim$samples[[1]]$theta
+posterior::summarise_draws(
+  post, 
+  ~quantile(.x, probs = c(0.025, 0.975))
+  )
 ```
 
-Creo una rappresentazione grafica della catena nei primi 100 passi.
+
+## Visualizzazione
+
+Possiamo visualizzare la distribuzione a posteriori con le funzioni del pacchetto `bayesplot`. 
+
+Ad esempio, l'esame del "mixing" delle catene è fornito dal seguente grafico.
 
 ```{r}
-plot(1:100, chain_1[1:100], type = 'l')
+bayesplot::mcmc_trace(post, pars = c("theta"))
 ```
 
-L'oggetto `chain_1` è composto da 4000 elementi.
+La figura indica che c'è stato un mixing appropriato per le 4 catene.
+
+Un grafico della distribuzione a posteriori è il seguente. Di default, l'area centrale evidenziata corrisponde al 50% dell'area totale.
 
 ```{r}
-length(chain_1)
+bayesplot::mcmc_areas(post, pars = c("theta"))
 ```
 
-Un istogramma degli ultimi 2000 elementi (escludendo il warm-up) si ottiene nel modo seguente.
+Se vogliamo evidenziare il 95% dell'area centrale sottesa alla curva, usiamo l'argomento `prob = 0.95`.
 
 ```{r}
-hist(chain_1[2001:4000])
-```
-
-Lo stesso si può dire delle altre 3 catene che sono state create.
-
-Se combiniamo i valori delle 4 catene, escludendo il warm-up, possiamo creare un grafico che riporta la stima della distribuzione a posteriori nel modo seguente:
-
-```{r}
-posterior <- as.matrix(fit_stanfit)
-mcmc_areas(posterior, pars = c("theta"))
-```
-
-Di default, gli estremi dell'intervallo che contiene la curva corrispondono al 100% dell'area. L'area centrale evidenziata corrisponde al 50% dell'area. 
-Il segmento verticale evidenziato corrisponde alla mediana.
-
-Se vogliamo evidenziare il 90% dell'area centrale sottesa alla curva, usiamo l'argomento `prob = 0.9`.
-
-```{r}
-mcmc_areas(posterior, pars = c("theta"), prob = 0.9)
-```
-Il valore numerico esatto di questo intervallo si ottiene nel modo seguente.
-
-```{r}
-fit$summary(c("theta"))
-```
-
-L'esame del "mixing" delle catene è fornito dal seguente grafico.
-
-```{r}
-fit_stanfit %>%
-  mcmc_trace(pars = c("theta"))
-```
-
-Un istogramma si ottiene nel modo seguente
-
-```{r}
- mcmc_hist(fit_stanfit, pars = "theta") +
-  yaxis_text(TRUE) +
-  ylab("count")
+bayesplot::mcmc_areas(post, pars = c("theta"), prob = 0.95)
 ```
 
 Sappiamo che, nel caso beta-binomiale, la distribuzione a posteriori deve essere una Beta(25, 17).
@@ -322,7 +297,7 @@ bayesrules::summarize_beta_binomial(
 Per verificare il risultato ottenuto, sovrapponiamo la curva corrispondente ad una Beta(25, 17) all'approssimazione numerica della distribuzione a posteriori ottenuta da Stan:
 
 ```{r}
-mcmc_dens(fit_stanfit, pars = "theta") +
+mcmc_dens(post, pars = "theta") +
   yaxis_text(TRUE) +
   ylab("density") +
   stat_function(fun = dbeta, args = list(shape1 = 25, shape2=17))

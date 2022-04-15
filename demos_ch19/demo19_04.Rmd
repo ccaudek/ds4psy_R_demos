@@ -27,16 +27,9 @@ code.r{
 suppressPackageStartupMessages({
   library("here")
   library("tidyverse")
-  library("scales")
   library("bayesplot")
   library("rstan")
   library("cmdstanr")
-  library("posterior")
-  library("loo")
-  library("rethinking")
-  library("brms")
-  library("dagitty")
-  library("ggdag")
 })
 
 rstan_options(auto_write = TRUE) # avoid recompilation of models
@@ -55,89 +48,94 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Stima dei coefficienti e rumore
+# Confronto tra due proporzioni
 
-In questo tutorial viene esaminato un aspetto discusso da Richard McElreath nella sua lecture [Statistical Rethinking 2022 Lecture 17](https://www.youtube.com/watch?v=lTFAB6QmwHM&list=PLDcUM9US4XdMROZ57-OIRtIK0aOynbgZN&index=18). Con una semplice simulazione, McElreath mostra come la presenza di rumore non produce sempre una sottostima dei "veri" effetti causali. L'idea diffusa è che le stime delle associazioni tra variabili che otteniamo nelle analisi dei dati rappresentano sempre, a causa del rumore intrinseco nelle misurazioni, delle sottostime dei veri effetti causali che sono presenti nel mondo empirico. Una tale sottostima è chiamata *attenuazione*. Ma questa idea è falsa. Con questa semplice simulazione, McElreath mostra come, in generale, la presenza di rumore di misurazione non comporta necessariamente una sottostima degli effetti causali che legano le variabili.
+Consideriamo i dati di uno studio sulla rianimazione cardiopolmonare (RCP) discussi nel testo *Modern Statistical Methods for Psychology*. L'esperimento consisteva in due trattamenti su pazienti sottoposti a RCP per infarto e successivamente ricoverati in ospedale. Ogni paziente è stato assegnato in modo casuale ad uno di due gruppi. I pazienti di un gruppo ricevevano un anticoagulante (gruppo di trattamento); gli altri non ricevere un anticoagulante (gruppo di controllo). La variabile di esito di interesse era se il paziente fosse sopravvissuto per almeno 24 ore (Böttiger et al. 2001).
 
-McElreath ipotizza la seguente struttura causale nella quale $x$ ha un effetto su $y$. Come sempre avviene in pratica, il ricercatore non ha un accesso diretto a $x$ ma può misurare solo un qualche proxy di $x$, qui chiamato $x_{star}$. La variabile misurata, necessariamente, risulta corrotta dal rumore $e$. McElreath ipotizza, come avviene spesso in pratica, che l'entità del rumore che influenza $x_{star}$ dipenda da $y$. La situazione è rappresentata dal seguente diagramma:
+I dati sono i seguenti.
 
-```{r}
-dag <- dagitty("dag {
-  x -> x_star
-  x -> y
-  e -> x_star
-  y -> e
-}")
+- Gruppo di controllo (*n* = 50): 11 sopravvissuti;
+- Gruppo di trattamento (*n* = 40): 14 soproavvissuti.
 
-coordinates(dag) <- list(
-  x = c(e = 1, x = 2, x_star = 1, y = 3),
-  y = c(e = 1, x = 3, x_star = 2, y = 3)
-)
-plot(dag)
-```
-
-Simuliamo ora un campione di dati che soddisfa i vincoli di una tale struttura causale:
+La probabilità di sopravvivenza nel gruppo di controllo è
 
 ```{r}
-n <- 500
-x <- rnorm(n)
-y <- rnorm(n, 0.0 * x)
-x_star <- rnorm(n, 0.7*x + 0.3*y)
+theta_c = 11 / 50
+theta_c
 ```
 
-Si noti che, nella struttura causale ipotizzata, i dati sono stati generati assumendo che $x$ abbia un effetto nullo sulla $y$.
-
-Inseriamo i dati in una lista appropriata come input per Stan:
+La probabilità di sopravvivenza nel gruppo di trattamento è
 
 ```{r}
-data_list <- list(
-  N = length(x),
-  x = x_star,
-  y = y
-)
+theta_t = 14 / 40
+theta_t
 ```
 
-Utilizziamo un semplice modello di regressione per esaminare la relazione tra $x$ e $y$ in questi dati.
+Sulla base delle due proporzioni possiamo calcolare l'odds-ratio.
 
-```{r stan}
-modelString = "
-data {
-  int<lower=0> N;
-  vector[N] x;
-  vector[N] y;
-}
-parameters {
-  real alpha;
-  real beta;
-  real<lower=0> sigma;
-}
-model {
-  alpha ~ normal(0, 1);
-  beta ~ normal(0, 1);
-  sigma ~ exponential(1);
-  y ~ normal(alpha + beta * x, sigma);
-}
+```{r}
+or <- (theta_t / (1 - theta_t)) / (theta_c / (1 - theta_c)) 
+or
+```
+
+Ciò significa che gli odds di sopravvivere nelle 24 ore successive ad una rianimazione cardiopolmonare sono maggiori del 90% per chi ha ricevuto un anticoagulante rispetto a chi non l'ha ricevuto.
+
+In questo modo abbiamo sintetizzato i dati del campione. Il nostro obiettivo però non è solo quello di descrivere il campione, ma bensì quello di fare inferenza sul parametro sconosciuto OR ("nella popolazione") costruendo la distribuzione a posteriori per questo parametro.
+
+## Dati
+
+Inseriamo i dati in un oggetto di classe list.
+
+```{r}
+data_bin2 <- list(N1 = 50, y1 = 11, N2 = 40, y2 = 14)
+```
+
+Per analizzare se il trattamento è utile, possiamo utilizzare il modello binomiale per entrambi i gruppi e calcolare l'odds-ratio. Seguiamo l'approccio descritto da Aki Vehtari e implementiamo il modello descritto nella seguente [pagina web](http://avehtari.github.io/BDA_R_demos/demos_rstan/cmdstanr_demo.html#4_Comparison_of_two_groups_with_Binomial).
+
+```{r}
+model_string <- "
+  //  Comparison of two groups with Binomial
+  data {
+    int<lower=0> N1;              // number of experiments in group 1
+    int<lower=0> y1;              // number of survivers in group 1
+    int<lower=0> N2;              // number of experiments in group 2
+    int<lower=0> y2;              // number of survivers in group 2
+  }
+  parameters {
+    real<lower=0,upper=1> theta1; // probability of surviving in group 1
+    real<lower=0,upper=1> theta2; // probability of surviving in group 2
+  }
+  model {
+    theta1 ~ beta(1, 1);          // prior
+    theta2 ~ beta(1, 1);          // prior
+    y1 ~ binomial(N1, theta1);    // observation model / likelihood
+    y2 ~ binomial(N2, theta2);    // observation model / likelihood
+  }
+  generated quantities {
+    // generated quantities are computed after sampling
+    real oddsratio = (theta2/(1-theta2))/(theta1/(1-theta1));
+  }
 "
-writeLines(modelString, con = "code/noise_1.stan")
 ```
 
-Leggiamo il file in cui abbiamo salvato il codice Stan
+Salvo il modello nel file `binom2.stan`.
 
 ```{r}
-file <- file.path("code", "noise_1.stan")
+writeLines(model_string, con = "code/binom2.stan")
+file <- file.path("code", "binom2.stan")
 ```
 
-Compiliamo il modello
+Compilo il modello.
 
 ```{r}
 mod <- cmdstan_model(file)
 ```
 
-Eseguiamo il campionamento MCMC:
+Eseguo il campionamento MCMC.
 
 ```{r, message = FALSE, warning=FALSE, results='hide'}
 fit <- mod$sample(
-  data = data_list,
+  data = data_bin2,
   iter_sampling = 4000L,
   iter_warmup = 2000L,
   seed = 84735,
@@ -147,60 +145,35 @@ fit <- mod$sample(
 )
 ```
 
-Esaminiamo la soluzione trasformando l'oggetto `fit` nel formato `stanfit` per comodità:
+## Risultati
+
+Esamino la media a posteriori nel modo seguente.
 
 ```{r}
-stanfit <- rstan::read_stan_csv(fit$output_files())
-posterior <- as.matrix(stanfit)
-mcmc_areas(posterior, pars = c("alpha", "beta"))
+fit$summary()
 ```
 
-Ricordiamo che abbiamo generato i dati in modo tale che $x$ abbia un effetto causale nullo sulla $y$. A causa del rumore, però, i risultati della regressione suggeriscono un chiaro effetto di $x$ su $y$: la moda a posteriori del parametro $\beta$ è pari a circa 0.17.
-
-Esaminiamo ora la situazione opposta, ovvero quella nella quale vi è un effetto causale di $x$ sulla $y$. Simuliamo i dati seguendo le indicazioni di McElreath:
+Creo un oggetto di classe `draws_array`.
 
 ```{r}
-n <- 500
-x <- rnorm(n)
-y <- rnorm(n, 0.8 * x)
-x_star <- rnorm(n, 0.7*x + 0.3*y)
+post <- fit$draws()
 ```
 
-Inseriamo i dati in una lista:
+Calcolo ora l'intervallo di credibilità al 95%.
 
 ```{r}
-data2_list <- list(
-  N = length(x),
-  x = x_star,
-  y = y
-)
+posterior::summarise_draws(
+  post, 
+  ~quantile(.x, probs = c(0.025, 0.975))
+  )
 ```
 
-Eseguiamo il campionamento MCMC:
+Un odds-ratio pari a 1 indica che gli odds di sopravvivenza sono uguali nei due gruppi. L'intervallo di credibilità del 95%  per l'OR è [0.76, 4.74] e dunque contiene il valore 1. Questo suggerisce che il presente campione fornisce evidenze deboli (poco convincenti) a favore dell'idea la somministrazione di anticoagulanti in questa circostanza posso portare a dei benefici sulla probabilità di sopravvivenza del paziente. 
 
-```{r, message = FALSE, warning=FALSE, results='hide'}
-fit2 <- mod$sample(
-  data = data2_list,
-  iter_sampling = 4000L,
-  iter_warmup = 2000L,
-  seed = 84735,
-  chains = 4L,
-  refresh = 0,
-  thin = 1
-)
-```
+Alla stessa conclusione giunge la discussione fornita nel testo *Modern Statistical Methods for Psychology* usando l'approccio frequentista e eseguendo un test sulla differenza tra due proporzioni (non sull'odds-ratio). 
 
-Esaminiamo la soluzione ottenuta:
+Provando a cambiare la distribuzione a priori per $\theta$ in modo che corrisponda, ad esempio, ad una Beta(2, 2) la conclusione non cambia. 
 
-```{r}
-stanfit2 <- rstan::read_stan_csv(fit2$output_files())
-posterior2 <- as.matrix(stanfit2)
-mcmc_areas(posterior2, pars = c("alpha", "beta"))
-```
-
-In questo secondo caso, il vero effetto causale è $\beta = 0.8$ ma, a causa del rumore di misurazione, abbiamo stimato $\hat{\beta} \approx 0.5$.
-
-In conclusione, la presenza del rumore di misurazione può avere effetti opposti: può fare emergere un'associazione causale che, in realtà, non esiste, oppure può sottostimare un'associazione causale effettiva. Il risultato che si osserva dipende dalla reale struttura causale che lega le variabili.
 
 ## Informazioni sulla sessione di lavoro
 
