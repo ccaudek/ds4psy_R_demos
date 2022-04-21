@@ -55,40 +55,60 @@ knitr::opts_chunk$set(
 
 Nell'esperimento di Milgram (1963), 26 partecipanti su 40 hanno inflitto delle scosse elettriche della massima intensità ai loro compagni -- non sapevano in realtà che le scosse fossero solo apparenti, non reali. 
 
-Per analizzare questi dati, nel testo *Bayes rules!* si impone una Beta(1, 10) quale distribuzione a priori su $\theta$ (probabilità ignota di infliggere una scossa). Questa scelta della distribuzione a priori riporta il problema all'interno dello schema beta-binomiale. In tali circostanze è dunque facile trovare la distribuzione a posteriori.
+Per analizzare questi dati, nel testo *Bayes rules!* si impone una Beta(1, 10) quale distribuzione a priori su $\theta$ (probabilità ignota di infliggere una scossa). 
 
 ```{r}
-summarize_beta_binomial(alpha = 1, beta = 10, y = 26, n = 40)
+bayesrules::plot_beta(1, 10)
 ```
 
-Con una distribuzione a priori Beta(1, 10), la media della distribuzione a posteriori è uguale a 0.529.
+Questa scelta della distribuzione a priori ci consente di affrontare il problema all'interno dello schema beta-binomiale. In tali circostanze è facile trovare la distribuzione a posteriori.  
 
-Per fare un esempio in cui non è possibile usare lo schema beta-binomiale, supponiamo che la distribuzione a priori per $\theta$ sia la seguente.
-
-```{r}
-ngrid <- 100
-theta_grid <- seq(0, 1, length.out = ngrid) 
-prior <- dnorm(theta_grid, mean = 0, sd = 0.12)
-df <- data.frame(
-  theta_grid = theta_grid, prior = prior
-)
-
-# df$prior <- ifelse(
-#   df$theta_grid <= 0.5, 0, df$prior
-# )
-
-plot(df$theta_grid, df$prior, type = 'l')
-```
-
-Così facendo, le credenze a priori descritte dalla distribuzione a priori precedente sono piuttosto simili a quelle descritte da una Beta(1, 10), anche se non identiche.
+Sappiamo infatti che la distribuzione a posteriori sarà una Beta di parametri 27 (𝑦+𝛼 = 26 + 1) e 24 (𝑛−𝑦+𝛽 = 30 - 26 + 10).
 
 ```{r}
 plot_beta_binomial(alpha = 1, beta = 10, y = 26, n = 40)
 ```
 
-Svolgiamo dunque l'analisi con Stan per poi calcolare la moda e l'intervallo di credibilità.
+I valori numerici si  ottengono nel modo seguente.
 
-I dati sono i seguenti.
+```{r}
+summarize_beta_binomial(alpha = 1, beta = 10, y = 26, n = 40)
+```
+
+La media della distribuzione Beta è $\mathbb{E}(\pi) = \alpha / (\alpha + \beta)$.
+
+```{r}
+27 / (27 + 24)
+```
+
+La moda è
+
+$$
+\mbox{Mo}(\pi) = {\displaystyle {\frac {\alpha -1}{\alpha +\beta -2}}}
+$$
+ovvero
+
+```{r}
+(27 - 1) / (27 + 24 - 2)
+```
+
+La varianza è
+
+$$
+\operatorname{var}(X) = \operatorname{E}[(X - \mu)^2] = \frac{\alpha \beta}{(\alpha + \beta)^2(\alpha + \beta + 1)}
+$$
+
+ovvero
+
+```{r}
+(27 * 24) / ((27 + 24)^2 * (27 + 24 + 1))
+```
+
+### Soluzione con Stan
+
+Svolgiamo ora l'analisi con Stan.
+
+I dati nella forma adeguata per essere letti in Stan sono i seguenti.
 
 ```{r}
 data_list <- list(
@@ -110,21 +130,21 @@ parameters {
   real<lower=0, upper=1> theta;
 }
 model {
-  theta ~ normal(0, 0.12);
+  theta ~ beta(1, 10);
   y ~ bernoulli(theta);
 }
 "
 ```
 
-Compiliamo il modello.
+Compilo il modello.
 
 ```{r}
-writeLines(model_string, con = "code/oneprop_3.stan")
-file <- file.path("code", "oneprop_3.stan")
+writeLines(model_string, con = "code/oneprop_4.stan")
+file <- file.path("code", "oneprop_4.stan")
 mod <- cmdstan_model(file)
 ```
 
-Eseguiamo il campionamento MCMC.
+Eseguo il campionamento MCMC.
 
 ```{r}
 fit <- mod$sample(
@@ -138,7 +158,7 @@ fit <- mod$sample(
 )
 ```
 
-Rappresentiamo graficamente la distribuzione a posteriori.
+Rappresento graficamente la distribuzione a posteriori.
 
 ```{r}
 fit_stanfit <- rstan::read_stan_csv(fit$output_files())
@@ -146,23 +166,32 @@ posterior <- as.matrix(fit_stanfit)
 mcmc_areas(posterior, pars = c("theta"))
 ```
 
-La mediana è  0.458, solo un po' più piccola di quella trovata con lo schema beta-binomiale che usa una distribuzione a priori Beta(1, 10).
+Una sintesi della distribuzione a posteriori si trova nel modo seguente.
 
 ```{r}
 fit$summary(c("theta"))
 ```
 
-Calcoliamo ora l'intervallo di credibilità al 89%. La scelta dell'89% è del tutto arbitraria.
+Calcolo l'intervallo di credibilità al 95%. La scelta dell'95% è del tutto arbitraria.
 
 ```{r}
 out <- rstantools::posterior_interval(
   as.matrix(fit_stanfit),
-  prob = 0.89
+  prob = 0.95
 )
 out
 ```
 
-Possiamo interpretare l'intervallo di credibilità dicendo che, a posteriori, possiamo quantificare la nostra incertezza rispetto al valore ignoto del parametro $\theta$ dicendo che siamo sicuri all'89% che il vero valore di tale parametro sia contenuto nell'intervallo [0.356, 0.560]. Ma potremmo anche esprimere la stessa incertezza scegliendo un diverso livello di probabilità. Per esempio
+Con l'istruzione seguente trovo l'intervallo di massima densità (HDI).
+
+```{r}
+stanfit <- rstan::read_stan_csv(fit$output_files())
+bayestestR::hdi(stanfit, ci = 0.95)
+```
+
+Interpreto l'intervallo di credibilità dicendo che, a posteriori, posso quantificare la mia incertezza rispetto al valore ignoto del parametro $\theta$ dicendo che sono sicuri all'89% che il vero valore di tale parametro sia contenuto nell'intervallo [0.40, 0.66]. 
+
+È anche esprimere la stessa incertezza scegliendo un diverso livello di probabilità. Per esempio
 
 ```{r}
 out <- rstantools::posterior_interval(
@@ -172,7 +201,103 @@ out <- rstantools::posterior_interval(
 out
 ```
 
-Per esempio, possiamo dire che siamo sicuri al 75% che il vero valore di tale parametro sia contenuto nell'intervallo [0.385, 0.531].
+oppure
+
+```{r}
+stanfit <- rstan::read_stan_csv(fit$output_files())
+bayestestR::hdi(stanfit, ci = 0.75)
+```
+
+### Distribuzione a priori non coniugata
+
+Considero ora un esempio in cui non è possibile usare lo schema beta-binomiale. 
+
+Supponiamo che la distribuzione a priori per $\theta$ sia una $\mathcal{N}(0, 0.12)$.
+
+```{r}
+ngrid <- 100
+theta_grid <- seq(0, 1, length.out = ngrid) 
+prior <- dnorm(theta_grid, mean = 0, sd = 0.12)
+df <- data.frame(
+  theta_grid = theta_grid, prior = prior
+)
+
+plot(df$theta_grid, df$prior, type = 'l')
+```
+
+Con una $\mathcal{N}(0, 0.12)$, le credenze descritte dalla distribuzione a priori sono molto simili a quelle descritte da una Beta(1, 10), anche se non identiche.
+
+Tutte le altre caratteristiche del problema restano uguali al caso discusso sopra.
+
+Specifico dunque il modello in Stan.
+
+```{r}
+model2_string <- "
+data {
+  int<lower=0> N;
+  array[N] int<lower=0, upper=1> y;
+}
+parameters {
+  real<lower=0, upper=1> theta;
+}
+model {
+  theta ~ normal(0, 0.12);
+  y ~ bernoulli(theta);
+}
+"
+```
+
+Compilo il modello.
+
+```{r}
+writeLines(model2_string, con = "code/oneprop_5.stan")
+file2 <- file.path("code", "oneprop_5.stan")
+mod2 <- cmdstan_model(file2)
+```
+
+Eseguo il campionamento MCMC.
+
+```{r}
+fit2 <- mod2$sample(
+  data = data_list,
+  iter_sampling = 10000L,
+  iter_warmup = 2000L,
+  seed = 84735,
+  chains = 4L,
+  refresh = 0
+)
+```
+
+Rappresento graficamente la distribuzione a posteriori.
+
+```{r}
+fit2_stanfit <- rstan::read_stan_csv(fit2$output_files())
+posterior2 <- as.matrix(fit2_stanfit)
+mcmc_areas(posterior2, pars = c("theta"))
+```
+
+Una sintesi della distribuzione a posteriori si trova nel modo seguente.
+
+```{r}
+fit2$summary(c("theta"))
+```
+
+Calcolo l'intervallo di credibilità al 89%. La scelta dell'89% è del tutto arbitraria.
+
+```{r}
+out2 <- rstantools::posterior_interval(
+  as.matrix(fit2_stanfit),
+  prob = 0.95
+)
+out2
+```
+
+L'intervallo a densità a posteriori più alta al 95% è praticamente identico a quello trovato in precedenza.
+
+```{r}
+stanfit2 <- rstan::read_stan_csv(fit2$output_files())
+bayestestR::hdi(stanfit2, ci = 0.95)
+```
 
 ## Considerazioni conclusive {-}
 
