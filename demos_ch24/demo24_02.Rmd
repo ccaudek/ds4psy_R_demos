@@ -1,0 +1,105 @@
+---
+title: "Data science per psicologi - demo 24.02"
+author: "Corrado Caudek"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    theme: readable
+    highlight: pygments
+    code_download: true
+---
+
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+code.r{
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+.custom-inline {
+  font-size: 13pt;
+  font-family: 'Inconsolata';
+}
+</style>
+
+```{r}
+suppressPackageStartupMessages({
+  library("here")
+  library("tidyverse")
+  library("bayesplot")
+})
+
+theme_set(bayesplot::theme_default(base_size = 12))
+bayesplot::color_scheme_set("gray")
+set.seed(84735)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  tidy = 'styler',
+  fig.width = 6,
+  fig.asp = 0.618 # 1 / phi
+)
+```
+
+# Modello di regressione 
+
+In questo demo verrà descritto un esercizio relativo al modello di regressione lineare bivariata.
+
+## Esercizio
+
+Si consideri il seguente output relativo ad un modello di regressione che è stato adattato usando Stan:
+
+````
+> fit$summary(c("alpha", "beta", "sigma"))
+  variable    mean  median     sd    mad       q5     q95  rhat ess_bulk ess_tail
+  <chr>      <dbl>   <dbl>  <dbl>  <dbl>    <dbl>   <dbl> <dbl>    <dbl>    <dbl>
+1 alpha    474.    474.    21.1   20.4   439.     508.     1.00   12093.    9976.
+2 beta       0.309   0.315  0.145  0.139   0.0640   0.536  1.00   11148.    9048.
+3 sigma    117.    115.    17.6   16.1    92.4    149.     1.00   10085.    9068.
+````
+
+Supponiamo che il modello ipotizzi una distribuzione gaussiana di possibili valori $y$ centrati su $\hat{y}$. Si consideri una tale distribuzione in corrispondenza di $X$ pari a 1.5; si trovi il valore $Y$ che lascia sotto di sé una probabilità pari a 0.2.
+
+### Soluzione
+
+La soluzione dell'esercizio richiede una comprensione del modello statistico di regressione lineare (Capitolo 24 della dispensa). Il modello statistico della regressione lineare ci dice che, in corrispondenza di ciascun valore $x_i$ abbiamo una distribuzione $p(y \mid x_i) = \mathcal{N}(\beta_0 + \beta_1 x_i, \sigma)$.
+
+La media di tale distribuzione è, appunto 
+
+$$
+\mu_i = \beta_0 + \beta_1 x_i.
+$$
+Nel caso presente, abbiamo
+
+```{r}
+b0 <- 474
+b1 <- 0.309
+sigma <- 117
+```
+
+Il problema ci dice di considerare la distribuzione 
+
+$$
+\mathcal{N}(\beta_0 + \beta_1 x_i, \sigma) = \mathcal{N}(474 + 0.309 \cdot 1.5, 117)
+$$
+ovvero
+
+$$
+\mathcal{N}(474.4635, 117).
+$$
+
+Vogliamo trovare il quantile di ordine 0.2 per la distribuzione $p(y \mid x = 1.5$. Dunque
+
+```{r}
+qnorm(0.2, 474.4635, 117)
+```
+
+
+## Informazioni sulla sessione di lavoro
+
+```{r}
+utils::sessionInfo()
+```
+
+
