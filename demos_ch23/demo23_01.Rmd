@@ -49,267 +49,173 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Modello di regressione in Stan
+# Modello Normale-Normale
 
-In questo demo ci poniamo il problema di implementare il modello di regressione semplice usando Stan.
+Presento qui la soluzione di uno degli esercizi WarmUp #19.
 
-Useremo i dati contenuti nel pacchetto `sur`. 
+## Esercizio
 
-```{r}
-library("sur")
-data(Brainsz)
-glimpse(Brainsz)
-```
-
-Riporto qui sotto la descrizione del set di dati.
-
-> The data are based on a study by Willerman et al. (1991) of the relationships between brain size, gender, and intelligence. The research participants consisted of 40 right-handed introductory psychology students with no history of alcoholism, unconsciousness, brain damage, epilepsy, or heart disease who were selected from a larger pool of introductory psychology students with total Scholastic Aptitude Test Scores higher than 1350 or lower than 940. The students in the study took four subtests (Vocabulary, Similarities, Block Design, and Picture Completion) of the Wechsler (1981) Adult Intelligence Scale-Revised. Among the students with Wechsler full-scale IQ’s less than 103, 10 males and 10 females were randomly selected. Similarly, among the students with Wechsler full-scale IQ’s greater than 130, 10 males and 10 females were randomly selected, yielding a randomized blocks design. MRI scans were performed at the same facility for all 40 research participants to measure brain size. The scans consisted of 18 horizontal MRI images. The computer counted all pixels with non-zero gray scale in each of the 18 images, and the total count served as an index for brain size. The dataset and description are adapted from the Data and Story Library (DASL) website.
-
-Mi concentrerò sulla relazione tra FSIQ e grandezza del cervello.
+Supponiamo di avere osservato il campione
 
 ```{r}
-Brainsz %>% 
-  ggplot(aes(x = MRI, y = FSIQ, color = GENDER)) +
-  geom_point()
+y <- c(
+  16, 16.9, 14.5, 15.3, 16.8, 15.5, 9.9, 14.1, 16.1, 14.1, 15, 14.4, 17, 15.3, 
+  15, 16.9, 16.1, 13.6, 14.2, 14.3, 16.3, 15.3, 15.1, 14.9
+)
 ```
 
-I dati rappresentati nel diagramma a dispersione suggeriscono che, in questo piccolo campione, sembra esserci un'associazione positiva tra MRI e FSIQ per i maschi, ma non per le femmine.
+Ipotizziamo che provenga da una popolazione che segue la legge Normale. Vogliamo fare inferenza sulla media $\mu$ della popolazione. Supponiamo che la deviazione standard $\sigma$ della popolazione sia nota e sia identica alla deviazione standard del campione (calcolata con $n −1$ al denominatore). Imponiamo su $\mu$ una distribuzione a priori Normale di media 12.7 e deviazione standard 0.9.
 
-Per fare un esercizio, ci concentriamo sui maschi.
+Si trovi il valore massimo della densità della distribuzione a posteriori $p(\mu \mid y)$.
+
+
+### Soluzione
+
+La situazione descritta in questo esercizio è discussa nel Capitolo 23 della dispensa e riguarda la famiglia coniugata Normale-Normale. 
+
+Viene considerata qui l'inferenza sulla media $\mu$ di una popolazione Normale, quando si verificano due condizioni:
+
+- la distribuzione a priori su $\mu$ è Normale;
+- la deviazione standard $\sigma$ della distribuzione a posteriori $p(\mu \mid \sigma)$ è conosciuta.
+
+Entrambe le condizioni sono soddisfatte nel problema proposto. In tali circostanze, la distribuzione a posteriori è una Normale di parametri $\mu_p$ e $\sigma_p$ specificati dalle equazioni 23.3 e 23.4.
+
+Definisco le quantità di interesse.
 
 ```{r}
-males <- Brainsz %>% 
-  dplyr::filter(GENDER == "Male")
+mu_prior <- 12.7
+sd_prior <- 0.9
+sigma <- sd(y)
+n <- length(y)
+y_bar <- mean(y)
+```
+
+Calcolo la media della distribuzione $p(\mu \mid y)$.
+
+```{r}
+mu_post <- function(tau_0, mu_0, sigma, y_bar) {
+  ((1/tau_0^2) * mu_0 + (n/sigma^2) * y_bar)/ (1/tau_0^2 + n/sigma^2)
+}
 ```
 
 ```{r}
-males %>% 
-  ggplot(aes(x = MRI, y = FSIQ)) +
-  geom_point()
+mu_post(sd_prior, mu_prior, sigma, y_bar)
 ```
 
-Per semplificare l'analisi, standardizzo i dati.
+Calcolo la deviazione standard della distribuzione $p(\mu \mid y)$.
 
 ```{r}
-males$fsiq <- scale(males$FSIQ) %>% 
-  as.numeric()
-
-males$mri <- scale(males$MRI) %>% 
-  as.numeric()
+sigma_post <- function(tau_0, n, sigma) {
+  sqrt(1 / ((1 / tau_0^2) + (n / sigma^2)))
+}
 ```
-
-Esamino il diagramma a dispersione per le due variabili standardizzate.
 
 ```{r}
-males %>% 
-  ggplot(aes(x = mri, y = fsiq)) +
-  geom_point()
+sigma_post(sd_prior, n, sigma)
+```
+
+Anziché implementare le equazioni 23.3 e 23.4 in $\mathsf{R}$, possiamo usare la funzione `summarize_normal_normal()` del pacchetto `bayesrules`. 
+
+Gli argomenti richiesti da `summarize_normal_normal()` sono stati specificati sopra. Con tali informazioni possiamo replicare i due risultati precedenti.
+
+```{r}
+bayesrules::summarize_normal_normal( 
+  mean = mu_prior, 
+  sd = sd_prior, 
+  sigma = sigma, 
+  y_bar = y_bar, 
+  n = n
+)
+```
+
+Avendo trovato che $p(\mu \mid \sigma) = \mathcal{N}(\mu = 14.86107, \sigma = 0.2883797)$, diventa possibile rispondere alla domanda del problema: "Si trovi il valore massimo della densità della distribuzione a posteriori $p(\mu \mid y)$".
+
+Il problema chiede di trovare il valore massimo dell'ordinata della funzione di densità $\mathcal{N}(\mu = 14.86107, \sigma = 0.2883797)$. Il massimo della funzione di densità Normale si trova in corrispondenza della media della distribuzione. Dunque
+
+```{r}
+dnorm(14.86107, 14.86107, 0.2883797)
 ```
 
 
-### I dati in Stan
+## Modello Normale in Stan
 
-Inserisco i dati in una lista così come richiesto da Stan:
+Svolgo ora lo stesso esercizio usando Stan. Nel caso presente è inutile usare Stan, dato che la soluzione può essere trovata più facilmente usando le formule 23.3 e 23.4. Tuttavia, svolgo comunque l'esercizio usando Stan per verificare che viene trovata la stessa soluzione.
+
+Inerisco i dati nel formato appropriato per Stan.
 
 ```{r}
 data_list <- list(
-  N = length(males$fsiq),
-  x = males$mri,
-  y = males$fsiq
-)
-
-data_list
+    N = length(y),
+    y = y,
+    MU = mu_prior,
+    SD = sd_prior,
+    SIGMA = sigma
+  )
 ```
 
-Definizione il modello in linguaggio Stan.
+Definisco il modello. Si noti che viene elencato un solo parametro, in quanto $\sigma$ è considerata nota.
 
 ```{r}
-model_string <- "
-  data {
-    int<lower=0> N;     // number of data points
-    vector[N] x;    // covariate / predictor
-    vector[N] y;    // target
-  }
-  parameters {
-    real alpha;          // intercept
-    real beta;           // slope
-    real<lower=0> sigma; // standard deviation is constrained to be positive
-  }
-  transformed parameters {
-    // deterministic transformation of parameters and data
-    vector[N] mu = alpha + beta*x;      // linear model
-  }
-  model {
-    alpha ~ normal(0, 2.5);    // prior
-    beta ~ normal(0, 2.5);     // prior
-    sigma ~ normal(0, 10);      // as sigma is constrained to be positive,
-                               // this is same as half-normal prior
-    y ~ normal(mu, sigma);     // likelihood
-  }
-  generated quantities {
-  vector[N] y_rep;
-    for(i in 1:N){
-      y_rep[i] = normal_rng(alpha + beta * x[i], sigma);
-    }
-  }
-
+model_string = "
+data {
+  int<lower=0> N;
+  vector[N] y;
+  real MU;
+  real<lower=0> SD;
+  real<lower=0> SIGMA;
+}
+parameters {
+  real mu;
+}
+model {
+  mu ~ normal(MU, SD);
+  y ~ normal(mu, SIGMA);
+}
 "
 ```
 
-Salvo il modello Stan in un file.
+Scrivo il modello nel file `onemean_1.stan`.
 
 ```{r}
-writeLines(model_string, con = "code/lmod_1.stan")
-file <- file.path("code", "lmod_1.stan")
+writeLines(model_string, con = "onemean_1.stan")
 ```
 
-Compilo il modello.
+Leggo l'inridizzo del file.
+
+```{r}
+file <- file.path("onemean_1.stan")
+```
+
+Compilo il modello in C++.
 
 ```{r}
 mod <- cmdstan_model(file)
 ```
 
-Eseguo il campionamento MCMC.
+Eseguo il campionamento MCMC. Si noti il grande numero di iterazioni che vengono richieste (maggiore è il numero di iterazioni, più preciso sarà il risultato).
 
-```{r, message = FALSE, warning=FALSE, results='hide'}
+```{r}
 fit <- mod$sample(
-  data = data_list,
-  iter_sampling = 4000L,
-  iter_warmup = 2000L,
-  seed = 84735,
-  chains = 4L,
-  refresh = 0,
-  thin = 1
-)
-```
-
-## Diagnostiche
-
-Le seguenti diagnostiche sono spiegate nel *CmdStan User's Guide*.
-
-```{r}
-fit$cmdstan_diagnose()
-```
-
-
-## Posterior predictive checks
-
-Esaminiamo i posterior predictive checks.
-
-```{r}
-y_rep <- fit$draws("y_rep", format = "matrix")
-ppc_dens_overlay(y = data_list$y, yrep = y_rep[1:100, ])
-```
-
-I dati di partenza hanno una forma bimodale, per cui il fit del modello non è perfetto. 
-
-```{r}
-plot(density(data_list$y))
-```
-
-Le curve in grigio sono generate usando i valori predetti
-
-$$
-\hat{y} = a + b x,
-$$
-laddove $a$ e $b$ sono valori presi a caso dalla distribuzione a posteriori dei parametri. Considerando il campione di partenza, si può dire che il fit sia ragionevole.
-
-Possiamo anche esaminare la distribuzione predittiva a posteriori di varie statistiche campionarie.
-
-```{r}
-ppc_stat(y = data_list$y, yrep = y_rep[1:100, ], stat = "mean")
-```
-
-```{r}
-ppc_stat(y = data_list$y, yrep = y_rep[1:100, ], stat = "sd")
-```
-
-
-```{r}
-ppc_stat(y = data_list$y, yrep = y_rep[1:100, ], stat = "min")
-```
-
-```{r}
-ppc_stat(y = data_list$y, yrep = y_rep[1:100, ], stat = "max")
-```
-
-## Stime a posteriori
-
-Esamino i risultati del campionamento MCMC.
-
-```{r}
-post <- fit$draws()
-```
-
-Estraggo solo le stime a posteriori dei parametri di interesse.
-
-```{r}
-post_parms <- subset_draws(post, c("alpha", "beta", "sigma"))
-posterior::summarise_draws(post_parms)
-```
-
-Trovo l'intervallo di credibilità al 95%.
-
-```{r}
-posterior::summarise_draws(
-  post_parms, 
-  ~quantile(.x, probs = c(0.025, 0.975))
+    data = data_list,
+    iter_sampling = 100000L,
+    iter_warmup = 5000L,
+    seed = 84735,
+    chains = 4L,
+    refresh = 0
   )
 ```
 
-Calcolo la probabilità di $\beta > 0$.
+Esamino i risultati ottenuti.
 
 ```{r}
-draws_lin <- as_draws_df(fit$draws())
-mean(draws_lin[, "beta"] > 0) 
+fit$summary()
 ```
 
-I risultati ottenuti sono molto simili a quelli trovati con l'approccio frequentista.
+La stima MCMC dei parametri della distribuzione a posteriori è quasi identica alla soluzione analitica (R-markdown stampa solo un decimale; dal terminale di RStudio ho recuperato le cinque cifre decimali usate qui sotto).  Se usiamo le stime MCMC per risolvere il problema, il risultato cercato cambia di pochissimo rispetto alla soluzione esatta:
 
 ```{r}
-fm <- lm(fsiq ~ mri, males)
-summary(fm)
+dnorm(14.86259, 14.86259, 0.2890914)
 ```
-
-Esamino il "mixing" delle catene.
-
-```{r}
-bayesplot::mcmc_trace(post, pars = c("alpha", "beta", "sigma"))
-```
-
-Creo un grafico della distribuzione a posteriori dei tre parametri. 
-
-```{r}
-bayesplot::mcmc_areas(post, pars = c("alpha", "beta", "sigma"), prob = 0.95)
-```
-
-Una rappresentazione della retta di regressione con l'intervallo di credibilità al 90% è la seguente.
-
-```{r}
-mu <- draws_lin %>%
-  as_draws_df() %>%
-  as_tibble() %>%
-  select(starts_with("mu")) %>%
-  apply(2, quantile, c(0.05, 0.5, 0.95)) %>%
-  t() %>% 
-  data.frame(x = data_list$x, .)  %>% 
-  gather(pct, y, -x)
-
-ggplot() +
-  geom_point(aes(x, y), data = data.frame(data_list), size = 1) +
-  geom_line(aes(x, y, linetype = pct), data = mu, color = 'red') +
-  scale_linetype_manual(values = c(2,1,2)) +
-  labs(y = 'FSIQ', x= "MRI") +
-  guides(linetype = "none")
-```
-
-
-## Conclusioni {-}
-
-Dato che abbiamo standardizzato i dati, il parametro $\alpha$ deve essere 0.
-
-L'intervallo di credibilità al 95% per $\beta$ non inckllude lo 0. Interpretiamo questo risultato dicendo che, con un livello di certezza soggettiva del 95%, possiamo concludere che vi sono evidenze che, nei maschi, la grandezza del cervello, così come indicizzata dagli scan MRI, è positivamente associata al FSIQ. In particolare, un aumento di una deviazione standard nella grandezza del cervello, così com'è stata misurata nel presente studio, corrisponde ad un amento medio nel FSIQ di 0.498 deviazioni standard, 95% CI [0.05,	0.94]. 
-
 
 
 ## Informazioni sulla sessione di lavoro
