@@ -33,10 +33,6 @@ suppressPackageStartupMessages({
   library("posterior")
 })
 
-rstan_options(auto_write = TRUE) # avoid recompilation of models
-options(mc.cores = parallel::detectCores()) # parallelize across all CPUs
-Sys.setenv(LOCAL_CPPFLAGS = "-march=native") # improve execution time
-
 theme_set(bayesplot::theme_default(base_size = 12))
 bayesplot::color_scheme_set("gray")
 set.seed(84735)
@@ -80,7 +76,7 @@ Viene considerata qui l'inferenza sulla media $\mu$ di una popolazione Normale, 
 
 Entrambe le condizioni sono soddisfatte nel problema proposto. In tali circostanze, la distribuzione a posteriori è una Normale di parametri $\mu_p$ e $\sigma_p$ specificati dalle equazioni 23.3 e 23.4.
 
-Definisco le quantità di interesse.
+Procediamo dunque nel modo seguente. Definisco le quantità di interesse.
 
 ```{r}
 mu_prior <- 12.7
@@ -90,7 +86,7 @@ n <- length(y)
 y_bar <- mean(y)
 ```
 
-Calcolo la media della distribuzione $p(\mu \mid y)$.
+Implemento in una funzione l'eq. 23.3. 
 
 ```{r}
 mu_post <- function(tau_0, mu_0, sigma, y_bar) {
@@ -98,11 +94,13 @@ mu_post <- function(tau_0, mu_0, sigma, y_bar) {
 }
 ```
 
+Calcolo la media della distribuzione $p(\mu \mid y)$.
+
 ```{r}
 mu_post(sd_prior, mu_prior, sigma, y_bar)
 ```
 
-Calcolo la deviazione standard della distribuzione $p(\mu \mid y)$.
+Implemento in una funzione l'eq. 23.4. 
 
 ```{r}
 sigma_post <- function(tau_0, n, sigma) {
@@ -110,13 +108,15 @@ sigma_post <- function(tau_0, n, sigma) {
 }
 ```
 
+Calcolo la deviazione standard della distribuzione $p(\mu \mid y)$.
+
 ```{r}
 sigma_post(sd_prior, n, sigma)
 ```
 
-Anziché implementare le equazioni 23.3 e 23.4 in $\mathsf{R}$, possiamo usare la funzione `summarize_normal_normal()` del pacchetto `bayesrules`. 
+Anziché scrivere due funzioni che implementano le equazioni 23.3 e 23.4 in $\mathsf{R}$, è possibile usare la funzione `summarize_normal_normal()` del pacchetto `bayesrules`. 
 
-Gli argomenti richiesti da `summarize_normal_normal()` sono stati specificati sopra. Con tali informazioni possiamo replicare i due risultati precedenti.
+Gli argomenti richiesti da `summarize_normal_normal()` sono stati specificati sopra. Con tali informazioni e usando `summarize_normal_normal()` si replicano i due risultati che ho ottenuto sopra.
 
 ```{r}
 bayesrules::summarize_normal_normal( 
@@ -128,18 +128,23 @@ bayesrules::summarize_normal_normal(
 )
 ```
 
-Avendo trovato che $p(\mu \mid \sigma) = \mathcal{N}(\mu = 14.86107, \sigma = 0.2883797)$, diventa possibile rispondere alla domanda del problema: "Si trovi il valore massimo della densità della distribuzione a posteriori $p(\mu \mid y)$".
+Avendo trovato che $p(\mu \mid \sigma) = \mathcal{N}(\mu = 14.86107, \sigma = 0.2883797)$, diventa ora possibile rispondere alla domanda del problema: 
 
-Il problema chiede di trovare il valore massimo dell'ordinata della funzione di densità $\mathcal{N}(\mu = 14.86107, \sigma = 0.2883797)$. Il massimo della funzione di densità Normale si trova in corrispondenza della media della distribuzione. Dunque
+> Si trovi il valore massimo della densità della distribuzione a posteriori $p(\mu \mid y)$.
+
+Il problema chiede di trovare il valore massimo dell'ordinata della funzione di densità
+
+$$\mathcal{N}(\mu = 14.86107, \sigma = 0.2883797).$$ 
+
+Il massimo della funzione di densità Normale si trova in corrispondenza della media della distribuzione. Dunque la soluzione è data dalla seguente istruzione.
 
 ```{r}
 dnorm(14.86107, 14.86107, 0.2883797)
 ```
 
-
 ## Modello Normale in Stan
 
-Svolgo ora lo stesso esercizio usando Stan. Nel caso presente è inutile usare Stan, dato che la soluzione può essere trovata più facilmente usando le formule 23.3 e 23.4. Tuttavia, svolgo comunque l'esercizio usando Stan per verificare che viene trovata la stessa soluzione.
+Svolgo ora lo stesso esercizio usando Stan. Nel caso presente è inutile usare Stan, dato che la soluzione può essere trovata più facilmente usando le formule 23.3 e 23.4. Tuttavia, svolgo comunque l'esercizio usando Stan per valutare la somiglianza della soluzione MCMC dalla soluzione corretta.
 
 Inerisco i dati nel formato appropriato per Stan.
 
@@ -211,17 +216,15 @@ Esamino i risultati ottenuti.
 fit$summary()
 ```
 
-La stima MCMC dei parametri della distribuzione a posteriori è quasi identica alla soluzione analitica (R-markdown stampa solo un decimale; dal terminale di RStudio ho recuperato le cinque cifre decimali usate qui sotto).  Se usiamo le stime MCMC per risolvere il problema, il risultato cercato cambia di pochissimo rispetto alla soluzione esatta:
+La stima MCMC dei parametri della distribuzione a posteriori è quasi identica alla soluzione analitica (R-markdown stampa solo un decimale; dal terminale di RStudio ho recuperato le cinque cifre decimali usate qui sotto).  Se uso la stima MCMC per risolvere l'esercizio, il risultato cercato cambia di pochissimo rispetto alla soluzione esatta:
 
 ```{r}
 dnorm(14.86259, 14.86259, 0.2890914)
 ```
-
 
 ## Informazioni sulla sessione di lavoro
 
 ```{r}
 utils::sessionInfo()
 ```
-
 
